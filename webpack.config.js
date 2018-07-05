@@ -1,8 +1,7 @@
 const path = require('path')
-const webpack = require('webpack')
 
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
-const CopyWebpackPlugin = require('copy-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const HtmlWebPackPlugin = require("html-webpack-plugin");
 
 const paths = {
   src: path.join(__dirname, 'src'),
@@ -12,7 +11,7 @@ const paths = {
 
 module.exports = {
   context: paths.src,
-  entry: ['./app.js', './main.scss'],
+  entry: ['./app.js'],
   output: {
     filename: 'app.bundle.js',
     path: paths.dist,
@@ -29,23 +28,30 @@ module.exports = {
         }],
       },
       {
-        test: /\.scss$/,
-        use: ExtractTextPlugin.extract([
-          'css-loader', 'sass-loader'
-        ]),
-      }
+        test: /\.html$/,
+        use: [
+          {
+            loader: "html-loader",
+            options: { minimize: true }
+          }
+        ]
+      },
+      {
+        test: /\.css$/,
+        use: [ 'style-loader', 'css-loader' ]
+      },
     ],
   },
   devServer: {
     contentBase: paths.dist,
-    compress: true,
     port: '4800',
     stats: 'errors-only',
   },
+  devtool: "cheap-module-source-map",
   plugins: [
-    new ExtractTextPlugin({
-      filename: 'main.bundle.css',
-      allChunks: true,
+    new HtmlWebPackPlugin({
+      template: "./index.html",
+      filename: "./index.html"
     }),
     new CopyWebpackPlugin([
       {

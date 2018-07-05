@@ -1,11 +1,11 @@
 {
-  "name": "learn-d3",
+  "name": "rdf-explorer",
   "version": "1.0.0",
-  "description": "Basic D3.js project for learning purposes",
+  "description": "Questionnaire RDF Explorer",
   "main": "src/app.js",
   "scripts": {
-    "start": "./node_modules/.bin/webpack-dev-server --hot --inline --progress",
-    "build": "webpack -p --config webpack.config.js --hide-modules"
+    "start": "./node_modules/.bin/webpack-dev-server --mode development --host 0.0.0.0",
+    "build": "webpack --mode production --config webpack.config.js --hide-modules"
   },
   "repository": {
     "type": "git",
@@ -14,12 +14,12 @@
   "keywords": [
     "d3js"
   ],
-  "author": "Will Soares",
+  "author": "Alex Benito",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/willamesoares/learn-d3/issues"
+    "url": "https://github.com/acdh-oeaw/exploreAT-rdf-explorer/issues"
   },
-  "homepage": "https://github.com/willamesoares/learn-d3#readme",
+  "homepage": "https://github.com/acdh-oeaw/exploreAT-rdf-explorer#readme",
   "devDependencies": {
     "babel-core": "^6.25.0",
     "babel-loader": "^7.1.1",
@@ -27,15 +27,15 @@
     "babel-preset-stage-0": "^6.24.1",
     "copy-webpack-plugin": "^4.0.1",
     "css-loader": "^0.28.4",
-    "extract-text-webpack-plugin": "^4.0.0-beta.0",
-    "node-sass": "^4.5.3",
-    "sass-loader": "^7.0.3",
+    "html-loader": "^0.5.5",
+    "html-webpack-plugin": "^3.2.0",
     "style-loader": "^0.21.0",
     "webpack": "^4.12.2",
     "webpack-cli": "^3.0.8",
     "webpack-dev-server": "^3.1.4"
   },
   "dependencies": {
-    "d3": "^5.5.0"
+    "d3": "^5.5.0",
+    "d3-sparql": "^1.0.0"
   }
 }
