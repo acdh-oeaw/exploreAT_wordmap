@@ -1,6 +1,5 @@
 const path = require('path')
 
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 
 const paths = {
@@ -10,8 +9,7 @@ const paths = {
 }
 
 module.exports = {
-  context: paths.src,
-  entry: ['./app.js'],
+  entry: './src/index.js',
   output: {
     filename: 'app.bundle.js',
     path: paths.dist,
@@ -23,8 +21,7 @@ module.exports = {
         test: /\.js$/,
         exclude: [/node_modules/],
         use: [{
-          loader: 'babel-loader',
-          options: { presets: ['es2015', 'stage-0'] },
+          loader: 'babel-loader'
         }],
       },
       {
@@ -50,14 +47,8 @@ module.exports = {
   devtool: "cheap-module-source-map",
   plugins: [
     new HtmlWebPackPlugin({
-      template: "./index.html",
-      filename: "./index.html"
+      template: "./src/index.html",
+      filename: "./src/index.html"
     }),
-    new CopyWebpackPlugin([
-      {
-        from: paths.data,
-        to: paths.dist + '/data'
-      }
-    ])
   ],
 }
