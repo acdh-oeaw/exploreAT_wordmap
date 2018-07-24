@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { hot } from 'react-hot-loader'
 import { sparql } from 'd3-sparql'
-
 import OverviewChart from './OverviewChart'
+
 import './App.css'
 
 
@@ -40,13 +40,27 @@ class App extends Component {
 
 	componentDidMount() {
 		sparql(questEndpoint, genderQuery, (err, data) => {
+			console.log(data);
 			if (err) throw err
 			this.setState({ data: data}) 
 		})
 	}
 
 	render() {
-		return <OverviewChart data={this.state.data} size={[width, height]}/>
+		if (this.state.data.length == 0) {
+			return (
+				<div className='column'>
+					<p>Loading</p>
+				</div>
+			)
+		}
+		return  (
+			<div className='column'>
+				<OverviewChart data={this.state.data} size={[width, height]}>
+				</OverviewChart>
+			</div>
+		)
+			
 	}
 }
 

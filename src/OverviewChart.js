@@ -23,33 +23,41 @@ class OverviewChart extends Component {
   		const { data, size } = this.props
   		const node = d3.select(this.node)
   		
+  		const xOffset = 200
 				
-		const xScale = d3.scaleOrdinal()
-						.domain([0, 1])
-						.range([300, size[0] - 300])
+		const xScale = d3.scalePoint()
+						.domain(["Male", "Female"])
+						.range([xOffset, size[0] - xOffset])
 		const foci = {
 			"Male" : {
-				"x" : xScale(0),
+				"x" : xScale("Male"),
 				"y" : size[1] / 2 
 			},
 			"Female": {
-				"x" : xScale(1),
+				"x" : xScale("Female"),
 				"y" : size[1] / 2
 			}
 		}
 
-		const forceX = d3.forceX((d) => foci[d.gender].x)
-		const forceY = d3.forceY((d) => foci[d.gender].y)
+		console.log(foci["Male"].x, foci["Female"].x)
+
+
+		const forceX = d3.forceX().x((d) => foci[d.gender].x)
+		const forceY = d3.forceY().y((d) => foci[d.gender].y)
 
 		const radiusScale = d3.scaleLinear()
 						.domain(d3.extent(data, d => parseInt(d.nQuestion)))
 						.range([5, 10])
 
-		node.append('g')
 
 
+		const xAxis = d3.axisBottom().scale(xScale)
+
+		const namesSet = new Set(data.map(d => d.firstName + ' ' + d.lastName))
+		console.log(namesSet);
 
 		const circles = node.append('g')
+						// .attr('transform', `translate(${xOffset}, 0)`)
 						.attr('class', 'circles')
 						.selectAll('circle')
 						.data(data)
@@ -57,8 +65,12 @@ class OverviewChart extends Component {
 						.attr("r", d=> radiusScale(parseInt(d.nQuestion)))
 						.attr("fill", d => d.gender == "Female" ? "red" : "blue")
 
+		node.append('g').attr('transform', `translate(0, ${size[1] - 50})`).attr('id', 'xAxisG').call(xAxis)
+
+
+
 		const force = d3.forceSimulation(data)
-						.velocityDecay(0.65)
+						// .velocityDecay(0.65)
 						.force('x', forceX)
 						.force('y', forceY)
 						.force('collide', d3.forceCollide(12))
