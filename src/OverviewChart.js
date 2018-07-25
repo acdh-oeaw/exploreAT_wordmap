@@ -1,20 +1,24 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3'
 import Select from 'react-select'
+import d3tip from 'd3-tip'
 
 
 
 const options = [
 	{ value: 'gender', label: 'Gender' },
 	{ value: 'author', label: 'Author' },
+	{ value: 'publication_year', label: 'Publication Year' },
 ]
 
 const optionsMap = {
 	'gender' : 'gender',
-	'author' : 'fullName'
+	'author' : 'fullName',
+	'publication_year' : 'publicationYear'
 }
 
 const xOffset = 150
+
 
 class OverviewChart extends Component {
 
@@ -83,6 +87,17 @@ class OverviewChart extends Component {
 						.domain(d3.extent(data, d => parseInt(d.nQuestion)))
 						.range([4, 15])
 
+		const tip = d3tip().attr('class', 'd3-tip').html(d => {
+															return `<p>Questionnaire ${d.number}</p>
+																	<p>${d.title}</p>
+																	<p>${d.nQuestion} questions</p>
+																	<p>${d.fullName}</p>
+																	<p>Published in ${d.publicationYear}</p>`
+														})
+
+		node.call(tip)
+
+
 		d3.select('#idns')
 			.on('change', () => {
 				const element = document.getElementById('inds')
@@ -102,6 +117,8 @@ class OverviewChart extends Component {
 						.enter().append("circle")
 						.attr("r", d=> radiusScale(parseInt(d.nQuestion)))
 						.attr("fill", d => d.gender == "Female" ? "red" : "blue")
+						.on('mouseover', tip.show)
+  						.on('mouseout', tip.hide)
 
 		node.append('g').attr('transform', `translate(0, ${size[1] - 50})`).attr('id', 'xAxisG').call(this.state.xAxis)
 

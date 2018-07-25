@@ -39,6 +39,7 @@
   "dependencies": {
     "d3": "^5.5.0",
     "d3-sparql": "^1.0.0",
+    "d3-tip": "^0.9.1",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "react-hot-loader": "^4.3.3",
