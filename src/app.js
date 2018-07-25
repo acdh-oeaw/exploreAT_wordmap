@@ -40,8 +40,12 @@ class App extends Component {
 
 	componentDidMount() {
 		sparql(questEndpoint, genderQuery, (err, data) => {
-			console.log(data);
+			data = data.map(d => {
+				d.fullName = d.firstName + ' ' + d.lastName
+				return d
+			})
 			if (err) throw err
+			console.log(data)
 			this.setState({ data: data}) 
 		})
 	}

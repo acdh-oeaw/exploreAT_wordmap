@@ -9,7 +9,7 @@ body {
 /* Style the header */
 .header {
     background-color: #f1f1f1;
-    padding: 30px;
+    padding: 10px;
     text-align: center;
     font-size: 35px;
 }
@@ -28,10 +28,15 @@ body {
     padding: 10px;
 }
 
+svg {
+    display: block;
+    margin: auto;
+}
+
 #idns {
-    position: relative;
-    bottom: 40px;
-    left: 150px;
+    max-width: 100px;
+    margin: auto;
+    font-size: 12px
 }
 
 /* Style the footer */
