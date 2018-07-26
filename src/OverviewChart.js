@@ -17,7 +17,7 @@ const optionsMap = {
 	'publication_year' : 'publicationYear'
 }
 
-const xOffset = 150
+const xOffset = 180
 
 
 class OverviewChart extends Component {
@@ -63,7 +63,7 @@ class OverviewChart extends Component {
   		
 
 		this.state.xScale
-				.domain(d3.map(data, d => d[optionsMap[selectedOption.value]]).keys())
+				.domain(d3.map(data, d => d[optionsMap[selectedOption.value]]).keys().sort())
 				.range([xOffset, size[0] - xOffset])
 
 		this.state.xAxis.scale(this.state.xScale)
