@@ -3,6 +3,7 @@ import * as d3 from 'd3'
 import d3tip from 'd3-tip'
 import Select from 'react-select'
 import SearchField from 'react-search-field'
+import { schemeSet1 } from 'd3-scale-chromatic'
 
 
 
@@ -27,26 +28,37 @@ class OverviewChart extends Component {
     	super(props)
 
     	this.state = {
-    		selectedOption: options[0],
+    		clusterOption: options[0],
+    		colorOption: options[1],
     		xAxis: d3.axisBottom(),
     		xScale: d3.scalePoint(),
     		forceX: d3.forceX(),
     		forceY: d3.forceY(),
     		simulation: d3.forceSimulation(),
+    		fill: null,
     		searchTerm: '',
+    		shouldUpdateForce: true
     	}
 
     	this.createOverviewChart = this.createOverviewChart.bind(this)
-    	this.updateChart = this.updateChart.bind(this)
+    	this.updateForce = this.updateForce.bind(this)
+    	this.updateColors = this.updateColors.bind(this)
     	this.updateHighlights = this.updateHighlights.bind(this)
-    	this.handleSelectChange = this.handleSelectChange.bind(this)
+    	this.handleClusterSelectChange = this.handleClusterSelectChange.bind(this)
+    	this.handleColorSelectChange = this.handleColorSelectChange.bind(this)
     	this.handleSearchChange = this.handleSearchChange.bind(this)
   	}
 
-  	handleSelectChange(selectedOption) {
-  		console.log('handleSelectChange')
-  		this.setState({ selectedOption })
-  		console.log(`Option selected:`, selectedOption);
+  	handleClusterSelectChange(clusterOption) {
+  		console.log('handleClusterSelectChange')
+  		this.setState({ clusterOption, shouldUpdateForce : true })
+  		console.log(`Cluster selected:`, clusterOption);
+  	}
+
+  	handleColorSelectChange(colorOption) {
+  		console.log('handleColorSelectChange')
+  		this.setState({ colorOption, shouldUpdateForce : false })
+  		console.log(`Color selected:`, colorOption);
   	}
 
   	handleSearchChange(value, event) {
@@ -58,29 +70,47 @@ class OverviewChart extends Component {
     	this.createOverviewChart()
   	}
 
+
   	componentDidUpdate() {
   		console.log('componentDidUpdate')
-  		this.updateChart()
+  		if (this.state.shouldUpdateForce)
+  			this.updateForce()
+  		else 
+  			this.updateColors()
   	}
 
 
   	updateConfig() {
   		console.log('updateConfig')
   		const { data, size } = this.props
-  		const { selectedOption } = this.state
+  		const { clusterOption, colorOption } = this.state
 
   		
-
+  		const clusterKeys = d3.map(data, d => d[optionsMap[clusterOption.value]]).keys().sort()
 		this.state.xScale
-				.domain(d3.map(data, d => d[optionsMap[selectedOption.value]]).keys().sort())
+				.domain(clusterKeys)
 				.range([xOffset, size[0] - xOffset])
 
 		this.state.xAxis.scale(this.state.xScale)
+
+
+
+		const colorKeys = d3.map(data, d => d[optionsMap[colorOption.value]]).keys().sort()
+		console.log(colorKeys)
+		if (colorKeys.length == 2)
+			this.state.fill = d => d[optionsMap[colorOption.value]] == colorKeys[0] ? "red" : "blue"
+		else {
+			console.log('else');
+			this.state.fill = d => schemeSet1[colorKeys.indexOf(d[optionsMap[colorOption.value]])]
+		}
 		
-		this.state.forceX.x((d) => this.state.xScale(d[optionsMap[selectedOption.value]]))
+		
+		this.state.forceX.x((d) => this.state.xScale(d[optionsMap[clusterOption.value]]))
 		this.state.forceY.y((d) => size[1] / 2)
 		
   	}
+
+
 
   	createOverviewChart() {
   		console.log('createOverviewChart')
@@ -88,12 +118,13 @@ class OverviewChart extends Component {
 
   		this.updateConfig()
   		const { data, size } = this.props
+  		const { colorOption } = this.state
   		
   		const node = d3.select(this.node)
   		
 
 		const radiusScale = d3.scaleLinear()
-						.domain(d3.extent(data, d => parseInt(d.nQuestion)))
+						.domain(d3.extent(data, d => d.nQuestion))
 						.range([4, 15])
 
 		const tip = d3tip().attr('class', 'd3-tip').html(d => {
@@ -106,14 +137,21 @@ class OverviewChart extends Component {
 
 		node.call(tip)
 
+
+		const colorKeys = d3.map(data, d => d[optionsMap[colorOption.value]]).keys().sort()
+		if (colorKeys.length == 2)
+			this.state.fill = d => d[optionsMap[colorOption.value]] == colorKeys[0] ? "red" : "blue"
+		else
+			this.state.fill = d => schemeSet1[colorKeys.indexOf(d[optionsMap[colorOption.value]])]
+
 		const circles = node.append('g')
 						// .attr('transform', `translate(${xOffset}, 0)`)
 						.attr('class', 'circles')
 						.selectAll('circle')
 						.data(data)
 						.enter().append("circle")
-						.attr("r", d=> radiusScale(parseInt(d.nQuestion)))
-						.attr("fill", d => d.gender == "Female" ? "red" : "blue")
+						.attr("r", d=> radiusScale(d.nQuestion))
+						.attr("fill", this.state.fill)
 						.on('mouseover', tip.show)
   						.on('mouseout', tip.hide)
 
@@ -137,11 +175,13 @@ class OverviewChart extends Component {
     	
   	}
 
-
-  	updateChart() {
+  	updateForce() {
+  		console.log('updateForce');
   		this.updateConfig()
   		const t = d3.transition().duration(500)
-  		d3.select(this.node).select("#xAxisG").transition(t).call(this.state.xAxis)
+  		const nodeSelection = d3.select(this.node)
+
+  		nodeSelection.select("#xAxisG").transition(t).call(this.state.xAxis)
 
   		this.state.simulation
   				.force('x', this.state.forceX)
@@ -150,15 +190,24 @@ class OverviewChart extends Component {
   	
   	}
 
-  	updateHighlights(searchTerm) {
+  	updateColors() {
+  		console.log('updateColors')
+  		this.updateConfig()
   		const t = d3.transition().duration(500)
-  		console.log('updateHighlights')
-  		d3.select(this.node).selectAll('circle').style('opacity', d => d.title.indexOf(searchTerm) == -1 ? 0.2 : 1)
+  		d3.select(this.node).selectAll('circle').transition(t).attr('fill', this.state.fill)
   	}
+
+  	updateHighlights(searchTerm) {
+  		console.log('updateHighlights')
+  		const t = d3.transition().duration(500)
+  		d3.select(this.node).selectAll('circle').transition(t).style('opacity', d => d.title.indexOf(searchTerm) == -1 ? 0.2 : 1)
+  	}
+
+
 
 	render() {
 		console.log('render')
-		let { selectedOption } = this.state 
+		let { clusterOption, colorOption } = this.state 
 
 		return (
 		<div id='container'>
@@ -168,12 +217,22 @@ class OverviewChart extends Component {
 			/>
 			<svg ref={node => this.node = node} width={this.props.size[0]} height={this.props.size[1]}>
 			</svg>
-			<Select
-				id='idns'
-				value={selectedOption}
-				onChange={this.handleSelectChange}
-				options={options}
-			/>
+			<div id='select-container'>
+				<Select
+					id='cluster-select'
+					className='selector'
+					value={clusterOption}
+					onChange={this.handleClusterSelectChange}
+					options={options}
+				/>
+				<Select
+					id='color-select'
+					className='selector'
+					value={colorOption}
+					onChange={this.handleColorSelectChange}
+					options={options}
+				/>
+			</div>
 		</div>)
 
 	}

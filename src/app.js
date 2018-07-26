@@ -46,6 +46,8 @@ class App extends Component {
 				d.fullName = d.firstName + ' ' + d.lastName
 				d.number = d.questionnaire.substring(d.questionnaire.lastIndexOf('/') + 1)
 				d.title = d.title.substring(d.title.lastIndexOf(':') + 1)
+				d.nQuestion = parseInt(d.nQuestion)
+				d.publicationYear = `${parseInt(d.publicationYear)}`
 				return d
 			})
 			if (err) throw err
