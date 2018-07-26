@@ -81,38 +81,6 @@ class OverviewChart extends Component {
   	}
 
 
-  	updateConfig() {
-  		console.log('updateConfig')
-  		const { data, size } = this.props
-  		const { clusterOption, colorOption } = this.state
-
-  		
-  		const clusterKeys = d3.map(data, d => d[optionsMap[clusterOption.value]]).keys().sort()
-		this.state.xScale
-				.domain(clusterKeys)
-				.range([xOffset, size[0] - xOffset])
-
-		this.state.xAxis.scale(this.state.xScale)
-
-
-
-		const colorKeys = d3.map(data, d => d[optionsMap[colorOption.value]]).keys().sort()
-		console.log(colorKeys)
-		if (colorKeys.length == 2)
-			this.state.fill = d => d[optionsMap[colorOption.value]] == colorKeys[0] ? "red" : "blue"
-		else {
-			console.log('else');
-			this.state.fill = d => schemeSet1[colorKeys.indexOf(d[optionsMap[colorOption.value]])]
-		}
-		
-		
-		this.state.forceX.x((d) => this.state.xScale(d[optionsMap[clusterOption.value]]))
-		this.state.forceY.y((d) => size[1] / 2)
-		
-  	}
-
-
-
   	createOverviewChart() {
   		console.log('createOverviewChart')
   		if (this.props.data.length == 0) return 
@@ -200,6 +168,37 @@ class OverviewChart extends Component {
 					})
 		})
     	
+  	}
+
+
+  	updateConfig() {
+  		console.log('updateConfig')
+  		const { data, size } = this.props
+  		const { clusterOption, colorOption } = this.state
+
+  		
+  		const clusterKeys = d3.map(data, d => d[optionsMap[clusterOption.value]]).keys().sort()
+		this.state.xScale
+				.domain(clusterKeys)
+				.range([xOffset, size[0] - xOffset])
+
+		this.state.xAxis.scale(this.state.xScale)
+
+
+
+		const colorKeys = d3.map(data, d => d[optionsMap[colorOption.value]]).keys().sort()
+		console.log(colorKeys)
+		if (colorKeys.length == 2)
+			this.state.fill = d => d[optionsMap[colorOption.value]] == colorKeys[0] ? "red" : "blue"
+		else {
+			console.log('else');
+			this.state.fill = d => schemeSet1[colorKeys.indexOf(d[optionsMap[colorOption.value]])]
+		}
+		
+		
+		this.state.forceX.x((d) => this.state.xScale(d[optionsMap[clusterOption.value]]))
+		this.state.forceY.y((d) => size[1] / 2)
+		
   	}
 
   	updateForce() {
