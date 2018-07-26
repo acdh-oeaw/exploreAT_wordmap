@@ -97,18 +97,6 @@ class OverviewChart extends Component {
 
 		node.call(tip)
 
-
-		d3.select('#idns')
-			.on('change', () => {
-				const element = document.getElementById('inds')
-				const cluster = element.options[sect.selectedIndex].value
-				console.log(cluster)
-			})
-
-
-		const namesSet = new Set(data.map(d => d.fullName))
-		console.log(namesSet);
-
 		const circles = node.append('g')
 						// .attr('transform', `translate(${xOffset}, 0)`)
 						.attr('class', 'circles')
