@@ -43,6 +43,7 @@
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "react-hot-loader": "^4.3.3",
+    "react-search-field": "^0.0.3",
     "react-select": "^2.0.0"
   }
 }

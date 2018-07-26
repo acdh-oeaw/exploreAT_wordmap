@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3'
-import Select from 'react-select'
 import d3tip from 'd3-tip'
+import Select from 'react-select'
+import SearchField from 'react-search-field'
 
 
 
@@ -31,18 +32,26 @@ class OverviewChart extends Component {
     		xScale: d3.scalePoint(),
     		forceX: d3.forceX(),
     		forceY: d3.forceY(),
-    		simulation: d3.forceSimulation()
+    		simulation: d3.forceSimulation(),
+    		searchTerm: '',
     	}
 
     	this.createOverviewChart = this.createOverviewChart.bind(this)
     	this.updateChart = this.updateChart.bind(this)
-    	this.handleChange = this.handleChange.bind(this)
+    	this.updateHighlights = this.updateHighlights.bind(this)
+    	this.handleSelectChange = this.handleSelectChange.bind(this)
+    	this.handleSearchChange = this.handleSearchChange.bind(this)
   	}
 
-  	handleChange(selectedOption) {
-  		console.log('handleChange')
+  	handleSelectChange(selectedOption) {
+  		console.log('handleSelectChange')
   		this.setState({ selectedOption })
   		console.log(`Option selected:`, selectedOption);
+  	}
+
+  	handleSearchChange(value, event) {
+  		console.log(value);
+  		this.updateHighlights(value)
   	}
 
 	componentDidMount() {
@@ -141,18 +150,28 @@ class OverviewChart extends Component {
   	
   	}
 
+  	updateHighlights(searchTerm) {
+  		const t = d3.transition().duration(500)
+  		console.log('updateHighlights')
+  		d3.select(this.node).selectAll('circle').style('opacity', d => d.title.indexOf(searchTerm) == -1 ? 0.2 : 1)
+  	}
+
 	render() {
 		console.log('render')
 		let { selectedOption } = this.state 
 
 		return (
-		<div>
+		<div id='container'>
+			<SearchField 
+				placeholder='Search title'
+				onChange={this.handleSearchChange}
+			/>
 			<svg ref={node => this.node = node} width={this.props.size[0]} height={this.props.size[1]}>
 			</svg>
 			<Select
 				id='idns'
 				value={selectedOption}
-				onChange={this.handleChange}
+				onChange={this.handleSelectChange}
 				options={options}
 			/>
 		</div>)
