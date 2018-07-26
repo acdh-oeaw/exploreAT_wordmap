@@ -4,6 +4,7 @@ import d3tip from 'd3-tip'
 import Select from 'react-select'
 import SearchField from 'react-search-field'
 import { schemeSet1 } from 'd3-scale-chromatic'
+import * as legend from 'd3-svg-legend'
 
 
 
@@ -15,11 +16,11 @@ const options = [
 
 const optionsMap = {
 	'gender' : 'gender',
-	'author' : 'fullName',
+	'author' : 'lastName',
 	'publication_year' : 'publicationYear'
 }
 
-const xOffset = 180
+const xOffset = 350
 
 
 class OverviewChart extends Component {
@@ -127,6 +128,23 @@ class OverviewChart extends Component {
 						.domain(d3.extent(data, d => d.nQuestion))
 						.range([4, 15])
 
+		node.append("g")
+		.attr("class", "legendSize")
+		.attr("transform", "translate(20, 100)")
+
+		console.log(legend)
+		const legendCircle = legend.legendSize()
+							.scale(radiusScale)
+							.ascending(true)
+							.title('# questions')
+							.shape('circle')
+							.shapePadding(15)
+							.labelOffset(20)
+							.orient('vertical')
+
+		node.select('.legendSize')
+					.call(legendCircle)
+
 		const tip = d3tip().attr('class', 'd3-tip').html(d => {
 															return `<p>Questionnaire ${d.number}</p>
 																	<p>${d.title}</p>
@@ -155,7 +173,16 @@ class OverviewChart extends Component {
 						.on('mouseover', tip.show)
   						.on('mouseout', tip.hide)
 
-		node.append('g').attr('transform', `translate(0, ${size[1] - 50})`).attr('id', 'xAxisG').call(this.state.xAxis)
+		node.append('g')
+				.attr('transform', `translate(0, ${size[1] - 50})`)
+				.attr('id', 'xAxisG')
+				.call(this.state.xAxis)
+			.selectAll('text')
+			.attr('y', 8)
+			.attr('x', -3)
+			.attr('dy', '.35em')
+			.attr('transform', "rotate(-45)")
+			.attr('text-anchor', "end")
 
 
 
@@ -181,7 +208,14 @@ class OverviewChart extends Component {
   		const t = d3.transition().duration(500)
   		const nodeSelection = d3.select(this.node)
 
-  		nodeSelection.select("#xAxisG").transition(t).call(this.state.xAxis)
+  		nodeSelection.select("#xAxisG")
+  						.call(this.state.xAxis)
+  					.selectAll('text')
+					.attr('y', 8)
+					.attr('x', -3)
+					.attr('dy', '.35em')
+					.attr('transform', "rotate(-45)")
+					.attr('text-anchor', "end")
 
   		this.state.simulation
   				.force('x', this.state.forceX)
