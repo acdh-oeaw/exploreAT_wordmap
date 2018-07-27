@@ -39,10 +39,16 @@ svg {
     margin: 30px 5px 5px 5px;
 }
 
+#color-select {
+    position: relative;
+    left: 580px;
+}
+
 .selector {
     max-width: 200px;
     margin: auto;
     font-size: 12px;
+    margin-top: 10px;
 }
 
 
