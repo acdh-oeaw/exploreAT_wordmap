@@ -33,10 +33,11 @@ class OverviewChart extends Component {
     		colorOption: options[1],
     		xAxis: d3.axisBottom(),
     		xScale: d3.scalePoint(),
+    		colorScale: d3.scaleOrdinal(schemeSet1),
+    		colorLegend: legend.legendColor().orient("vertical"),
     		forceX: d3.forceX(),
     		forceY: d3.forceY(),
     		simulation: d3.forceSimulation(),
-    		fill: null,
     		searchTerm: '',
     		shouldUpdateForce: true
     	}
@@ -100,7 +101,6 @@ class OverviewChart extends Component {
 		.attr("class", "legendSize")
 		.attr("transform", "translate(20, 100)")
 
-		console.log(legend)
 		const legendCircle = legend.legendSize()
 							.scale(radiusScale)
 							.ascending(true)
@@ -113,6 +113,19 @@ class OverviewChart extends Component {
 		node.select('.legendSize')
 					.call(legendCircle)
 
+
+		const colorKeys = d3.map(data, d => d[optionsMap[colorOption.value]]).keys().sort()
+		this.state.colorScale.domain(colorKeys)
+
+		node.append("g")
+			.attr("class", "colorLegend")
+			.attr("transform", `translate(${size[0] - 120}, 100)`)
+
+		this.state.colorLegend.scale(this.state.colorScale).title(colorOption.label)
+
+		node.select('.colorLegend').call(this.state.colorLegend)
+
+
 		const tip = d3tip().attr('class', 'd3-tip').html(d => {
 															return `<p>Questionnaire ${d.number}</p>
 																	<p>${d.title}</p>
@@ -124,11 +137,7 @@ class OverviewChart extends Component {
 		node.call(tip)
 
 
-		const colorKeys = d3.map(data, d => d[optionsMap[colorOption.value]]).keys().sort()
-		if (colorKeys.length == 2)
-			this.state.fill = d => d[optionsMap[colorOption.value]] == colorKeys[0] ? "red" : "blue"
-		else
-			this.state.fill = d => schemeSet1[colorKeys.indexOf(d[optionsMap[colorOption.value]])]
+		
 
 		const circles = node.append('g')
 						// .attr('transform', `translate(${xOffset}, 0)`)
@@ -137,7 +146,7 @@ class OverviewChart extends Component {
 						.data(data)
 						.enter().append("circle")
 						.attr("r", d=> radiusScale(d.nQuestion))
-						.attr("fill", this.state.fill)
+						.attr("fill", d=> this.state.colorScale(d[optionsMap[colorOption.value]]))
 						.on('mouseover', tip.show)
   						.on('mouseout', tip.hide)
 
@@ -186,20 +195,20 @@ class OverviewChart extends Component {
 
 
 
-		const colorKeys = d3.map(data, d => d[optionsMap[colorOption.value]]).keys().sort()
-		console.log(colorKeys)
-		if (colorKeys.length == 2)
-			this.state.fill = d => d[optionsMap[colorOption.value]] == colorKeys[0] ? "red" : "blue"
-		else {
-			console.log('else');
-			this.state.fill = d => schemeSet1[colorKeys.indexOf(d[optionsMap[colorOption.value]])]
-		}
+		// const colorKeys = d3.map(data, d => d[optionsMap[colorOption.value]]).keys().sort()
+		// console.log(colorKeys)
+		// if (colorKeys.length == 2)
+		// 	this.state.fill = d => d[optionsMap[colorOption.value]] == colorKeys[0] ? "red" : "blue"
+		// else {
+		// 	this.state.fill = d => schemeSet1[colorKeys.indexOf(d[optionsMap[colorOption.value]])]
+		// }
 		
 		
 		this.state.forceX.x((d) => this.state.xScale(d[optionsMap[clusterOption.value]]))
 		this.state.forceY.y((d) => size[1] / 2)
 		
   	}
+
 
   	updateForce() {
   		console.log('updateForce');
@@ -225,9 +234,15 @@ class OverviewChart extends Component {
 
   	updateColors() {
   		console.log('updateColors')
-  		this.updateConfig()
+  		// this.updateConfig()
+  		const { colorOption } = this.state
+  		const { data } = this.props
+  		const colorKeys = d3.map(data, d => d[optionsMap[colorOption.value]]).keys().sort()
+		this.state.colorScale.domain(colorKeys)
+		this.state.colorLegend.scale(this.state.colorScale).title(colorOption.label)
+		d3.select('.colorLegend').call(this.state.colorLegend)
   		const t = d3.transition().duration(500)
-  		d3.select('.circles').selectAll('circle').transition(t).attr('fill', this.state.fill)
+  		d3.select('.circles').selectAll('circle').transition(t).attr("fill", d=> this.state.colorScale(d[optionsMap[colorOption.value]]))
   	}
 
   	updateHighlights(searchTerm) {
