@@ -227,13 +227,13 @@ class OverviewChart extends Component {
   		console.log('updateColors')
   		this.updateConfig()
   		const t = d3.transition().duration(500)
-  		d3.select(this.node).selectAll('circle').transition(t).attr('fill', this.state.fill)
+  		d3.select('.circles').selectAll('circle').transition(t).attr('fill', this.state.fill)
   	}
 
   	updateHighlights(searchTerm) {
   		console.log('updateHighlights')
   		const t = d3.transition().duration(500)
-  		d3.select(this.node).selectAll('circle').transition(t).style('opacity', d => d.title.indexOf(searchTerm) == -1 ? 0.2 : 1)
+  		d3.select('.circles').selectAll('circle').transition(t).style('opacity', d => d.title.indexOf(searchTerm) == -1 ? 0.2 : 1)
   	}
 
 
