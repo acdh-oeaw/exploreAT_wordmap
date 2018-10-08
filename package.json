@@ -4,7 +4,7 @@
   "description": "Questionnaire RDF Explorer",
   "main": "src/app.js",
   "scripts": {
-    "start": "./node_modules/.bin/webpack-dev-server --mode development --host 0.0.0.0",
+    "start": "./node_modules/.bin/webpack-dev-server --mode development --host 0.0.0.0 --open",
     "build": "webpack --mode production --config webpack.config.js --hide-modules"
   },
   "repository": {

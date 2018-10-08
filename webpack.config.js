@@ -1,4 +1,5 @@
 const path = require('path')
+const webpack = require('webpack')
 
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 
@@ -43,6 +44,7 @@ module.exports = {
     contentBase: paths.dist,
     port: '4800',
     stats: 'errors-only',
+    hot: true
   },
   devtool: "cheap-module-source-map",
   plugins: [
@@ -50,5 +52,6 @@ module.exports = {
       template: "./src/index.html",
       filename: "./index.html"
     }),
+    new webpack.HotModuleReplacementPlugin()
   ],
 }
