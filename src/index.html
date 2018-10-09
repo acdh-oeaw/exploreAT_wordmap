@@ -3,13 +3,10 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RDF-Explorer</title>
+    <title><%= htmlWebpackPlugin.options.title %></title>
   </head>
   <body>
-    <h2 class="header">Questionnaire RDF Explorer</h2>
-
+    <h1 class="header"><%= htmlWebpackPlugin.options.myPageHeader %></h1>
     <div id="root" class="row"></div>
-
-    <script type="text/javascript" src="/dist/app.bundle.js"></script>
   </body>
 </html>

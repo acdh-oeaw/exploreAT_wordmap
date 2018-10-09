@@ -3,7 +3,7 @@ import { hot } from 'react-hot-loader'
 import { sparql } from 'd3-sparql'
 import OverviewChart from './OverviewChart'
 
-import './app.css'
+import './App.css'
 
 
 const 	width = 1200,
@@ -28,8 +28,6 @@ const 	genderQuery = `	PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 	  						?question oldcan:isQuestionOf ?questionnaire. 
 						} GROUP BY ?questionnaire ?title ?publicationYear ?author ?gender ?lastName ?firstName`
 
-const questEndpoint = 'http://localhost:3030/dboe/query'
-
 
 class App extends Component {
 	constructor(props) {
@@ -41,21 +39,22 @@ class App extends Component {
 	}
 
 	componentDidMount() {
-		sparql(questEndpoint, genderQuery, (err, data) => {
-			data = data.map(d => {
-				d.fullName = d.firstName + ' ' + d.lastName
-				d.number = d.questionnaire.substring(d.questionnaire.lastIndexOf('/') + 1)
-				d.title = d.title.substring(d.title.lastIndexOf(':') + 1)
-				d.nQuestion = parseInt(d.nQuestion)
-				d.publicationYear = `${parseInt(d.publicationYear)}`
-				return d
-			})
-			if (err) throw err
-			console.log(data)
-			this.setState({ data: data}) 
+
+		sparql(API_URL, genderQuery, (err, data) => {
+			if (data && !err) {
+				console.log(data)
+				data = data.map(d => {
+					d.fullName = d.firstName + ' ' + d.lastName
+					d.number = d.questionnaire.substring(d.questionnaire.lastIndexOf('/') + 1)
+					d.title = d.title.substring(d.title.lastIndexOf(':') + 1)
+					d.nQuestion = parseInt(d.nQuestion)
+					d.publicationYear = `${parseInt(d.publicationYear)}`
+					return d
+				})
+				this.setState({ data: data}) 	
+			} else if (err) throw err
 		})
 	}
-
 	render() {
 		if (this.state.data.length == 0) {
 			return (
