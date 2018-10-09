@@ -3,7 +3,7 @@ import { hot } from 'react-hot-loader'
 import { sparql } from 'd3-sparql'
 import OverviewChart from './OverviewChart'
 
-import './App.css'
+import './app.css'
 
 
 const 	width = 1200,
