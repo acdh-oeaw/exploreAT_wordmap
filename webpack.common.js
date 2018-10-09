@@ -1,20 +1,12 @@
 const path = require('path')
-const webpack = require('webpack')
 
 const HtmlWebPackPlugin = require("html-webpack-plugin");
-
-const paths = {
-  src: path.join(__dirname, 'src'),
-  dist: path.join(__dirname, 'dist'),
-  data: path.join(__dirname, 'data')
-}
 
 module.exports = {
   entry: './src/index.js',
   output: {
-    filename: 'app.bundle.js',
-    path: paths.dist,
-    publicPath: 'dist',
+    filename: '[name].bundle.js',
+    path: path.resolve(__dirname, 'dist')
   },
   module: {
     rules: [
@@ -40,18 +32,12 @@ module.exports = {
       },
     ],
   },
-  devServer: {
-    contentBase: paths.dist,
-    port: '4800',
-    stats: 'errors-only',
-    hot: true
-  },
-  devtool: "cheap-module-source-map",
+
   plugins: [
     new HtmlWebPackPlugin({
+      title: 'Production',
       template: "./src/index.html",
       filename: "./index.html"
     }),
-    new webpack.HotModuleReplacementPlugin()
   ],
 }
