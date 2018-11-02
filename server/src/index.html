@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Server api</title>
+</head>
+<body>
+	<h1>Server API</h1>
+	<h2>This is a home page for listing server's API options</h2>
+	<h3>Available paths are</h3>
+	<ul>
+		<li><b>/api/param1/<i>value</i>/param2/<i>value</i></b></li>
+		<li>Prints parameters given through the url</li><br>
+		<li><b>/api/resource/<i>value</i></b></li>
+		<li>Retrieves the xml resource asked in the parameter. The url has to be correctly defined</li><br>
+		<li><b><input type="text" id="myText" value="" placeholder="original url"></b><input type="text" id="result" value="" readonly><button onclick="myFunction()">Convert</button></li>
+		
+		<script>
+		const urlToParam = function(url){
+	        let param = url;
+
+	        const filters = [
+	            (u)=>u.replace(/\./g,'-2E-'),
+	            (u)=>u.replace(/:/g,'-3A-'),
+	            (u)=>u.replace(/\//g,'-2F-'),
+	            (u)=>u.replace(/\?/g,'-3F-'),
+	            (u)=>u.replace(/#/g,'-23-'),
+	            (u)=>u.replace(/\[/g,'-5B-'),
+
+	            (u)=>u.replace(/\]/g,'-5D-'),
+	            (u)=>u.replace(/@/g,'-40-'),
+	            (u)=>u.replace(/!/g,'-21-'),
+	            (u)=>u.replace(/\$/g,'-24-'),
+	            (u)=>u.replace(/&/g,'-26-'),
+
+	            (u)=>u.replace(/'/g,'-60-'),
+	            (u)=>u.replace(/\(/g,'-28-'),
+	            (u)=>u.replace(/\)/g,'-29-'),
+	            (u)=>u.replace(/\*/g,'-2A-'),
+	            (u)=>u.replace(/,/g,'-2C-'),
+
+	            (u)=>u.replace(/;/g,'-3B-'),
+	            (u)=>u.replace(/=/g,'-3D-'),
+	            (u)=>u.replace(/ /g,'-20-'),
+
+	        ];
+
+	        filters.map(filter=>param=filter(param));
+
+	        return param;
+	    }
+		function myFunction() {
+		    document.getElementById("result").value = urlToParam(document.getElementById("myText").value);
+		}
+		</script>
+		<li>Retrieves the path used for asking resources</li>
+	</ul>
+</body>
+</html>
