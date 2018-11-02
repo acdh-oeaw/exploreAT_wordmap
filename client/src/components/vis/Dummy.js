@@ -28,9 +28,13 @@ class Dummy extends React.Component{
     }
 
     render(){
+        const size = {
+            width: this.props.width+"px",
+            height: this.props.height+"px"
+        }
         return(
-            <div id="Dummy" className="visualization" width={this.props.width} height={this.props.height}>
-                <p>Dummy component</p>
+            <div id="Dummy" className="visualization" style={size}>
+                <p style={{margin:0}}>Dummy component {this.props.height}</p>
             </div>
         );
     }

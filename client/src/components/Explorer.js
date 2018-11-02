@@ -4,6 +4,7 @@ import UrlParamWrapper from '../aux/UrlParamWrapper';
 import RGL, { WidthProvider } from "react-grid-layout";
 const ReactGridLayout = WidthProvider(RGL);
 import Dummy from './vis/Dummy'
+import VisWrapper from './vis/VisWrapper'
 import * as d3 from 'd3';
 
 import gridStyleLayout from '../../node_modules/react-grid-layout/css/styles.css';
@@ -16,7 +17,7 @@ class Explorer extends React.Component{
       data : [],
       loaded:false,
       layout: {
-        'dummy': {x: 0, y: 0, w: 1, h: 2, isDraggable:true},
+        'dummy': {x: 0, y: 0, w: 2, h: 4, isDraggable:true},
       }
     }
     this.wrapper = new UrlParamWrapper();
@@ -64,9 +65,11 @@ class Explorer extends React.Component{
                 className="layout"
                 compactType={null}>
                 <div key="dummy">
-                  <Dummy
-                    width={this.state.layout.dummy.w * Math.trunc(document.body.clientWidth/6)} 
-                    height={this.state.layout.dummy.h * 90 + (this.state.layout.dummy.h - 1)*10}/>           
+                  <VisWrapper width={this.state.layout.dummy.w * Math.trunc(document.body.clientWidth/6)- 10} 
+                    height={this.state.layout.dummy.h * 90 + (this.state.layout.dummy.h - 1)*10}
+                    name={"dummy"}>
+                    <Dummy/>
+                  </VisWrapper>
                 </div>
             </ReactGridLayout>
           </div>
