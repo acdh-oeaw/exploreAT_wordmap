@@ -17,11 +17,22 @@ class Explorer extends React.Component{
       data : [],
       loaded:false,
       layout: {
-        'dummy': {x: 0, y: 0, w: 2, h: 4, isDraggable:true},
+        'alex': {x: 0, y: 0, w: 2, h: 4, isDraggable:true},
+        'antonio': {x: 3, y: 0, w: 2, h: 4, isDraggable:true},
+      },
+      visComponents: {
+        alex: React.createElement(Dummy,{},null),
+        antonio: React.createElement(Dummy,{},null),
       }
-    }
+    }      
+     
+    this.availableComponents = {
+      "Dummy": Dummy
+    };
     this.wrapper = new UrlParamWrapper();
     this.onLayoutChange = this.onLayoutChange.bind(this);
+    this.addComponent = this.addComponent.bind(this);
+    this.removeComponent = this.removeComponent.bind(this);
   }
 
   generateLayout(l){
@@ -32,6 +43,22 @@ class Explorer extends React.Component{
     }));
   }
 
+  addComponent(name, type){
+    if(!d3.keys(this.state.components).includes(name)){
+      let newInstance = React.createElement(this.availableComponents[name],{},null)
+
+      this.setState(prevState=>(prevState.visComponents[name]=newInstance));
+    }
+  }
+
+  removeComponent(name){
+    if(d3.keys(this.state.components).includes(name)){
+      this.setState(prevState=>{
+        delete prevState.visComponents[name];
+        return prevState;
+    }
+  }
+
   onLayoutChange(a){
     const newLayout = {};
     a.map(x=>{newLayout[x.i] = x});
@@ -40,6 +67,16 @@ class Explorer extends React.Component{
 
   render(){
     const pretty_entities = this.wrapper.paramToUrl(this.props.match.params.entities);
+
+    const visComponents = d3.entries(this.state.visComponents).map(c=>(
+      <div key={c.key}>
+        <VisWrapper width={this.state.layout[c.key].w * Math.trunc(document.body.clientWidth/6)- 10} 
+                    height={this.state.layout[c.key].h * 90 + (this.state.layout[c.key].h - 1)*10}
+                    name={c.key}>
+                    {c.value}
+        </VisWrapper>
+      </div>
+    ));
 
     return(<div id="explorer">
         <div className="header">
@@ -64,13 +101,7 @@ class Explorer extends React.Component{
                 cols={6}
                 className="layout"
                 compactType={null}>
-                <div key="dummy">
-                  <VisWrapper width={this.state.layout.dummy.w * Math.trunc(document.body.clientWidth/6)- 10} 
-                    height={this.state.layout.dummy.h * 90 + (this.state.layout.dummy.h - 1)*10}
-                    name={"dummy"}>
-                    <Dummy/>
-                  </VisWrapper>
-                </div>
+                {visComponents.length>0?visComponents:""}
             </ReactGridLayout>
           </div>
         </div>
