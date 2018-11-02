@@ -35,7 +35,7 @@ class VisWrapper extends React.Component{
         const { children } = this.props;
 
         const childrenWithProps = React.Children.map(children, child =>
-          React.cloneElement(child, { width: this.props.width, height: (this.props.height-40) })
+          React.cloneElement(child, this.props)
         );
 
         return(
@@ -56,7 +56,7 @@ class VisWrapper extends React.Component{
                     <p>{this.props.name} - {this.props.height}</p>
                     <button style={buttonStyle}
                         className="button" 
-                        onClick={()=>console.log('null')}>  
+                        onClick={()=>this.props.removeComponent(this.props.name)}>  
                         close
                     </button>
                 </div>

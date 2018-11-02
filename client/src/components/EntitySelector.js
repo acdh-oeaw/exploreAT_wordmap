@@ -81,7 +81,7 @@ class EntitySelector extends React.Component{
 			
 		));
 
-		const pretty_entities = this.state.entities.join(' , ');
+		const pretty_entities = this.state.entities.map(a=>a.split('#')[1]).join(' , ');
 
 	    return (
 	    	<div id="explorer" className="entitySelector">
@@ -102,7 +102,7 @@ class EntitySelector extends React.Component{
 		        </div>
 		        <div className="loader" style={({display: this.state.loaded===true?'none':'block'})}></div>
 		        <div className="content">
-					<svg ref={node => this.svg = node} width={'100%'} height={'100%'}>
+					<svg ref={node => this.svg = node} width={'100%'} height={'80%'}>
 						{entities}
 					</svg>
 			      	<NavLink to={url} style={
