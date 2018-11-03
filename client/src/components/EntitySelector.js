@@ -2,6 +2,54 @@ import React from "react";
 import { BrowserRouter as Route, NavLink } from "react-router-dom";
 import UrlParamWrapper from '../aux/UrlParamWrapper';
 import * as d3 from 'd3';
+import { sparql } from 'd3-sparql'
+
+const   genderQuery = ` 
+  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+  PREFIX oldcan: <https://explorations4u.acdh.oeaw.ac.at/ontology/oldcan#>
+
+  Select ?questionnaire ?author ?title ?publicationYear ?lastName ?firstName  ?gender (COUNT(?question) as ?nQuestion) 
+    from <http://exploreat.adaptcentre.ie/Questionnaire_graph>
+    from <http://exploreat.adaptcentre.ie/Person_graph>
+    from <http://exploreat.adaptcentre.ie/Question_graph>
+  WHERE {
+      ?questionnaire oldcan:hasAuthor ?author.
+      ?questionnaire oldcan:title ?title.
+      ?questionnaire oldcan:publicationYear ?publicationYear. 
+      ?author oldcan:FirstName ?firstName.
+      ?author oldcan:LastName ?lastName.
+      ?author foaf:gender ?gender.
+      ?question oldcan:isQuestionOf ?questionnaire. 
+  } GROUP BY ?questionnaire ?title ?publicationYear ?author ?gender ?lastName ?firstName`
+
+const getGraphsQuery = ()=>`
+	SELECT ?graph
+	WHERE {
+	  GRAPH ?graph { }
+	}
+`;
+
+const getEntitiesOverviewQuery = (graph_uri)=>`
+	SELECT DISTINCT ?object (count (?subject) as ?count)
+	from <`+graph_uri+`>
+	WHERE {
+  		?subject <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?object.
+	}group by ?object
+`;
+
+const getEntitiesDetailQuery = (graph_uri)=>`
+	SELECT ?object ?predicates ?count
+	FROM <`+graph_uri+`>
+	WHERE{
+		{SELECT DISTINCT ?object 
+		 WHERE {?subject <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?object}} .
+		{SELECT (GROUP_CONCAT(DISTINCT ?predicate; SEPARATOR=",") AS ?predicates) (COUNT(DISTINCT ?predicate) AS ?count) 
+		WHERE {?subject ?predicate []}}
+	}
+	limit 60
+`;
 
 class EntitySelector extends React.Component{
 	constructor(props){
@@ -11,6 +59,13 @@ class EntitySelector extends React.Component{
 			current_search: "",
 			loaded: false,
 			ontology:[],
+			graphs: [],
+			graph_entities: [],
+			graphs_loaded: false,
+			graph_entities_loaded: false,
+			selected_graph: "",
+			selected_entities: [],
+			current_state: "Retrieving available graphs"
 		};
 
 		this.wrapper = new UrlParamWrapper();
@@ -19,29 +74,50 @@ class EntitySelector extends React.Component{
 	}
 
 	componentDidMount(){
-		//const url = 'http://'+window.location.hostname+':8080/api/resource/'+this.props.match.params.ontology;
-		const url = 'http://rdf-translator.appspot.com/convert/xml/json-ld/'+
-			this.wrapper.safeParamToStandarParam(this.props.match.params.ontology);
-		d3.json(url).then(data=>{
-			const filtered = data['@graph'].filter(d=>{
-					if(typeof(d['@type']) == 'string'){
-						//console.log('string', d, (['owl:Class','rdfs:Class'].includes(d['@type'])));
-						return(['owl:Class','rdfs:Class'].includes(d['@type']));
-					}
-					if(typeof(d['@type']) == 'object'){
-						//console.log('array', d, (d['@type'].includes('owl:Class')));
-						return(d['@type'].includes('owl:Class'));
-					}
-				});
-			this.setState({
-				loaded:true, 
-				ontology:filtered});
+		this.retrieveGraphs()		  
+	}
+	
+	retrieveGraphs(){
+		const api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
+	    sparql(api_url, getGraphsQuery(), (err, data) => {
+	      if (data && !err) {
+	        this.setState({graphs_loaded:true, graphs:data.map(g=>g.graph), current_state:'Retrieving entities from graphs'});
+	      } else if (err) throw err
+	    });
+	}
+
+	retrieveEntities(){
+		const api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
+		let retrieved = 0;
+
+		this.state.graphs.map(graph_uri=>{
+		    sparql(api_url, getEntitiesOverviewQuery(graph_uri), (err, data) => {
+		      if (data && !err) {
+		        this.setState(prevState=>{
+		        	prevState.graph_entities.push({graph:graph_uri, entities:data});
+		        	prevState.current_state= 'Entities retrieved for '+graph_uri;
+		        	return prevState;
+		        });
+		        retrieved += 1;
+		        if(retrieved == this.state.graphs.length)
+		        	this.setState({graph_entities_loaded:true})
+		      } else if (err) throw err
+		    });
 		});
+	}
+
+	retrieveGraphDetails(){
+
 	}
 
 	componentDidUpdate(prevProps, prevState, snapshot){
 		if(prevState.loaded===false && this.state.loaded===true && this.state.ontology!=[]){
 			console.log('ontology loaded', this.state.ontology)
+		}else{
+			if(prevState.graphs_loaded == false && this.state.graphs_loaded == true)
+				this.retrieveEntities()
+			if(prevState.graph_entities_loaded == false && this.state.graph_entities_loaded == true)
+				console.log('data correctly retrieved', this.state.graphs, this.state.graph_entities)
 		}
 	}
 
@@ -100,7 +176,10 @@ class EntitySelector extends React.Component{
 		            <li><input type="text" value={this.state.current_search} onChange={this.handleFilterChange} /></li>
 		          </ul>
 		        </div>
-		        <div className="loader" style={({display: this.state.loaded===true?'none':'block'})}></div>
+		        <div id="loader" style={({display: this.state.loaded===true?'none':'flex'})}>
+			        <div className="loader" ></div>
+			        <p>{this.state.current_state}</p>
+		        </div>
 		        <div className="content">
 					<svg ref={node => this.svg = node} width={'100%'} height={'80%'}>
 						{entities}

@@ -150,6 +150,17 @@ div#explorer div.content{
 
 /* Loader 
 */
+div#loader{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+div#loader p{
+	display:inline-block;
+	color: #18bc9c;
+	font-size: 1.2em;
+}
+
 .loader,
 .loader:after {
   border-radius: 50%;

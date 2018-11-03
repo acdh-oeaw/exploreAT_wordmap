@@ -6,8 +6,8 @@ class SourceSelector extends React.Component{
 	constructor(props){
 		super(props);
 		this.state={
-			ontology:"",
-			sparql:""
+			ontology:"http://explorations4u.acdh.oeaw.ac.at/ontology/oldcan",
+			sparql:"http://localhost:3030/oldcan/query"
 		};
 
 		this.wrapper = new UrlParamWrapper();
