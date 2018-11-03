@@ -4,26 +4,6 @@ import UrlParamWrapper from '../aux/UrlParamWrapper';
 import * as d3 from 'd3';
 import { sparql } from 'd3-sparql'
 
-const   genderQuery = ` 
-  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-  PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-  PREFIX oldcan: <https://explorations4u.acdh.oeaw.ac.at/ontology/oldcan#>
-
-  Select ?questionnaire ?author ?title ?publicationYear ?lastName ?firstName  ?gender (COUNT(?question) as ?nQuestion) 
-    from <http://exploreat.adaptcentre.ie/Questionnaire_graph>
-    from <http://exploreat.adaptcentre.ie/Person_graph>
-    from <http://exploreat.adaptcentre.ie/Question_graph>
-  WHERE {
-      ?questionnaire oldcan:hasAuthor ?author.
-      ?questionnaire oldcan:title ?title.
-      ?questionnaire oldcan:publicationYear ?publicationYear. 
-      ?author oldcan:FirstName ?firstName.
-      ?author oldcan:LastName ?lastName.
-      ?author foaf:gender ?gender.
-      ?question oldcan:isQuestionOf ?questionnaire. 
-  } GROUP BY ?questionnaire ?title ?publicationYear ?author ?gender ?lastName ?firstName`
-
 const getGraphsQuery = ()=>`
 	SELECT ?graph
 	WHERE {
@@ -55,14 +35,16 @@ class EntitySelector extends React.Component{
 	constructor(props){
 		super(props);
 		this.state={
-			entities: [],
-			current_search: "",
+			graphs_loaded: false,
+			graph_entities_loaded: false,
+			graph_details: false,
 			loaded: false,
+			loading:true,
+			current_search: "",
 			ontology:[],
 			graphs: [],
 			graph_entities: [],
-			graphs_loaded: false,
-			graph_entities_loaded: false,
+			graph_details: [],
 			selected_graph: "",
 			selected_entities: [],
 			current_state: "Retrieving available graphs"
@@ -70,6 +52,7 @@ class EntitySelector extends React.Component{
 
 		this.wrapper = new UrlParamWrapper();
 		this.toggleEntitySelection = this.toggleEntitySelection.bind(this);
+		this.toggleSelectedGraph = this.toggleSelectedGraph.bind(this);
 		this.handleFilterChange = this.handleFilterChange.bind(this);
 	}
 
@@ -107,22 +90,41 @@ class EntitySelector extends React.Component{
 	}
 
 	retrieveGraphDetails(){
+		const api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
+		const graph_uri = this.state.selected_graph;
 
+	    sparql(api_url, getEntitiesDetailQuery(graph_uri), (err, data) => {
+	      if (data && !err) {
+	      	console.log('details for '+graph_uri, data)
+	        this.setState(prevState=>{
+	        	prevState.graph_details={graph:graph_uri, entities:data};
+	        	prevState.loading=false;
+	        	prevState.graph_details_loaded= true;
+	        	return prevState;
+	        });
+	      } else if (err) throw err
+	    });
 	}
 
 	componentDidUpdate(prevProps, prevState, snapshot){
 		if(prevState.loaded===false && this.state.loaded===true && this.state.ontology!=[]){
-			console.log('ontology loaded', this.state.ontology)
 		}else{
 			if(prevState.graphs_loaded == false && this.state.graphs_loaded == true){
-				console.log('Available graphs', this.state.graphs)
 				this.retrieveEntities()
 			}
 			if(prevState.graph_entities_loaded == false && this.state.graph_entities_loaded == true){
-				console.log('data correctly retrieved', this.state.graphs, this.state.graph_entities)
-				this.setState({loaded:true})
+				this.setState({loaded:true, loading:false})
 			}
+			if(prevState.selected_graph != this.state.selected_graph && this.state.selected_graph != "")
+				this.retrieveGraphDetails()
 		}
+	}
+
+	toggleSelectedGraph(graph){
+		if(graph!="")
+			this.setState({selected_graph: graph, graph_details_loaded:false, loading:true, current_state:'Retrieving details for '+graph})
+		else
+			this.setState({selected_graph: graph})
 	}
 
 	toggleEntitySelection(entity){
@@ -147,35 +149,41 @@ class EntitySelector extends React.Component{
 			"/sparql/"+
 			this.props.match.params.sparql+
 			"/entities/"+
-			this.state.entities.map(e=>this.wrapper.urlToParam(e)).join(",");
+			this.state.selected_entities.map(e=>this.wrapper.urlToParam(e)).join(",");
 
 		const filtered = (entity)=>(this.state.current_search!="" && entity.search(this.state.current_search)==-1);
 		const style = (entity)=>({"fill":filtered(entity)===true?"lightgrey":"#18bc9c"});
 		const action = (entity)=>(filtered(entity)===false?this.toggleEntitySelection(entity):()=>{});
 
-		const graphs = this.state.graph_entities.map((g)=>(
-			<div key={g.graph} className="graph">
-				<p>{g.graph.split('/')[g.graph.split('/').length-1]} ({g.entities.reduce((a,e)=>a+e.count.valueOf(), 0)} entries)</p>
-				<ul>
-					{g.entities.map(e=>(<li key={e.object} className="entity">{e.object.split('ontology')[1]} ({e.count.valueOf()} entries)</li>))}
-				</ul>
-			</div>			
-		));
-		// const total_entries = this.state.graph_entities.reduce((total,g)=>(
-		// 	g.entities.reduce((partial,e)=>partial+e.count.valueOf(), 0)), 0);
+		let content = "";
+		if(this.state.loaded===true && this.state.selected_graph=="")
+			content = this.state.graph_entities.map((g)=>(
+				<div key={g.graph} className="graph" onClick={()=>this.toggleSelectedGraph(g.graph)}>
+					<p>{g.graph.split('/')[g.graph.split('/').length-1]} ({g.entities.reduce((a,e)=>a+e.count.valueOf(), 0)} entries)</p>
+					<ul>
+						{g.entities.map(e=>(<li key={e.object} className="entity">{e.object.split('ontology')[1]} ({e.count.valueOf()} entries)</li>))}
+					</ul>
+				</div>			
+			));
+		else if(this.state.graph_details_loaded===true && this.state.selected_graph!="")
+			content = (
+				<div className="graphDetails">
+					<h1>Graph : this.state.selected_graph</h1>
+					<h2 onClick={()=>this.toggleSelectedGraph("")}>Go back</h2>
+					<div id="details">
+						{this.state.graph_details.entities.map((g)=>(
+							<div key={g.object} className="entity">
+								<p>Entity : {g.object.split('/')[g.object.split('/').length-1]}</p>
+								<ul>
+									{g.predicates.split(',').map(e=>(<li key={e} className="entity" onClick={()=>this.toggleEntitySelection(e)}>{e}</li>))}
+								</ul>
+							</div>		
+						))}
+					</div>
+				</div>
+			);
 
-		// const graphs = this.state.graph_entities.map((g)=>{
-		// 	const width = (15+20*g.entities.reduce((a,e)=>a+e.count.valueOf(),0)/total_entries)+'%';
-		// 	return(
-		// 	<div key={g.graph} className="graph" style={({width:width})}>
-		// 		<p>{g.graph.split('/')[g.graph.split('/').length-1]} has {g.entities.reduce((a,e)=>a+e.count.valueOf(), 0)}</p>
-		// 		<ul>
-		// 			{g.entities.map(e=>(<li key={e.object} className="entity">{e.object.split('ontology')[1]} has {e.count.valueOf()} entries</li>))}
-		// 		</ul>
-		// 	</div>		
-		// )});
-
-		const pretty_entities = this.state.entities.map(a=>a.split('#')[1]).join(' , ');
+		const pretty_entities = this.state.selected_entities.map(a=>a.split('#')[1]).join(' , ');
 
 	    return (
 	    	<div id="explorer" className="entitySelector">
@@ -194,16 +202,16 @@ class EntitySelector extends React.Component{
 		            <li><input type="text" value={this.state.current_search} onChange={this.handleFilterChange} /></li>
 		          </ul>
 		        </div>
-		        <div id="loader" style={({display: this.state.loaded===true?'none':'flex'})}>
+		        <div id="loader" style={({display: this.state.loading===true?'flex':'none'})}>
 			        <div className="loader" ></div>
 			        <p>{this.state.current_state}</p>
 		        </div>
 		        <div className="content">
 		        	<div id="graphs">
-						{this.state.loaded===true?graphs:""}
+						{this.state.loading===false?content:""}
 					</div>
 			      	<NavLink to={url} style={
-			      		(this.state.entities.length>0)?{display:"block"}:{display:"none"}
+			      		(this.state.selected_entities.length>0)?{display:"block"}:{display:"none"}
 			      	}>Go</NavLink>
 		        </div>
 		    </div>

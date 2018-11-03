@@ -121,7 +121,10 @@ div#explorer.entitySelector li.entity{
 	font-size: 1.2em;
 }
 
-div#explorer.entitySelector div#graphs{
+div#explorer div.content{padding: 1em;}
+
+div#explorer.entitySelector div#graphs,
+div#explorer.entitySelector div.graphDetails #details{
 
 	padding:0.2em;
 	display: flex;
@@ -132,6 +135,7 @@ div#explorer.entitySelector div#graphs{
 }
 
 div#explorer.entitySelector div.graph{
+	cursor:pointer;
 	width: 24%;
 	padding:0.5em;
 	height: inherit;
@@ -140,6 +144,25 @@ div#explorer.entitySelector div.graph{
 
 div#explorer.entitySelector div.graph:hover{
 	background-color: lightgrey;
+}
+
+div#explorer.entitySelector div.graphDetails p{
+	font-size: 1.2em;
+}
+
+div#explorer.entitySelector div.graphDetails li.entity{
+	cursor:pointer;
+	margin-bottom: 5px;
+	font-size: 1em;
+}
+
+div#explorer.entitySelector div.graphDetails h1{
+	font-size: 2em;
+}
+div#explorer.entitySelector div.graphDetails h2{
+	cursor:pointer;
+	font-size: 1.2em;
+	color: #18bc9c;
 }
 
 /* Explorer ---------------------------------------------------------------------------
