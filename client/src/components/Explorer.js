@@ -1,15 +1,37 @@
 import React from "react";
-import { BrowserRouter as Route, NavLink } from "react-router-dom";
-import UrlParamWrapper from '../aux/UrlParamWrapper';
-import RGL, { WidthProvider } from "react-grid-layout";
-const ReactGridLayout = WidthProvider(RGL);
-import Dummy from './vis/Dummy'
-import VisWrapper from './vis/VisWrapper'
-import ComponentSelector from './vis/ComponentSelector'
 import * as d3 from 'd3';
-
+import { sparql } from 'd3-sparql'
 import gridStyleLayout from '../../node_modules/react-grid-layout/css/styles.css';
 import gridStyleResizable from '../../node_modules/react-resizable/css/styles.css';
+import { BrowserRouter as Route, NavLink } from "react-router-dom";
+import RGL, { WidthProvider } from "react-grid-layout";
+import UrlParamWrapper from '../aux/UrlParamWrapper';
+
+import Dummy from './vis/Dummy'
+import ComponentSelector from './vis/ComponentSelector'
+import VisWrapper from './vis/VisWrapper'
+
+const ReactGridLayout = WidthProvider(RGL);
+
+const   genderQuery = ` 
+  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+  PREFIX oldcan: <https://explorations4u.acdh.oeaw.ac.at/ontology/oldcan#>
+
+  Select ?questionnaire ?author ?title ?publicationYear ?lastName ?firstName  ?gender (COUNT(?question) as ?nQuestion) 
+    from <http://exploreat.adaptcentre.ie/Questionnaire_graph>
+    from <http://exploreat.adaptcentre.ie/Person_graph>
+    from <http://exploreat.adaptcentre.ie/Question_graph>
+  WHERE {
+      ?questionnaire oldcan:hasAuthor ?author.
+      ?questionnaire oldcan:title ?title.
+      ?questionnaire oldcan:publicationYear ?publicationYear. 
+      ?author oldcan:FirstName ?firstName.
+      ?author oldcan:LastName ?lastName.
+      ?author foaf:gender ?gender.
+      ?question oldcan:isQuestionOf ?questionnaire. 
+  } GROUP BY ?questionnaire ?title ?publicationYear ?author ?gender ?lastName ?firstName`
 
 class Explorer extends React.Component{
   constructor(props){
@@ -32,6 +54,23 @@ class Explorer extends React.Component{
       visComponents: {
       }
     }  
+  }
+
+  componentDidMount(){
+    sparql(API_URL, genderQuery, (err, data) => {
+      if (data && !err) {
+        console.log('raw',data)
+        data = data.map(d => {
+          d.fullName = d.firstName + ' ' + d.lastName
+          d.number = d.questionnaire.substring(d.questionnaire.lastIndexOf('/') + 1)
+          d.title = d.title.substring(d.title.lastIndexOf(':') + 1)
+          d.nQuestion = parseInt(d.nQuestion)
+          d.publicationYear = `${parseInt(d.publicationYear)}`
+          return d
+        })
+        console.log('curated',data)
+      } else if (err) throw err
+    });
   }
 
   generateLayout(l){
