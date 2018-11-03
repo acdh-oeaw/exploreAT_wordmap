@@ -115,6 +115,33 @@ div#explorer.entitySelector input{
 	margin:0;
 }
 
+div#explorer.entitySelector li.entity{
+	padding-left: 1em;
+	color: #18bc9c;
+	font-size: 1.2em;
+}
+
+div#explorer.entitySelector div#graphs{
+
+	padding:0.2em;
+	display: flex;
+	flex-direction: row;
+	
+	justify-content: space-between;
+	flex-wrap: wrap;
+}
+
+div#explorer.entitySelector div.graph{
+	width: 24%;
+	padding:0.5em;
+	height: inherit;
+	display: inline-block;
+}
+
+div#explorer.entitySelector div.graph:hover{
+	background-color: lightgrey;
+}
+
 /* Explorer ---------------------------------------------------------------------------
  * https://projects.lukehaas.me/css-loaders/
 */
@@ -242,3 +269,4 @@ button.button:hover{
 	font-weight: bold;
 	box-shadow: inset 0 0 5px 0px grey; 
 }
+

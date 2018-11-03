@@ -114,10 +114,14 @@ class EntitySelector extends React.Component{
 		if(prevState.loaded===false && this.state.loaded===true && this.state.ontology!=[]){
 			console.log('ontology loaded', this.state.ontology)
 		}else{
-			if(prevState.graphs_loaded == false && this.state.graphs_loaded == true)
+			if(prevState.graphs_loaded == false && this.state.graphs_loaded == true){
+				console.log('Available graphs', this.state.graphs)
 				this.retrieveEntities()
-			if(prevState.graph_entities_loaded == false && this.state.graph_entities_loaded == true)
+			}
+			if(prevState.graph_entities_loaded == false && this.state.graph_entities_loaded == true){
 				console.log('data correctly retrieved', this.state.graphs, this.state.graph_entities)
+				this.setState({loaded:true})
+			}
 		}
 	}
 
@@ -149,13 +153,27 @@ class EntitySelector extends React.Component{
 		const style = (entity)=>({"fill":filtered(entity)===true?"lightgrey":"#18bc9c"});
 		const action = (entity)=>(filtered(entity)===false?this.toggleEntitySelection(entity):()=>{});
 
-		const entities = this.state.ontology.map((e,i)=>(
-			<g key={e['@id']} onClick={()=>action(e['@id'])} transform={"translate("+(10 + 40*(i%10))+", "+(10 + 17*i)+")"}>
-				<circle style={style(e['@id'])} cx={5} cy={5} r={10}></circle>
-				<text style={style(e['@id'])} y={9} x={17}>{e['@id']}</text>
-			</g>
-			
+		const graphs = this.state.graph_entities.map((g)=>(
+			<div key={g.graph} className="graph">
+				<p>{g.graph.split('/')[g.graph.split('/').length-1]} ({g.entities.reduce((a,e)=>a+e.count.valueOf(), 0)} entries)</p>
+				<ul>
+					{g.entities.map(e=>(<li key={e.object} className="entity">{e.object.split('ontology')[1]} ({e.count.valueOf()} entries)</li>))}
+				</ul>
+			</div>			
 		));
+		// const total_entries = this.state.graph_entities.reduce((total,g)=>(
+		// 	g.entities.reduce((partial,e)=>partial+e.count.valueOf(), 0)), 0);
+
+		// const graphs = this.state.graph_entities.map((g)=>{
+		// 	const width = (15+20*g.entities.reduce((a,e)=>a+e.count.valueOf(),0)/total_entries)+'%';
+		// 	return(
+		// 	<div key={g.graph} className="graph" style={({width:width})}>
+		// 		<p>{g.graph.split('/')[g.graph.split('/').length-1]} has {g.entities.reduce((a,e)=>a+e.count.valueOf(), 0)}</p>
+		// 		<ul>
+		// 			{g.entities.map(e=>(<li key={e.object} className="entity">{e.object.split('ontology')[1]} has {e.count.valueOf()} entries</li>))}
+		// 		</ul>
+		// 	</div>		
+		// )});
 
 		const pretty_entities = this.state.entities.map(a=>a.split('#')[1]).join(' , ');
 
@@ -181,9 +199,9 @@ class EntitySelector extends React.Component{
 			        <p>{this.state.current_state}</p>
 		        </div>
 		        <div className="content">
-					<svg ref={node => this.svg = node} width={'100%'} height={'80%'}>
-						{entities}
-					</svg>
+		        	<div id="graphs">
+						{this.state.loaded===true?graphs:""}
+					</div>
 			      	<NavLink to={url} style={
 			      		(this.state.entities.length>0)?{display:"block"}:{display:"none"}
 			      	}>Go</NavLink>
