@@ -53,7 +53,7 @@ class VisWrapper extends React.Component{
                             export
                         </button>
                     </div>
-                    <p>{this.props.name} - {this.props.height}</p>
+                    <p>{this.props.name}</p>
                     <button style={buttonStyle}
                         className="button" 
                         onClick={()=>this.props.removeComponent(this.props.name)}>  

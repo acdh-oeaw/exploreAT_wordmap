@@ -11,6 +11,7 @@ import Dummy from './vis/Dummy'
 import ComponentSelector from './vis/ComponentSelector'
 import VisWrapper from './vis/VisWrapper'
 import VisSelectorWrapper from './vis/VisSelectorWrapper'
+import Table from './vis/Table'
 
 const ReactGridLayout = WidthProvider(RGL);
 
@@ -19,7 +20,8 @@ class Explorer extends React.Component{
     super(props);    
      
     this.availableComponents = {
-      "Dummy": Dummy
+      "Dummy": Dummy,
+      "Table": Table
     };
     this.wrapper = new UrlParamWrapper();
     this.onLayoutChange = this.onLayoutChange.bind(this);
