@@ -34,7 +34,7 @@ class Dummy extends React.Component{
         }
         return(
             <div id="Dummy" className="visualization" style={size}>
-                <p style={{margin:0}}>Dummy component for {this.props.entity} {this.props.height}</p>
+                <p style={{margin:0}}>Dummy component for {this.props.entities.map(e=>(<span key={e}>{e}</span>))} {this.props.height}</p>
             </div>
         );
     }

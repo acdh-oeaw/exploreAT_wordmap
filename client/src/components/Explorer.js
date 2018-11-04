@@ -26,7 +26,8 @@ class Explorer extends React.Component{
     this.removeComponent = this.removeComponent.bind(this);
 
     this.state = {
-      data : [],
+      data : null,
+      available_entities:[],
       loaded:false,
       layout: {
         'selector': {x: 0, y: 0, w: 2, h: 4, isDraggable:true},
@@ -42,6 +43,7 @@ class Explorer extends React.Component{
     const entityFromEntry = (e)=>e.split('+')[1];
     const nameOfEntity = (e)=>(e.search('#')!=-1?e.split('#')[1]:e.split(':')[1]);
     const entries = this.wrapper.paramToUrl(this.props.match.params.entities).split(',');
+    const api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
     let queries_per_graph = {};
 
     entries.map(e=>{
@@ -60,12 +62,16 @@ class Explorer extends React.Component{
     query += d3.keys(queries_per_graph).map(g=>"FROM <"+g+">").join("\n");
     query += "WHERE {\n"+d3.entries(queries_per_graph).map((entry,i)=>{
       const subject = s[i];
-      const lines = entry.value.map(e=>"?"+subject+" "+((e.search('http://')!=-1)?('<'+e+'>'):e)+" ?"+nameOfEntity(e)).join(" .\n");
+      const lines = entry.value.map(e=>"?"+subject+" "+((e.search('http://')!=-1)?('<'+e+'>'):e)+" ?"+nameOfEntity(e)+" .").join("\n");
       return(lines);
     }).join("\n");
     query += "\n}\nLIMIT 100"
 
-    console.log("query\n", query)
+    sparql(api_url, query, (err, data) => {
+      if (data && !err) {
+        this.setState({data:data, available_entities:entries.map(e=>nameOfEntity(entityFromEntry(e)))});
+      } else if (err) throw err;
+    });
   }
 
   generateLayout(l){
@@ -76,13 +82,13 @@ class Explorer extends React.Component{
     }));
   }
 
-  addComponent(name, entity, type){
+  addComponent(name, entities, type){
     if(!d3.keys(this.state.components).includes(name)){
       let newInstance = React.createElement(this.availableComponents[type],{},null)
 
       this.setState(prevState=>{
         prevState.layout[name] = {x: 0, y: 0, w: 2, h: 4, isDraggable:true};
-        prevState.visComponents[name]={entity:entity,instance:newInstance};
+        prevState.visComponents[name]={entities:entities,instance:newInstance};
         prevState.loaded = true;
         return prevState;
       });
@@ -91,7 +97,6 @@ class Explorer extends React.Component{
 
   removeComponent(name){
     if(d3.keys(this.state.visComponents).includes(name)){
-      console.info('removing the : ',name)
       this.setState(prevState=>{
         delete prevState.visComponents[name];
         delete prevState.layout[name];
@@ -107,7 +112,6 @@ class Explorer extends React.Component{
   }
 
   render(){
-    console.log(this.state)
     const pretty_entities = this.wrapper.paramToUrl(this.props.match.params.entities)
       .split(',').map(a=>a.split('#')[1]).join(' , ');
 
@@ -116,7 +120,8 @@ class Explorer extends React.Component{
           <VisWrapper width={this.state.layout[c.key].w * Math.trunc(document.body.clientWidth/6)- 15} 
                       height={this.state.layout[c.key].h * 90 + (this.state.layout[c.key].h - 1)*10 - 40}
                       name={c.key}
-                      entity={c.value.entity}
+                      entities={c.value.entities}
+                      data={this.state.data}
                       removeComponent={this.removeComponent}>
                       {c.value.instance}
           </VisWrapper>
@@ -129,9 +134,7 @@ class Explorer extends React.Component{
               height={this.state.layout.selector.h * 90 + (this.state.layout.selector.h - 1)*10 - 45}
               name={"Component Selector"}
               addComponent={this.addComponent}
-              entities={this.wrapper
-                  .paramToUrl(this.props.match.params.entities)
-                  .split(',')}
+              entities={this.state.available_entities}
               availableComponents={d3.keys(this.availableComponents)}>
               <ComponentSelector/>
         </VisWrapper>

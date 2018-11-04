@@ -15,12 +15,12 @@ class ComponentSelector extends React.Component{
 
         this.state = {
             name: "",
-            entity: "",
+            entities: [],
             type: ""
         };
 
         this.handleNameChange = this.handleNameChange.bind(this);
-        this.handleEntityChange = this.handleEntityChange.bind(this);
+        this.toggleEntitySelection = this.toggleEntitySelection.bind(this);
         this.handleTypeChange = this.handleTypeChange.bind(this);
         this.createComponent = this.createComponent.bind(this);
     }
@@ -29,8 +29,15 @@ class ComponentSelector extends React.Component{
         this.setState({name: event.target.value});
     };
 
-    handleEntityChange(entity){
-        this.setState({entity: entity.value});
+    toggleEntitySelection(entity){
+        this.setState((prevState)=>{
+            if(entity && entity.length>0)
+                if(prevState.entities.includes(entity))
+                    prevState.entities = prevState.entities.filter(e=>e!=entity)
+                else
+                    prevState.entities.push(entity)
+            return(prevState);
+        });
     };
 
     handleTypeChange(type){
@@ -38,9 +45,9 @@ class ComponentSelector extends React.Component{
     };
 
     createComponent(){
-        if(this.state.name != "" && this.state.entity != "" && this.state.type != ""){
-            this.props.addComponent(this.state.name, this.state.entity, this.state.type);
-            this.setState({name: "", entity: "", type: ""});
+        if(this.state.name != "" && this.state.entities.length>0 && this.state.type != ""){
+            this.props.addComponent(this.state.name, this.state.entities, this.state.type);
+            this.setState({name: "", entities: []});
         }
     }
 
@@ -49,9 +56,9 @@ class ComponentSelector extends React.Component{
             width: this.props.width+"px",
             height: this.props.height+"px"
         }
+        const style = (e)=>this.state.entities.includes(e)?{cursor:"pointer",color:"#18bc9c"}:{cursor:"pointer",color:"black"};
         return(
             <div id="Dummy" className="visualization" style={size}>
-                {this.props.name}
                 <ul>
                     <li>Name for the new component :</li>
                     <li><input type="text" value={this.state.name} onChange={this.handleNameChange} /></li>
@@ -59,11 +66,10 @@ class ComponentSelector extends React.Component{
                 <ul>
                     <li>Entity to explore on the new component :</li>
                     <li>
-                        <Dropdown 
-                            options={this.props.entities.map(e=>({value:e,label:e.split('#')[1]}))} 
-                            onChange={this.handleEntityChange} 
-                            value={this.props.entities[0]} 
-                            placeholder="Select an entity" /></li>
+                    {this.props.entities.map(e=>(
+                        <span onClick={()=>this.toggleEntitySelection(e)} style={style(e)} key={e}> {e} </span>
+                        ))}
+                    </li>
                 </ul>
                 <ul>
                     <li>Type of component to be created :</li>
