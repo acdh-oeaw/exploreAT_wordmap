@@ -120,8 +120,14 @@ class Explorer extends React.Component{
   }
 
   render(){
+    const entityFromEntry = (e)=>e.split('+')[1];
+    const nameOfEntity = (e)=>(e.slice(Math.max(...[
+      e.lastIndexOf('/'),
+      e.lastIndexOf('#'),
+      e.lastIndexOf(':'),
+    ])+1));
     const pretty_entities = this.wrapper.paramToUrl(this.props.match.params.entities)
-      .split(',').map(a=>a.split('#')[1]).join(' , ');
+      .split(',').map(a=>nameOfEntity(entityFromEntry(a))).join(' , ');
 
     const visComponents = d3.entries(this.state.visComponents).map(c=>(
         <div key={c.key}>
