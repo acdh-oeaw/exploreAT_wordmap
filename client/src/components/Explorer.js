@@ -41,7 +41,12 @@ class Explorer extends React.Component{
     const s = "abcdefghijklmnopqrstuvwxyz";
     const graphFromEntry = (e)=>e.split('+')[0];
     const entityFromEntry = (e)=>e.split('+')[1];
-    const nameOfEntity = (e)=>(e.search('#')!=-1?e.split('#')[1]:e.split(':')[1]);
+    const nameOfEntity = (e)=>(e.slice(Math.max(...[
+      e.lastIndexOf('/'),
+      e.lastIndexOf('#'),
+      e.lastIndexOf(':'),
+    ])+1));
+
     const entries = this.wrapper.paramToUrl(this.props.match.params.entities).split(',');
     const api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
     let queries_per_graph = {};
