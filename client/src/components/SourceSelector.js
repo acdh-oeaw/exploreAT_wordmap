@@ -6,12 +6,14 @@ class SourceSelector extends React.Component{
 	constructor(props){
 		super(props);
 		this.state={
-			ontology:"http://explorations4u.acdh.oeaw.ac.at/ontology/oldcan",
+			ontology:"https://explorations4u.acdh.oeaw.ac.at/ontology/oldcan",
+			prefix:"oldcan",
 			sparql:"http://localhost:3030/oldcan/query"
 		};
 
 		this.wrapper = new UrlParamWrapper();
 		this.handleOntologyChange = this.handleOntologyChange.bind(this);
+		this.handlePrefixChange = this.handlePrefixChange.bind(this);
 		this.handleSparqlChange = this.handleSparqlChange.bind(this);
 
 	}
@@ -24,10 +26,16 @@ class SourceSelector extends React.Component{
 		this.setState({sparql: event.target.value});
 	};
 
+	handlePrefixChange(event){
+		this.setState({prefix: event.target.value});
+	};
+
 	render() {
 		const url = 
 			"/explorer/ontology/"+
 			this.wrapper.urlToParam(this.state.ontology)+
+			"/prefix/"+
+			this.wrapper.urlToParam(this.state.prefix)+
 			"/sparql/"+
 			this.wrapper.urlToParam(this.state.sparql);
 
@@ -39,12 +47,16 @@ class SourceSelector extends React.Component{
 			          <input type="text" value={this.state.ontology} onChange={this.handleOntologyChange} />
 			        </label>
 			        <label>
+			          Prefix for the ontology:
+			          <input type="text" value={this.state.prefix} onChange={this.handlePrefixChange} />
+			        </label>
+			        <label>
 			          Sparql endpoint:
 			          <input type="text" value={this.state.sparql} onChange={this.handleSparqlChange} />
 			        </label>
 		      	</form>
 		      	<NavLink to={url} style={
-		      		(this.state.ontology.length>0 && this.state.sparql.length>0)?{display:"block"}:{display:"none"}
+		      		(this.state.ontology.length>0 && this.state.sparql.length>0 && this.state.prefix.length>0)?{display:"block"}:{display:"none"}
 		      	}>Go</NavLink>
 	      	</div>
 	    );

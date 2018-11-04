@@ -13,26 +13,6 @@ import VisWrapper from './vis/VisWrapper'
 
 const ReactGridLayout = WidthProvider(RGL);
 
-const   genderQuery = ` 
-  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-  PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-  PREFIX oldcan: <https://explorations4u.acdh.oeaw.ac.at/ontology/oldcan#>
-
-  Select ?questionnaire ?author ?title ?publicationYear ?lastName ?firstName  ?gender (COUNT(?question) as ?nQuestion) 
-    from <http://exploreat.adaptcentre.ie/Questionnaire_graph>
-    from <http://exploreat.adaptcentre.ie/Person_graph>
-    from <http://exploreat.adaptcentre.ie/Question_graph>
-  WHERE {
-      ?questionnaire oldcan:hasAuthor ?author.
-      ?questionnaire oldcan:title ?title.
-      ?questionnaire oldcan:publicationYear ?publicationYear. 
-      ?author oldcan:FirstName ?firstName.
-      ?author oldcan:LastName ?lastName.
-      ?author foaf:gender ?gender.
-      ?question oldcan:isQuestionOf ?questionnaire. 
-  } GROUP BY ?questionnaire ?title ?publicationYear ?author ?gender ?lastName ?firstName`
-
 class Explorer extends React.Component{
   constructor(props){
     super(props);    
@@ -57,20 +37,35 @@ class Explorer extends React.Component{
   }
 
   componentDidMount(){
-    sparql(API_URL, genderQuery, (err, data) => {
-      if (data && !err) {
-        console.log('raw',data)
-        data = data.map(d => {
-          d.fullName = d.firstName + ' ' + d.lastName
-          d.number = d.questionnaire.substring(d.questionnaire.lastIndexOf('/') + 1)
-          d.title = d.title.substring(d.title.lastIndexOf(':') + 1)
-          d.nQuestion = parseInt(d.nQuestion)
-          d.publicationYear = `${parseInt(d.publicationYear)}`
-          return d
-        })
-        console.log('curated',data)
-      } else if (err) throw err
+    const s = "abcdefghijklmnopqrstuvwxyz";
+    const graphFromEntry = (e)=>e.split('+')[0];
+    const entityFromEntry = (e)=>e.split('+')[1];
+    const nameOfEntity = (e)=>(e.search('#')!=-1?e.split('#')[1]:e.split(':')[1]);
+    const entries = this.wrapper.paramToUrl(this.props.match.params.entities).split(',');
+    let queries_per_graph = {};
+
+    entries.map(e=>{
+      if(!queries_per_graph[graphFromEntry(e)])
+        queries_per_graph[graphFromEntry(e)]=[entityFromEntry(e),];
+      else
+        queries_per_graph[graphFromEntry(e)].push(entityFromEntry(e))
     });
+
+    let query = "PREFIX "+
+      this.wrapper.paramToUrl(this.props.match.params.prefix)+
+      ": <"+
+      this.wrapper.paramToUrl(this.props.match.params.ontology)+
+      "#>";
+    query += "\n SELECT " + entries.map(e=>"?"+nameOfEntity(entityFromEntry(e))).join(' ')+"\n"
+    query += d3.keys(queries_per_graph).map(g=>"FROM <"+g+">").join("\n");
+    query += "WHERE {\n"+d3.entries(queries_per_graph).map((entry,i)=>{
+      const subject = s[i];
+      const lines = entry.value.map(e=>"?"+subject+" "+((e.search('http://')!=-1)?('<'+e+'>'):e)+" ?"+nameOfEntity(e)).join(" .\n");
+      return(lines);
+    }).join("\n");
+    query += "\n}\nLIMIT 100"
+
+    console.log("query\n", query)
   }
 
   generateLayout(l){

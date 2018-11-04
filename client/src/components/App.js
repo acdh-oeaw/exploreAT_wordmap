@@ -28,9 +28,9 @@ const App = (props) => {
           <Switch>
             <Route exact path="/" component={Home}/>
             <Route exact path="/sources" component={SourceSelector}/>
-            <Route exact path="/explorer/ontology/:ontology/sparql/:sparql" component={EntitySelector}/>
-            <Route exact path="/explorer/ontology/:ontology/sparql/:sparql/entities" component={EntitySelector}/>
-            <Route exact path="/explorer/ontology/:ontology/sparql/:sparql/entities/:entities" component={Explorer}/>
+            <Route exact path="/explorer/ontology/:ontology/prefix/:prefix/sparql/:sparql" component={EntitySelector}/>
+            <Route exact path="/explorer/ontology/:ontology/prefix/:prefix/sparql/:sparql/entities" component={EntitySelector}/>
+            <Route exact path="/explorer/ontology/:ontology/prefix/:prefix/sparql/:sparql/entities/:entities" component={Explorer}/>
             <Route component={Home}/>
           </Switch>
         </div>

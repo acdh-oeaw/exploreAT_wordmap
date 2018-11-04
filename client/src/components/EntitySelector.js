@@ -41,12 +41,12 @@ class EntitySelector extends React.Component{
 			loaded: false,
 			loading:true,
 			current_search: "",
-			ontology:[],
 			graphs: [],
 			graph_entities: [],
 			graph_details: [],
 			selected_graph: "",
 			selected_entities: [],
+			selected_entities_uris: [],
 			current_state: "Retrieving available graphs"
 		};
 
@@ -129,11 +129,20 @@ class EntitySelector extends React.Component{
 
 	toggleEntitySelection(entity){
 		this.setState((prevState)=>{
+			const ontology = this.wrapper.paramToUrl(this.props.match.params.ontology);
+			const prefix = this.wrapper.paramToUrl(this.props.match.params.prefix);
+
 			if(entity && entity.length>0)
-				if(prevState.entities.includes(entity))
-					prevState.entities = prevState.entities.filter(e=>e!=entity)
-				else
-					prevState.entities.push(entity)
+				if(prevState.selected_entities.includes(entity))
+					prevState.selected_entities = prevState.selected_entities.filter(e=>e!=entity)
+				else{
+					prevState.selected_entities.push(entity)
+					if(-1 != entity.search(ontology)){
+						entity = prefix + ":" + entity.split(ontology+"#")[1];
+						prevState.selected_entities_uris.push(this.state.selected_graph+'+'+entity);
+					}else
+						prevState.selected_entities_uris.push(this.state.selected_graph+'+'+entity)
+				}
 			return(prevState);
 		});
 	};
@@ -146,10 +155,12 @@ class EntitySelector extends React.Component{
 		const url = 
 			"/explorer/ontology/"+
 			this.props.match.params.ontology+
+			"/prefix/"+
+			this.props.match.params.prefix+
 			"/sparql/"+
 			this.props.match.params.sparql+
 			"/entities/"+
-			this.state.selected_entities.map(e=>this.wrapper.urlToParam(e)).join(",");
+			this.state.selected_entities_uris.map(e=>this.wrapper.urlToParam(e)).join(",");
 
 		const filtered = (entity)=>(this.state.current_search!="" && entity.search(this.state.current_search)==-1);
 		const style = (entity)=>({"fill":filtered(entity)===true?"lightgrey":"#18bc9c"});
@@ -168,7 +179,7 @@ class EntitySelector extends React.Component{
 		else if(this.state.graph_details_loaded===true && this.state.selected_graph!="")
 			content = (
 				<div className="graphDetails">
-					<h1>Graph : this.state.selected_graph</h1>
+					<h1>Graph : {this.state.selected_graph}</h1>
 					<h2 onClick={()=>this.toggleSelectedGraph("")}>Go back</h2>
 					<div id="details">
 						{this.state.graph_details.entities.map((g)=>(
