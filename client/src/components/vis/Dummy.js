@@ -30,7 +30,7 @@ class Dummy extends React.Component{
     render(){
         const size = {
             width: this.props.width+"px",
-            height: this.props.height+"px"
+            height: (this.props.height)+"px"
         }
         return(
             <div id="Dummy" className="visualization" style={size}>

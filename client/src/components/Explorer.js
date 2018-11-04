@@ -10,6 +10,7 @@ import UrlParamWrapper from '../aux/UrlParamWrapper';
 import Dummy from './vis/Dummy'
 import ComponentSelector from './vis/ComponentSelector'
 import VisWrapper from './vis/VisWrapper'
+import VisSelectorWrapper from './vis/VisSelectorWrapper'
 
 const ReactGridLayout = WidthProvider(RGL);
 
@@ -135,14 +136,14 @@ class Explorer extends React.Component{
 
     visComponents.push(
       <div key="selector">
-        <VisWrapper width={this.state.layout.selector.w * Math.trunc(document.body.clientWidth/6) - 20} 
+        <VisSelectorWrapper width={this.state.layout.selector.w * Math.trunc(document.body.clientWidth/6) - 20} 
               height={this.state.layout.selector.h * 90 + (this.state.layout.selector.h - 1)*10 - 45}
               name={"Component Selector"}
               addComponent={this.addComponent}
               entities={this.state.available_entities}
               availableComponents={d3.keys(this.availableComponents)}>
               <ComponentSelector/>
-        </VisWrapper>
+        </VisSelectorWrapper>
       </div>
     );
 
