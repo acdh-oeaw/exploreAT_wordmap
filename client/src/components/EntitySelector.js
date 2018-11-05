@@ -20,8 +20,8 @@ class EntitySelector extends React.Component{
 			graphs_loaded: false,
 			graph_entities_loaded: false,
 			graph_details: false,
-			loaded: false,
-			loading:true,
+			loaded: false, 
+			loading:true, // For display issues
 			current_search: "",
 			graphs: [],
 			graph_entities: [],
@@ -37,6 +37,11 @@ class EntitySelector extends React.Component{
 		this.toggleEntitySelection = this.toggleEntitySelection.bind(this);
 		this.toggleSelectedGraph = this.toggleSelectedGraph.bind(this);
 		this.handleFilterChange = this.handleFilterChange.bind(this);
+
+		// Url query param based parameters
+		this.api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
+		this.ontology = this.wrapper.paramToUrl(this.props.match.params.ontology);
+		this.prefix = this.wrapper.paramToUrl(this.props.match.params.prefix);
 	}
 
 	componentDidMount(){
@@ -50,9 +55,7 @@ class EntitySelector extends React.Component{
 	 * @fires   this.setState()
 	 */
 	retrieveGraphs(){
-		const api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
-
-	    sparql(api_url, this.sparqlQueries.getGraphsQuery(), (err, data) => {
+	    sparql(this.api_url, this.sparqlQueries.getGraphsQuery(), (err, data) => {
 	      if (data && !err) {
 	        this.setState({
 	        	graphs_loaded:true, 
@@ -70,11 +73,10 @@ class EntitySelector extends React.Component{
 	 * @fires   this.setState()
 	 */
 	retrieveEntities(){
-		const api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
 		let retrieved = 0;
 
 		this.state.graphs.map(graph_uri=>{
-		    sparql(api_url, this.sparqlQueries.getEntitiesOverviewQuery(graph_uri), (err, data) => {
+		    sparql(this.api_url, this.sparqlQueries.getEntitiesOverviewQuery(graph_uri), (err, data) => {
 		      if (data && !err) {
 		        this.setState(prevState=>{
 		        	prevState.graph_entities.push({graph:graph_uri, entities:data});
@@ -96,12 +98,10 @@ class EntitySelector extends React.Component{
 	 * @fires   this.setState()
 	 */
 	retrieveGraphDetails(){
-		const api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
 		const graph_uri = this.state.selected_graph;
 
-	    sparql(api_url, this.sparqlQueries.getEntitiesDetailQuery(graph_uri), (err, data) => {
+	    sparql(this.api_url, this.sparqlQueries.getEntitiesDetailQuery(graph_uri), (err, data) => {
 	      if (data && !err) {
-	      	console.log('details for '+graph_uri, data)
 	        this.setState(prevState=>{
 	        	prevState.graph_details={graph:graph_uri, entities:data};
 	        	prevState.loading=false;
@@ -135,16 +135,13 @@ class EntitySelector extends React.Component{
 
 	toggleEntitySelection(entity){
 		this.setState((prevState)=>{
-			const ontology = this.wrapper.paramToUrl(this.props.match.params.ontology);
-			const prefix = this.wrapper.paramToUrl(this.props.match.params.prefix);
-
 			if(entity && entity.length>0)
 				if(prevState.selected_entities.includes(entity))
 					prevState.selected_entities = prevState.selected_entities.filter(e=>e!=entity)
 				else{
 					prevState.selected_entities.push(entity)
-					if(-1 != entity.search(ontology)){
-						entity = prefix + ":" + entity.split(ontology+"#")[1];
+					if(-1 != entity.search(this.ontology)){
+						entity = this.prefix + ":" + entity.split(ontology+"#")[1];
 						prevState.selected_entities_uris.push(this.state.selected_graph+'+'+entity);
 					}else
 						prevState.selected_entities_uris.push(this.state.selected_graph+'+'+entity)
@@ -157,18 +154,14 @@ class EntitySelector extends React.Component{
 		this.setState({current_search: event.target.value});
 	};
 
-	render() {
-		const url = 
-			"/explorer/ontology/"+
-			this.props.match.params.ontology+
-			"/prefix/"+
-			this.props.match.params.prefix+
-			"/sparql/"+
-			this.props.match.params.sparql+
-			"/entities/"+
-			this.state.selected_entities_uris.map(e=>this.wrapper.urlToParam(e)).join(",");
-
-		const pretty_entities = this.state.selected_entities.map(a=>a.split('#')[1]).join(' , ');
+	/**
+	 * renderContent
+	 * Either render a global view of the database and its graphs, or a detailed view
+	 * of a graph and the possible relationships.
+	 *
+	 * @return {JSX} Content for the EntitySelector screen.
+	 */
+	renderContent(){
 		const filtered = (entity)=>(this.state.current_search!="" && entity.search(this.state.current_search)==-1);
 		const style = (entity)=>({"fill":filtered(entity)===true?"lightgrey":"#18bc9c"});
 		const action = (entity)=>(filtered(entity)===false?this.toggleEntitySelection(entity):()=>{});
@@ -203,14 +196,26 @@ class EntitySelector extends React.Component{
 				</div>
 			);
 
+		return(content);
+	}
+
+	render() {
+		const url = 
+			"/explorer/ontology/" + this.props.match.params.ontology+
+			"/prefix/" +	this.props.match.params.prefix+
+			"/sparql/" + this.props.match.params.sparql+
+			"/entities/" + this.state.selected_entities_uris.map(e=>this.wrapper.urlToParam(e)).join(",");
+
+		const pretty_entities = this.state.selected_entities.map(a=>a.split('#')[1]).join(' , ');
+
 	    return (
 	    	<div id="explorer" className="entitySelector">
 	    		<div className="header">
 		          <h2>Entity selector</h2>
 		          <div className="info">
 		            <div>
-		              <span>Ontology : {this.wrapper.paramToUrl(this.props.match.params.ontology)}</span>
-		              <span>Sparql entry point : {this.wrapper.paramToUrl(this.props.match.params.sparql)}</span>
+		              <span>Ontology : {this.ontology}</span>
+		              <span>Sparql entry point : {this.api_url}</span>
 		            </div>
 		            <span>
 			            Search for specific entities 
@@ -226,7 +231,7 @@ class EntitySelector extends React.Component{
 
 		        <div className="content">
 		        	<div id="graphs">
-						{this.state.loading===false?content:""}
+						{this.state.loading===false?this.renderContent():""}
 					</div>
 			      	<NavLink to={url} style={
 			      		(this.state.selected_entities.length>0)?{display:"block"}:{display:"none"}
