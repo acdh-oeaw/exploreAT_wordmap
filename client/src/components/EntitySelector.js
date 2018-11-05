@@ -1,53 +1,9 @@
 import React from "react";
 import { BrowserRouter as Route, NavLink } from "react-router-dom";
-import UrlParamWrapper from '../aux/UrlParamWrapper';
 import * as d3 from 'd3';
 import { sparql } from 'd3-sparql'
-
-/**
- * getGraphsQuery
- * Provides a SPARQL query for retrieving available graphs.
- *
- * @return {string} The query.
- */
-const getGraphsQuery = ()=>`
-	SELECT ?graph
-	WHERE {
-	  GRAPH ?graph { }
-	}`;
-	
-/**
- * getEntitiesOverviewQuery
- * Provides a SPARQL query for retrieving all entities and count for a graph.
- *
- * @param {string} URI for the graph it is intended to query for.
- * @return {string} The query.
- */
-const getEntitiesOverviewQuery = (graph_uri)=>`
-	SELECT DISTINCT ?object (count (?subject) as ?count)
-	from <`+graph_uri+`>
-	WHERE {
-  		?subject <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?object.
-	}group by ?object
-`;
-/**
- * getEntitiesDetailQuery
- * Provides a SPARQL query to retirieve all predicates available in a graph.
- *
- * @param {string} URI for the graph it is intended to query for.
- * @return {string} The query.
- */
-const getEntitiesDetailQuery = (graph_uri)=>`
-	SELECT ?object ?predicates ?count
-	FROM <`+graph_uri+`>
-	WHERE{
-		{SELECT DISTINCT ?object 
-		 WHERE {?subject <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?object}} .
-		{SELECT (GROUP_CONCAT(DISTINCT ?predicate; SEPARATOR=",") AS ?predicates) (COUNT(DISTINCT ?predicate) AS ?count) 
-		WHERE {?subject ?predicate []}}
-	}
-	limit 60
-`;
+import UrlParamWrapper from '../aux/UrlParamWrapper';
+import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
 
 /**
  * EntitySelector
@@ -77,6 +33,7 @@ class EntitySelector extends React.Component{
 		};
 
 		this.wrapper = new UrlParamWrapper();
+		this.sparqlQueries = new SparqlQueryBuilder();
 		this.toggleEntitySelection = this.toggleEntitySelection.bind(this);
 		this.toggleSelectedGraph = this.toggleSelectedGraph.bind(this);
 		this.handleFilterChange = this.handleFilterChange.bind(this);
@@ -94,9 +51,14 @@ class EntitySelector extends React.Component{
 	 */
 	retrieveGraphs(){
 		const api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
-	    sparql(api_url, getGraphsQuery(), (err, data) => {
+
+	    sparql(api_url, this.sparqlQueries.getGraphsQuery(), (err, data) => {
 	      if (data && !err) {
-	        this.setState({graphs_loaded:true, graphs:data.map(g=>g.graph), current_state:'Retrieving entities from graphs'});
+	        this.setState({
+	        	graphs_loaded:true, 
+	        	graphs:data.map(g=>g.graph), 
+	        	current_state:'Retrieving entities from graphs'
+	        });
 	      } else if (err) throw err
 	    });
 	}
@@ -112,7 +74,7 @@ class EntitySelector extends React.Component{
 		let retrieved = 0;
 
 		this.state.graphs.map(graph_uri=>{
-		    sparql(api_url, getEntitiesOverviewQuery(graph_uri), (err, data) => {
+		    sparql(api_url, this.sparqlQueries.getEntitiesOverviewQuery(graph_uri), (err, data) => {
 		      if (data && !err) {
 		        this.setState(prevState=>{
 		        	prevState.graph_entities.push({graph:graph_uri, entities:data});
@@ -137,7 +99,7 @@ class EntitySelector extends React.Component{
 		const api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
 		const graph_uri = this.state.selected_graph;
 
-	    sparql(api_url, getEntitiesDetailQuery(graph_uri), (err, data) => {
+	    sparql(api_url, this.sparqlQueries.getEntitiesDetailQuery(graph_uri), (err, data) => {
 	      if (data && !err) {
 	      	console.log('details for '+graph_uri, data)
 	        this.setState(prevState=>{
