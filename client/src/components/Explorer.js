@@ -46,11 +46,15 @@ class Explorer extends React.Component{
       visComponents: {
       }
     }  
+
+    // Url query param based parameters
+    this.api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
+    this.ontology = this.wrapper.paramToUrl(this.props.match.params.ontology);
+    this.prefix = this.wrapper.paramToUrl(this.props.match.params.prefix);
+    this.entries = this.wrapper.paramToUrl(this.props.match.params.entities).split(',');
   }
 
   componentDidMount(){
-    const entries = this.wrapper.paramToUrl(this.props.match.params.entities).split(',');
-    const api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
     const query = this.createDataSparqlQuery();
     const graphFromEntry = (e)=>e.split('+')[0];
     const entityFromEntry = (e)=>e.split('+')[1];
@@ -60,9 +64,9 @@ class Explorer extends React.Component{
       e.lastIndexOf(':'),
     ])+1));
 
-    sparql(api_url, query, (err, data) => {
+    sparql(this.api_url, query, (err, data) => {
       if (data && !err) {
-        this.setState({data:data, available_entities:entries.map(e=>nameOfEntity(entityFromEntry(e)))});
+        this.setState({data:data, available_entities:this.entries.map(e=>nameOfEntity(entityFromEntry(e)))});
       } else if (err) throw err;
     });
   }
@@ -74,8 +78,6 @@ class Explorer extends React.Component{
    * @return {string} An SPARQL query
    */
   createDataSparqlQuery(){
-    const entries = this.wrapper.paramToUrl(this.props.match.params.entities).split(',');
-    const api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
     let queries_per_graph = {};
     const s = "abcdefghijklmnopqrstuvwxyz";
     const graphFromEntry = (e)=>e.split('+')[0];
@@ -86,19 +88,15 @@ class Explorer extends React.Component{
       e.lastIndexOf(':'),
     ])+1));
 
-    entries.map(e=>{
+    this.entries.map(e=>{
       if(!queries_per_graph[graphFromEntry(e)])
         queries_per_graph[graphFromEntry(e)]=[entityFromEntry(e),];
       else
         queries_per_graph[graphFromEntry(e)].push(entityFromEntry(e))
     });
 
-    let query = "PREFIX "+
-      this.wrapper.paramToUrl(this.props.match.params.prefix)+
-      ": <"+
-      this.wrapper.paramToUrl(this.props.match.params.ontology)+
-      "#>";
-    query += "\n SELECT " + entries.map(e=>"?"+nameOfEntity(entityFromEntry(e))).join(' ')+"\n"
+    let query = "PREFIX "+ this.prefix + ": <"+ this.ontology + "#>";
+    query += "\n SELECT " + this.entries.map(e=>"?"+nameOfEntity(entityFromEntry(e))).join(' ')+"\n"
     query += d3.keys(queries_per_graph).map(g=>"FROM <"+g+">").join("\n");
     query += "WHERE {\n"+d3.entries(queries_per_graph).map((entry,i)=>{
       const subject = s[i];
@@ -170,8 +168,7 @@ class Explorer extends React.Component{
       e.lastIndexOf('#'),
       e.lastIndexOf(':'),
     ])+1));
-    const pretty_entities = this.wrapper.paramToUrl(this.props.match.params.entities)
-      .split(',').map(a=>nameOfEntity(entityFromEntry(a))).join(' , ');
+    const pretty_entities = this.entries.map(a=>nameOfEntity(entityFromEntry(a))).join(' , ');
 
     // Display vis component intances through a wrapper class
     const visComponents = d3.entries(this.state.visComponents).map(c=>(
@@ -206,8 +203,8 @@ class Explorer extends React.Component{
           <h2>Explorer page</h2>
           <div className="info">
             <div>
-              <span>Ontology : {this.wrapper.paramToUrl(this.props.match.params.ontology)}</span>
-              <span>Sparql entry point : {this.wrapper.paramToUrl(this.props.match.params.sparql)}</span>
+              <span>Ontology : {this.ontology}</span>
+              <span>Sparql entry point : {this.api_url}</span>
             </div>
             <span>Current data available for entities : {pretty_entities}</span>
           </div>

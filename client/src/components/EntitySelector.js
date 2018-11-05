@@ -141,7 +141,7 @@ class EntitySelector extends React.Component{
 				else{
 					prevState.selected_entities.push(entity)
 					if(-1 != entity.search(this.ontology)){
-						entity = this.prefix + ":" + entity.split(ontology+"#")[1];
+						entity = this.prefix + ":" + entity.split(this.ontology+"#")[1];
 						prevState.selected_entities_uris.push(this.state.selected_graph+'+'+entity);
 					}else
 						prevState.selected_entities_uris.push(this.state.selected_graph+'+'+entity)
