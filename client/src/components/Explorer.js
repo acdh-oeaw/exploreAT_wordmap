@@ -26,11 +26,7 @@ const ReactGridLayout = WidthProvider(RGL);
 class Explorer extends React.Component{
   constructor(props){
     super(props);    
-     
-    this.availableComponents = {
-      "Dummy": Dummy,
-      "Table": Table
-    };
+    
     this.wrapper = new UrlParamWrapper();
     this.onLayoutChange = this.onLayoutChange.bind(this);
     this.addComponent = this.addComponent.bind(this);
@@ -43,10 +39,10 @@ class Explorer extends React.Component{
       layout: {
         'selector': {x: 0, y: 0, w: 2, h: 4, isDraggable:true},
       },
-      visComponents: {
-      }
+      visComponents: {}
     }  
 
+    this.availableComponents = {"Dummy": Dummy, "Table": Table};
     // Url query param based parameters
     this.api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
     this.ontology = this.wrapper.paramToUrl(this.props.match.params.ontology);
@@ -56,17 +52,13 @@ class Explorer extends React.Component{
 
   componentDidMount(){
     const query = this.createDataSparqlQuery();
-    const graphFromEntry = (e)=>e.split('+')[0];
-    const entityFromEntry = (e)=>e.split('+')[1];
-    const nameOfEntity = (e)=>(e.slice(Math.max(...[
-      e.lastIndexOf('/'),
-      e.lastIndexOf('#'),
-      e.lastIndexOf(':'),
-    ])+1));
-
+    
     sparql(this.api_url, query, (err, data) => {
       if (data && !err) {
-        this.setState({data:data, available_entities:this.entries.map(e=>nameOfEntity(entityFromEntry(e)))});
+        this.setState({
+          data:data, 
+          available_entities:this.entries.map(e=>this.wrapper.nameOfEntity(this.wrapper.entityFromEntry(e)))
+        });
       } else if (err) throw err;
     });
   }
@@ -80,27 +72,20 @@ class Explorer extends React.Component{
   createDataSparqlQuery(){
     let queries_per_graph = {};
     const s = "abcdefghijklmnopqrstuvwxyz";
-    const graphFromEntry = (e)=>e.split('+')[0];
-    const entityFromEntry = (e)=>e.split('+')[1];
-    const nameOfEntity = (e)=>(e.slice(Math.max(...[
-      e.lastIndexOf('/'),
-      e.lastIndexOf('#'),
-      e.lastIndexOf(':'),
-    ])+1));
 
     this.entries.map(e=>{
-      if(!queries_per_graph[graphFromEntry(e)])
-        queries_per_graph[graphFromEntry(e)]=[entityFromEntry(e),];
+      if(!queries_per_graph[this.wrapper.graphFromEntry(e)])
+        queries_per_graph[this.wrapper.graphFromEntry(e)]=[this.wrapper.entityFromEntry(e),];
       else
-        queries_per_graph[graphFromEntry(e)].push(entityFromEntry(e))
+        queries_per_graph[this.wrapper.graphFromEntry(e)].push(this.wrapper.entityFromEntry(e))
     });
 
     let query = "PREFIX "+ this.prefix + ": <"+ this.ontology + "#>";
-    query += "\n SELECT " + this.entries.map(e=>"?"+nameOfEntity(entityFromEntry(e))).join(' ')+"\n"
+    query += "\n SELECT " + this.entries.map(e=>"?"+this.wrapper.nameOfEntity(this.wrapper.entityFromEntry(e))).join(' ')+"\n"
     query += d3.keys(queries_per_graph).map(g=>"FROM <"+g+">").join("\n");
     query += "WHERE {\n"+d3.entries(queries_per_graph).map((entry,i)=>{
       const subject = s[i];
-      const lines = entry.value.map(e=>"?"+subject+" "+((e.search('http://')!=-1)?('<'+e+'>'):e)+" ?"+nameOfEntity(e)+" .").join("\n");
+      const lines = entry.value.map(e=>"?"+subject+" "+((e.search('http://')!=-1)?('<'+e+'>'):e)+" ?"+this.wrapper.nameOfEntity(e)+" .").join("\n");
       return(lines);
     }).join("\n");
     query += "\n}\nLIMIT 100"
@@ -162,13 +147,7 @@ class Explorer extends React.Component{
   }
 
   render(){
-    const entityFromEntry = (e)=>e.split('+')[1];
-    const nameOfEntity = (e)=>(e.slice(Math.max(...[
-      e.lastIndexOf('/'),
-      e.lastIndexOf('#'),
-      e.lastIndexOf(':'),
-    ])+1));
-    const pretty_entities = this.entries.map(a=>nameOfEntity(entityFromEntry(a))).join(' , ');
+    const pretty_entities = this.entries.map(a=>this.wrapper.nameOfEntity(this.wrapper.entityFromEntry(a))).join(' , ');
 
     // Display vis component intances through a wrapper class
     const visComponents = d3.entries(this.state.visComponents).map(c=>(

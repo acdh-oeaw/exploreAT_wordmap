@@ -21,6 +21,22 @@ class UrlParamWrapper{
         return(this.urlToParam(this.standarParamToUrl(param)));
     }
 
+    graphFromEntry(e){
+        return(e.split('+')[0]);
+    }
+
+    entityFromEntry(e){
+        return(e.split('+')[1]);
+    }
+
+    nameOfEntity(e){
+        return(e.slice(Math.max(...[
+          e.lastIndexOf('/'),
+          e.lastIndexOf('#'),
+          e.lastIndexOf(':'),
+        ])+1));
+    }
+
     urlToParam(url){
         let param = url;
 
