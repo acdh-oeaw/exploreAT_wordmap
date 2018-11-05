@@ -29,14 +29,14 @@ class ComponentSelector extends React.Component{
     };
 
     toggleEntitySelection(entity){
-        this.setState((prevState)=>{
-            if(entity && entity.length>0)
+        if(entity && entity.length>0)
+            this.setState((prevState)=>{
                 if(prevState.entities.includes(entity))
                     prevState.entities = prevState.entities.filter(e=>e!=entity)
                 else
                     prevState.entities.push(entity)
-            return(prevState);
-        });
+                return(prevState);
+            });
     };
 
     handleTypeChange(type){
@@ -51,13 +51,11 @@ class ComponentSelector extends React.Component{
     }
 
     render(){
-        const size = {
-            width: this.props.width+"px",
-            height: this.props.height+"px"
-        }
+        const size = {width: this.props.width+"px", height: this.props.height+"px"}
         const style = (e)=>this.state.entities.includes(e)?{cursor:"pointer",color:"#18bc9c"}:{cursor:"pointer",color:"black"};
+
         return(
-            <div id="Dummy" className="visualization" style={size}>
+            <div style={size}>
                 <ul>
                     <li>Name for the new component :</li>
                     <li><input type="text" value={this.state.name} onChange={this.handleNameChange} /></li>

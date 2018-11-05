@@ -49,8 +49,16 @@ class Explorer extends React.Component{
   }
 
   componentDidMount(){
+    const entries = this.wrapper.paramToUrl(this.props.match.params.entities).split(',');
     const api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
-    const query = createDataSparqlQuery();
+    const query = this.createDataSparqlQuery();
+    const graphFromEntry = (e)=>e.split('+')[0];
+    const entityFromEntry = (e)=>e.split('+')[1];
+    const nameOfEntity = (e)=>(e.slice(Math.max(...[
+      e.lastIndexOf('/'),
+      e.lastIndexOf('#'),
+      e.lastIndexOf(':'),
+    ])+1));
 
     sparql(api_url, query, (err, data) => {
       if (data && !err) {
