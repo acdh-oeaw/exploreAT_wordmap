@@ -12,6 +12,7 @@ import ComponentSelector from './vis/ComponentSelector'
 import VisWrapper from './vis/VisWrapper'
 import VisSelectorWrapper from './vis/VisSelectorWrapper'
 import Table from './vis/Table'
+import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
 
 const ReactGridLayout = WidthProvider(RGL);
 
@@ -27,11 +28,6 @@ class Explorer extends React.Component{
   constructor(props){
     super(props);    
     
-    this.wrapper = new UrlParamWrapper();
-    this.onLayoutChange = this.onLayoutChange.bind(this);
-    this.addComponent = this.addComponent.bind(this);
-    this.removeComponent = this.removeComponent.bind(this);
-
     this.state = {
       data : null,
       available_entities:[],
@@ -42,16 +38,22 @@ class Explorer extends React.Component{
       visComponents: {}
     }  
 
-    this.availableComponents = {"Dummy": Dummy, "Table": Table};
+    this.wrapper = new UrlParamWrapper();
+    this.sparqlQueries = new SparqlQueryBuilder();
+    this.onLayoutChange = this.onLayoutChange.bind(this);
+    this.addComponent = this.addComponent.bind(this);
+    this.removeComponent = this.removeComponent.bind(this);
     // Url query param based parameters
     this.api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
     this.ontology = this.wrapper.paramToUrl(this.props.match.params.ontology);
     this.prefix = this.wrapper.paramToUrl(this.props.match.params.prefix);
     this.entries = this.wrapper.paramToUrl(this.props.match.params.entities).split(',');
+
+    this.availableComponents = {"Dummy": Dummy, "Table": Table};
   }
 
   componentDidMount(){
-    const query = this.createDataSparqlQuery();
+    const query = this.sparqlQueries.createDataSparqlQuery(this.entries, this.ontology, this.prefix);
     
     sparql(this.api_url, query, (err, data) => {
       if (data && !err) {
@@ -61,36 +63,6 @@ class Explorer extends React.Component{
         });
       } else if (err) throw err;
     });
-  }
-
-  /**
-   * createDataSparqlQuery
-   * Provides a query for retrieving data for all of the entities passed from EntitySelector screen
-   *
-   * @return {string} An SPARQL query
-   */
-  createDataSparqlQuery(){
-    let queries_per_graph = {};
-    const s = "abcdefghijklmnopqrstuvwxyz";
-
-    this.entries.map(e=>{
-      if(!queries_per_graph[this.wrapper.graphFromEntry(e)])
-        queries_per_graph[this.wrapper.graphFromEntry(e)]=[this.wrapper.entityFromEntry(e),];
-      else
-        queries_per_graph[this.wrapper.graphFromEntry(e)].push(this.wrapper.entityFromEntry(e))
-    });
-
-    let query = "PREFIX "+ this.prefix + ": <"+ this.ontology + "#>";
-    query += "\n SELECT " + this.entries.map(e=>"?"+this.wrapper.nameOfEntity(this.wrapper.entityFromEntry(e))).join(' ')+"\n"
-    query += d3.keys(queries_per_graph).map(g=>"FROM <"+g+">").join("\n");
-    query += "WHERE {\n"+d3.entries(queries_per_graph).map((entry,i)=>{
-      const subject = s[i];
-      const lines = entry.value.map(e=>"?"+subject+" "+((e.search('http://')!=-1)?('<'+e+'>'):e)+" ?"+this.wrapper.nameOfEntity(e)+" .").join("\n");
-      return(lines);
-    }).join("\n");
-    query += "\n}\nLIMIT 100"
-
-    return(query);
   }
 
   /**
