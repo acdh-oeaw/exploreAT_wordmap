@@ -198,20 +198,18 @@ class EntitySelector extends React.Component{
 
 	    return (
 	    	<div id="explorer" className="entitySelector">
-		        <div className="header">
-		          <h2>Entity selection</h2>
-		          <ul>
-		            <li>Ontology : {this.wrapper.paramToUrl(this.props.match.params.ontology)}</li>
-		            <li>Sparql entry point : {this.wrapper.paramToUrl(this.props.match.params.sparql)}</li>
-		          </ul>
-		          <ul>
-		            <li>Current select entities :</li>
-		            <li>> { pretty_entities }</li>
-		          </ul>
-		          <ul>
-		            <li>Search for specific entities :</li>
-		            <li><input type="text" value={this.state.current_search} onChange={this.handleFilterChange} /></li>
-		          </ul>
+	    		<div className="header">
+		          <h2>Entity selector</h2>
+		          <div className="info">
+		            <div>
+		              <span>Ontology : {this.wrapper.paramToUrl(this.props.match.params.ontology)}</span>
+		              <span>Sparql entry point : {this.wrapper.paramToUrl(this.props.match.params.sparql)}</span>
+		            </div>
+		            <span>
+			            Search for specific entities 
+			            <input type="text" value={this.state.current_search} onChange={this.handleFilterChange} />
+		            Current selected entities : {pretty_entities}</span>
+		          </div>
 		        </div>
 		        <div id="loader" style={({display: this.state.loading===true?'flex':'none'})}>
 			        <div className="loader" ></div>

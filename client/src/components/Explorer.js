@@ -131,7 +131,7 @@ class Explorer extends React.Component{
 
     const visComponents = d3.entries(this.state.visComponents).map(c=>(
         <div key={c.key}>
-          <VisWrapper width={this.state.layout[c.key].w * Math.trunc(document.body.clientWidth/6)- 15} 
+          <VisWrapper width={this.state.layout[c.key].w * Math.trunc(document.body.clientWidth/6)- 25} 
                       height={this.state.layout[c.key].h * 90 + (this.state.layout[c.key].h - 1)*10 - 40}
                       name={c.key}
                       entities={c.value.entities}
@@ -158,14 +158,13 @@ class Explorer extends React.Component{
     return(<div id="explorer">
         <div className="header">
           <h2>Explorer page</h2>
-          <ul>
-            <li>Ontology : {this.wrapper.paramToUrl(this.props.match.params.ontology)}</li>
-            <li>Sparql entry point : {this.wrapper.paramToUrl(this.props.match.params.sparql)}</li>
-          </ul>
-          <ul>
-            <li>Current data available from entities :</li>
-            <li>{pretty_entities}</li>
-          </ul>
+          <div className="info">
+            <div>
+              <span>Ontology : {this.wrapper.paramToUrl(this.props.match.params.ontology)}</span>
+              <span>Sparql entry point : {this.wrapper.paramToUrl(this.props.match.params.sparql)}</span>
+            </div>
+            <span>Current data available for entities : {pretty_entities}</span>
+          </div>
         </div>
         <div className="content">
           <div className="loader" style={({display: this.state.loaded===true?'none':'block'})}></div>
