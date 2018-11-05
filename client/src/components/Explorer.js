@@ -59,7 +59,8 @@ class Explorer extends React.Component{
       if (data && !err) {
         this.setState({
           data:data, 
-          available_entities:this.entries.map(e=>this.wrapper.nameOfEntity(this.wrapper.entityFromEntry(e)))
+          available_entities:this.entries.map(e=>this.wrapper.nameOfEntity(this.wrapper.entityFromEntry(e))),
+          loaded: true
         });
       } else if (err) throw err;
     });
@@ -96,7 +97,6 @@ class Explorer extends React.Component{
       this.setState(prevState=>{
         prevState.layout[name] = {x: 0, y: 0, w: 2, h: 4, isDraggable:true};
         prevState.visComponents[name]={entities:entities,instance:newInstance};
-        prevState.loaded = true;
         return prevState;
       });
     }
@@ -118,9 +118,7 @@ class Explorer extends React.Component{
     this.setState({layout: newLayout});
   }
 
-  render(){
-    const pretty_entities = this.entries.map(a=>this.wrapper.nameOfEntity(this.wrapper.entityFromEntry(a))).join(' , ');
-
+  renderComponents(){
     // Display vis component intances through a wrapper class
     const visComponents = d3.entries(this.state.visComponents).map(c=>(
         <div key={c.key}>
@@ -138,8 +136,8 @@ class Explorer extends React.Component{
     // An extra component for selecting new vis components
     visComponents.push(
       <div key="selector">
-        <VisSelectorWrapper width={this.state.layout.selector.w * Math.trunc(document.body.clientWidth/6) - 20} 
-              height={this.state.layout.selector.h * 90 + (this.state.layout.selector.h - 1)*10 - 45}
+        <VisSelectorWrapper width={this.state.layout.selector.w * Math.trunc(document.body.clientWidth/6) - 25} 
+              height={this.state.layout.selector.h * 90 + (this.state.layout.selector.h - 1)*10 - 55}
               name={"Component Selector"}
               addComponent={this.addComponent}
               entities={this.state.available_entities}
@@ -148,6 +146,13 @@ class Explorer extends React.Component{
         </VisSelectorWrapper>
       </div>
     );
+
+    return(visComponents);
+  }
+
+  render(){
+    console.log(this.state)
+    const pretty_entities = this.entries.map(a=>this.wrapper.nameOfEntity(this.wrapper.entityFromEntry(a))).join(' , ');
 
     return(<div id="explorer">
         <div className="header">
@@ -171,7 +176,7 @@ class Explorer extends React.Component{
                 cols={6}
                 className="layout"
                 compactType={null}>
-                {visComponents}
+                {this.renderComponents()}
             </ReactGridLayout>
           </div>
         </div>
