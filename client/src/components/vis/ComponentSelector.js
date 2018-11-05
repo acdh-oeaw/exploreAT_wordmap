@@ -4,9 +4,8 @@ import Dropdown from 'react-dropdown';
 import 'react-dropdown/style.css'
 
 /* ComponentSelector
- * Draws a hull showing the area occupied by each of the groups.
- * Color of the stroke and area corresponds to each of the teams.
- * Represents the evolution of the area occupied through a line chart.
+ * Allows the creation of new vis components by calling the addComponent function
+ * provided as a prop, using the selected name, type and subset of entities.
  */
 
 class ComponentSelector extends React.Component{

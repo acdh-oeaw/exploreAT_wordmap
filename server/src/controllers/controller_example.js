@@ -3,6 +3,7 @@ const router = express.Router();
 const fetch = require('node-fetch');
 const wrapper = require('../aux/UrlParamWrapper'); 
 
+// Retrieves an external resource to evade cross origin restrictions
 router.route('/resource/:url')
     .get(function(req, res){
     	fetch(wrapper.paramToUrl(req.params.url))
@@ -13,6 +14,7 @@ router.route('/resource/:url')
 		    }).catch(error=>console.error(error));        
     });
 
+// Dummy route for scaffolding
 router.route('/param1/:param1/param2/:param2')
     .get(function(req, res){
         res.json({

@@ -2,9 +2,7 @@ import * as d3 from 'd3';
 import React from 'react';
 
 /* Table
- * Draws a hull showing the area occupied by each of the groups.
- * Color of the stroke and area corresponds to each of the teams.
- * Represents the evolution of the area occupied through a line chart.
+ * Table containing data retrieved.
  */
 
 class Table extends React.Component{

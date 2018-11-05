@@ -7,6 +7,13 @@ import EntitySelector from './EntitySelector';
 import Home from './Home';
 import Explorer from './Explorer';
 
+/**
+ * App
+ * Main component for the dashboard. Routes are handled by the app.
+ *
+ * @param props
+ * @return {React.Component} 
+ */
 const App = (props) => {
   return (
     <Router>

@@ -2,9 +2,10 @@ import * as d3 from 'd3';
 import React from 'react';
 
 /* Dummy
- * Draws a hull showing the area occupied by each of the groups.
- * Color of the stroke and area corresponds to each of the teams.
- * Represents the evolution of the area occupied through a line chart.
+ * Dummy component for scaffolding vis components
+ * Vis components are provided with width, height and data props
+ *
+ * Data is provided as an array of objects
  */
 
 class Dummy extends React.Component{
@@ -33,7 +34,7 @@ class Dummy extends React.Component{
             height: (this.props.height)+"px"
         }
         return(
-            <div id="Dummy" className="visualization" style={size}>
+            <div id="Dummy" className="visualization" style={size} ref={node => this.domElement = node}>
                 <p style={{margin:0}}>Dummy component for {this.props.entities.map(e=>(<span key={e}>{e}</span>))} {this.props.height}</p>
             </div>
         );

@@ -2,6 +2,14 @@ import React from "react";
 import { BrowserRouter as Route, NavLink } from "react-router-dom";
 import UrlParamWrapper from '../aux/UrlParamWrapper';
 
+/**
+ * Explorer
+ * Component for the initial exploration screen. Ontology url and prefix, 
+ * and the SPARQL database endpoints are obtained here.
+ *
+ * @param props
+ * @return {React.Component} 
+ */
 class SourceSelector extends React.Component{
 	constructor(props){
 		super(props);

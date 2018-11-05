@@ -9,7 +9,15 @@
         sub-delims  = "!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";" / "="
  * */
  module.exports = {
-   urlToParam: function(url){
+
+    /**
+     * urlToParam
+     * Encodes an url for passing it safely through an url query param
+     *
+     * @param {string} Url to be encoded
+     * @return {string} Encoded url
+     */
+    urlToParam: function(url){
         let param = url;
 
         const filters = [
@@ -42,6 +50,13 @@
 
         return param;
     },
+    /**
+     * paramToUrl
+     * Decodes a query param url encoded with this module       
+     *
+     * @param {string} The query param
+     * @return {string} The decoded url
+     */
     paramToUrl: function(param){
         let url = param;
 

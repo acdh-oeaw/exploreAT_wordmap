@@ -4,13 +4,25 @@ import UrlParamWrapper from '../aux/UrlParamWrapper';
 import * as d3 from 'd3';
 import { sparql } from 'd3-sparql'
 
+/**
+ * getGraphsQuery
+ * Provides a SPARQL query for retrieving available graphs.
+ *
+ * @return {string} The query.
+ */
 const getGraphsQuery = ()=>`
 	SELECT ?graph
 	WHERE {
 	  GRAPH ?graph { }
-	}
-`;
-
+	}`;
+	
+/**
+ * getEntitiesOverviewQuery
+ * Provides a SPARQL query for retrieving all entities and count for a graph.
+ *
+ * @param {string} URI for the graph it is intended to query for.
+ * @return {string} The query.
+ */
 const getEntitiesOverviewQuery = (graph_uri)=>`
 	SELECT DISTINCT ?object (count (?subject) as ?count)
 	from <`+graph_uri+`>
@@ -18,7 +30,13 @@ const getEntitiesOverviewQuery = (graph_uri)=>`
   		?subject <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?object.
 	}group by ?object
 `;
-
+/**
+ * getEntitiesDetailQuery
+ * Provides a SPARQL query to retirieve all predicates available in a graph.
+ *
+ * @param {string} URI for the graph it is intended to query for.
+ * @return {string} The query.
+ */
 const getEntitiesDetailQuery = (graph_uri)=>`
 	SELECT ?object ?predicates ?count
 	FROM <`+graph_uri+`>
@@ -31,6 +49,14 @@ const getEntitiesDetailQuery = (graph_uri)=>`
 	limit 60
 `;
 
+/**
+ * EntitySelector
+ * Component for displaying entities and relationships in the SPARQL database 	
+ * and selecting some for further analysis.
+ *
+ * @param props
+ * @return {React.Component} 
+ */
 class EntitySelector extends React.Component{
 	constructor(props){
 		super(props);
@@ -60,6 +86,12 @@ class EntitySelector extends React.Component{
 		this.retrieveGraphs()		  
 	}
 	
+	/**
+	 * retrieveGraphs
+	 * Retrieves all graphs in the SPARQL endpoint and sets them in the state
+	 *
+	 * @fires   this.setState()
+	 */
 	retrieveGraphs(){
 		const api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
 	    sparql(api_url, getGraphsQuery(), (err, data) => {
@@ -69,6 +101,12 @@ class EntitySelector extends React.Component{
 	    });
 	}
 
+	/**
+	 * retrieveEntities
+	 * Retrieves all entities in the SPARQL endpoint for each graph available
+	 *
+	 * @fires   this.setState()
+	 */
 	retrieveEntities(){
 		const api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
 		let retrieved = 0;
@@ -89,6 +127,12 @@ class EntitySelector extends React.Component{
 		});
 	}
 
+	/**
+	 * retrieveGraphDetails
+	 * Retrieves all predicates available in [this.state.selected_graph]
+	 *
+	 * @fires   this.setState()
+	 */
 	retrieveGraphDetails(){
 		const api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
 		const graph_uri = this.state.selected_graph;
@@ -162,10 +206,13 @@ class EntitySelector extends React.Component{
 			"/entities/"+
 			this.state.selected_entities_uris.map(e=>this.wrapper.urlToParam(e)).join(",");
 
+		const pretty_entities = this.state.selected_entities.map(a=>a.split('#')[1]).join(' , ');
 		const filtered = (entity)=>(this.state.current_search!="" && entity.search(this.state.current_search)==-1);
 		const style = (entity)=>({"fill":filtered(entity)===true?"lightgrey":"#18bc9c"});
 		const action = (entity)=>(filtered(entity)===false?this.toggleEntitySelection(entity):()=>{});
 
+		/* Content for EntitySelector is created based on whether all graphs or specific
+		   predicates for the selected graph should be displayed*/
 		let content = "";
 		if(this.state.loaded===true && this.state.selected_graph=="")
 			content = this.state.graph_entities.map((g)=>(
@@ -194,8 +241,6 @@ class EntitySelector extends React.Component{
 				</div>
 			);
 
-		const pretty_entities = this.state.selected_entities.map(a=>a.split('#')[1]).join(' , ');
-
 	    return (
 	    	<div id="explorer" className="entitySelector">
 	    		<div className="header">
@@ -211,10 +256,12 @@ class EntitySelector extends React.Component{
 		            Current selected entities : {pretty_entities}</span>
 		          </div>
 		        </div>
+
 		        <div id="loader" style={({display: this.state.loading===true?'flex':'none'})}>
 			        <div className="loader" ></div>
 			        <p>{this.state.current_state}</p>
 		        </div>
+
 		        <div className="content">
 		        	<div id="graphs">
 						{this.state.loading===false?content:""}

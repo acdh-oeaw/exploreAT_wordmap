@@ -15,6 +15,14 @@ import Table from './vis/Table'
 
 const ReactGridLayout = WidthProvider(RGL);
 
+/**
+ * Explorer
+ * Component for the dashboard screen. Manages the creation a deletion of 
+ * vis components and the data retrieval from the SPARQL database
+ *
+ * @param props
+ * @return {React.Component} 
+ */
 class Explorer extends React.Component{
   constructor(props){
     super(props);    
@@ -41,6 +49,26 @@ class Explorer extends React.Component{
   }
 
   componentDidMount(){
+    const api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
+    const query = createDataSparqlQuery();
+
+    sparql(api_url, query, (err, data) => {
+      if (data && !err) {
+        this.setState({data:data, available_entities:entries.map(e=>nameOfEntity(entityFromEntry(e)))});
+      } else if (err) throw err;
+    });
+  }
+
+  /**
+   * createDataSparqlQuery
+   * Provides a query for retrieving data for all of the entities passed from EntitySelector screen
+   *
+   * @return {string} An SPARQL query
+   */
+  createDataSparqlQuery(){
+    const entries = this.wrapper.paramToUrl(this.props.match.params.entities).split(',');
+    const api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
+    let queries_per_graph = {};
     const s = "abcdefghijklmnopqrstuvwxyz";
     const graphFromEntry = (e)=>e.split('+')[0];
     const entityFromEntry = (e)=>e.split('+')[1];
@@ -49,10 +77,6 @@ class Explorer extends React.Component{
       e.lastIndexOf('#'),
       e.lastIndexOf(':'),
     ])+1));
-
-    const entries = this.wrapper.paramToUrl(this.props.match.params.entities).split(',');
-    const api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
-    let queries_per_graph = {};
 
     entries.map(e=>{
       if(!queries_per_graph[graphFromEntry(e)])
@@ -75,13 +99,16 @@ class Explorer extends React.Component{
     }).join("\n");
     query += "\n}\nLIMIT 100"
 
-    sparql(api_url, query, (err, data) => {
-      if (data && !err) {
-        this.setState({data:data, available_entities:entries.map(e=>nameOfEntity(entityFromEntry(e)))});
-      } else if (err) throw err;
-    });
+    return(query);
   }
 
+  /**
+   * generateLayout
+   * Required for React-Grid to function well
+   *
+   * @param {object} Object containing the layout for each of the components
+   * @return {object} Layout
+   */
   generateLayout(l){
     return(d3.entries(l).map(x=>{
       const layout = x.value;
@@ -90,6 +117,15 @@ class Explorer extends React.Component{
     }));
   }
 
+  /**
+   * addComponent
+   * Creates a new instance of a vis component and sets the state to have an instance of the new 
+   * component, and a new layout for displaying it on the dashboard.
+   *
+   * @param {string} name Name to handle components internally.
+   * @param {array} entities Array containing a subset of entities to handle in the vis component.
+   * @param {string} type Name of the vis component. Should match a key in this.availableComponents.
+   */
   addComponent(name, entities, type){
     if(!d3.keys(this.state.components).includes(name)){
       let newInstance = React.createElement(this.availableComponents[type],{},null)
@@ -129,6 +165,7 @@ class Explorer extends React.Component{
     const pretty_entities = this.wrapper.paramToUrl(this.props.match.params.entities)
       .split(',').map(a=>nameOfEntity(entityFromEntry(a))).join(' , ');
 
+    // Display vis component intances through a wrapper class
     const visComponents = d3.entries(this.state.visComponents).map(c=>(
         <div key={c.key}>
           <VisWrapper width={this.state.layout[c.key].w * Math.trunc(document.body.clientWidth/6)- 25} 
@@ -142,6 +179,7 @@ class Explorer extends React.Component{
         </div>
     ));
 
+    // An extra component for selecting new vis components
     visComponents.push(
       <div key="selector">
         <VisSelectorWrapper width={this.state.layout.selector.w * Math.trunc(document.body.clientWidth/6) - 20} 

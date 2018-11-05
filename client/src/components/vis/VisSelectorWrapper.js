@@ -2,9 +2,7 @@ import * as d3 from 'd3';
 import React from 'react';
 
 /* VisSelectorWrapper
- * Provides funcionality for editing, deleting and exporting visualizations
- * Helps with abstraction of grid layout management
- * Represents the evolution of the area occupied through a line chart.
+ * Helps with abstraction of grid layout management for the ComponentSelector component.
  */
 
 class VisSelectorWrapper extends React.Component{
