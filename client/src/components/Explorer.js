@@ -7,11 +7,12 @@ import { BrowserRouter as Route, NavLink } from "react-router-dom";
 import RGL, { WidthProvider } from "react-grid-layout";
 import UrlParamWrapper from '../aux/UrlParamWrapper';
 
-import Dummy from './vis/Dummy'
 import ComponentSelector from './vis/ComponentSelector'
-import VisWrapper from './vis/VisWrapper'
 import VisSelectorWrapper from './vis/VisSelectorWrapper'
+import VisWrapper from './vis/VisWrapper'
+import Dummy from './vis/Dummy'
 import Table from './vis/Table'
+import PackedBubbles from './vis/PackedBubbles'
 import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
 
 const ReactGridLayout = WidthProvider(RGL);
@@ -49,7 +50,7 @@ class Explorer extends React.Component{
     this.prefix = this.wrapper.paramToUrl(this.props.match.params.prefix);
     this.entries = this.wrapper.paramToUrl(this.props.match.params.entities).split(',');
 
-    this.availableComponents = {"Dummy": Dummy, "Table": Table};
+    this.availableComponents = {"Dummy": Dummy, "Table": Table, "PackedBubbles": PackedBubbles};
   }
 
   componentDidMount(){
