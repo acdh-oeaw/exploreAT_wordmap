@@ -152,7 +152,6 @@ class Explorer extends React.Component{
   }
 
   render(){
-    console.log(this.state)
     const pretty_entities = this.entries.map(a=>this.wrapper.nameOfEntity(this.wrapper.entityFromEntry(a))).join(' , ');
 
     return(<div id="explorer">

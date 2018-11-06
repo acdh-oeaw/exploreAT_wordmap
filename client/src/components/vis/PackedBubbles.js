@@ -1,5 +1,10 @@
 import * as d3 from 'd3';
 import React from 'react';
+import d3tip from 'd3-tip';
+import Select from 'react-select';
+import SearchField from 'react-search-field';
+import { schemeSet1 } from 'd3-scale-chromatic';
+import * as legend from 'd3-svg-legend';
 
 /* PackedBubbles
  * Dummy component for scaffolding vis components
