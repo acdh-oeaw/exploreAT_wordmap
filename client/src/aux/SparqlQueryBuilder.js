@@ -82,7 +82,7 @@ class SparqlQueryBuilder{
     createDataSparqlQuery(entries, ontology, prefix){
         const wrapper = new UrlParamWrapper();
         let queries_per_graph = {};
-        const s = "abcdefghijklmnopqrstuvwxyz";
+        const p = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
         entries.map(e=>{
             if(!queries_per_graph[wrapper.graphFromEntry(e)])
@@ -91,12 +91,21 @@ class SparqlQueryBuilder{
                 queries_per_graph[wrapper.graphFromEntry(e)].push(wrapper.entityFromEntry(e))
         });
 
+        let s = d3.keys(queries_per_graph).map(e=>e.split('/')[e.split('/').length-1]);
+        s = s.map(e=>e.split('_')[0]);
+
         let query = "PREFIX "+ prefix + ": <"+ ontology + "#>";
-        query += "\n SELECT " + entries.map(e=>"?"+wrapper.nameOfEntity(wrapper.entityFromEntry(e))).join(' ')+"\n"
+        query += "\n SELECT " + s.map(e=>" ?"+e).join("")
+        query += " " +entries.map(e=>"?"+wrapper.nameOfEntity(wrapper.entityFromEntry(e))).join(' ')+"\n";
         query += d3.keys(queries_per_graph).map(g=>"FROM <"+g+">").join("\n");
-        query += "WHERE {\n"+d3.entries(queries_per_graph).map((entry,i)=>{
-            const subject = s[i];
-            const lines = entry.value.map(e=>"?"+subject+" "+((e.search('http://')!=-1)?('<'+e+'>'):e)+" ?"+wrapper.nameOfEntity(e)+" .").join("\n");
+        query += "WHERE {\n"+(()=>{
+            let lines = "";
+            for(let i=0; i<d3.keys(queries_per_graph).length-1;i++)
+                lines += "\nOPTIONAL{?" + s[i] + " ?" + p[i] + " ?" + s[i+1] +"}.";
+            return(lines);
+        })();
+        query += "\n"+d3.entries(queries_per_graph).map((entry,i)=>{
+            let lines = entry.value.map(e=>"?"+s[i]+" "+((e.search('http://')!=-1)?('<'+e+'>'):e)+" ?"+wrapper.nameOfEntity(e)+" .").join("\n");
             return(lines);
         }).join("\n");
         query += "\n}\nLIMIT 100"

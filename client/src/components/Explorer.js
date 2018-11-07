@@ -60,7 +60,7 @@ class Explorer extends React.Component{
       if (data && !err) {
         this.setState({
           data:data, 
-          available_entities:this.entries.map(e=>this.wrapper.nameOfEntity(this.wrapper.entityFromEntry(e))),
+          available_entities:d3.keys(data[0]),
           loaded: true
         });
       } else if (err) throw err;

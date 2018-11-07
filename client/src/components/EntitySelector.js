@@ -230,6 +230,14 @@ class EntitySelector extends React.Component{
 		        </div>
 
 		        <div className="content">
+			        <div className="tooltip" style={
+			      		(this.state.loading === false)?{display:"flex"}:{display:"none"}
+			      	}>
+				      	<p>Select the relationships you want to explore in the dashboard.Links between graphs will be
+				        asumed in the order entities <br />are selected from them. <i>(graphs A and B are related as A->B if relationships
+				        are firstly selected from A and then from B)</i>.
+				        </p>
+			        </div>
 		        	<div id="graphs">
 						{this.state.loading===false?this.renderContent():""}
 					</div>

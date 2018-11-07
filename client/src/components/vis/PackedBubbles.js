@@ -256,7 +256,7 @@ class PackedBubbles extends React.Component{
                             options={options}
                         />
                 </div>
-                <svg ref={node => this.node = node} width={this.props.width} height={this.props.height}>
+                <svg ref={node => this.node = node} width={this.props.width} height={this.props.height-300}>
                 </svg>
                 
                 <Select

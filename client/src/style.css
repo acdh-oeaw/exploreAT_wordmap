@@ -197,6 +197,18 @@ div#explorer.entitySelector div.graphDetails h2{
 	color: #18bc9c;
 }
 
+div#explorer.entitySelector .tooltip{
+	width:100%;
+	flex-direction: column;
+	align-items: center;
+}
+
+div#explorer.entitySelector .tooltip p{
+	color: grey;
+	margin:2px;
+	display:inline-block;
+}
+
 /* Explorer ---------------------------------------------------------------------------
  * https://projects.lukehaas.me/css-loaders/
 */
