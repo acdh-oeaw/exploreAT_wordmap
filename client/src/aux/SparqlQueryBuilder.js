@@ -71,6 +71,56 @@ class SparqlQueryBuilder{
     }
 
     /**
+     * getAvailableEntities
+     * Provides a SPARQL query for retrieving all entities in the database, and their 
+     * size.
+     *  
+     *
+     * @param {string} ontology - An ontology related to the case of study.
+     * @param {string} prefix - All entities and relationships will make use of it
+        to reduce the amount of characters used.
+     * @return {string} the SPARQL query, keys: entity, count.
+     */
+    getAvailableEntities(ontology, prefix){
+        return(
+        `
+        PREFIX ${prefix}: <${ontology}#>
+        SELECT DISTINCT ?entity (count(?h) as ?count)
+        WHERE {  
+          GRAPH ?g {?h <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?entity}
+        }group by ?entity
+        `
+        );
+    }
+
+    /**
+     * getEntityRelationships
+     * Provides a SPARQL query for retrieving all relationships in the database
+     *
+     *
+     * @param {string} ontology - An ontology related to the case of study.
+     * @param {string} prefix - All entities and relationships will make use of it
+        to reduce the amount of characters used.
+     * @return {string} the SPARQL query, keys: entity, relationship, to.
+     */
+    getEntityRelationships(ontology, prefix){
+        return(
+        `
+        PREFIX ${prefix}: <${ontology}#>
+        SELECT distinct ?entity ?relationship ?to WHERE {  
+          {SELECT ?entity ?o ?relationship WHERE{
+              {SELECT DISTINCT ?entity WHERE {  GRAPH ?g {?h <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?entity}}}.
+              GRAPH ?g {?f ?x ?entity}.
+                GRAPH ?g {?f ?relationship ?o}.
+            }
+          }.
+          GRAPH ?g {?o <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?to}
+        }
+        `
+        );
+    }
+
+    /**
      * createDataSparqlQuery
      * Provides a query for retrieving data for all of the entities passed from EntitySelector screen
      *
