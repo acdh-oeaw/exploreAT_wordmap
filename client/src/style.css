@@ -320,3 +320,125 @@ button.button:hover{
 div#Table{
 	overflow: scroll;
 }
+
+/* Old rdf explorer ------------------------------------------------------------------
+*/
+
+/* Style the header */
+div#PackedBubbles .header {
+    background-color: #f1f1f1;
+    padding: 0;
+    margin: 0px;
+    text-align: center;
+    font-size: 35px;
+}
+
+div#PackedBubbles svg {
+    display: block;
+    margin: 0;
+}
+
+div#PackedBubbles #top-container { 
+	display:flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+}
+
+div#PackedBubbles #top-container div{
+	display: inline-block;
+}
+
+
+div#PackedBubbles .selector {
+    max-width: 200px;
+    font-size: 12px;
+    margin-top: 0;
+}
+
+
+div#PackedBubbles .react-search-field {
+    max-width: 220px;
+    display: block;
+    margin: 0;
+}
+
+div#PackedBubbles #container { 
+    text-align: center;
+}
+
+/* Style the footer */
+div#PackedBubbles .footer {
+    background-color: #f1f1f1;
+    padding: 10px;
+    text-align: center;
+}
+
+.d3-tip {
+  line-height: 1;
+  /*font-weight: bold;*/
+  font-size: 11px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.d3-tip p{
+	margin: 2px;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Northward tooltips */
+.d3-tip.n:after {
+  content: "\25BC";
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+  text-align: center;
+}
+
+/* Eastward tooltips */
+.d3-tip.e:after {
+  content: "\25C0";
+  margin: -4px 0 0 0;
+  top: 50%;
+  left: -8px;
+}
+
+/* Southward tooltips */
+.d3-tip.s:after {
+  content: "\25B2";
+  margin: 0 0 1px 0;
+  top: -8px;
+  left: 0;
+  text-align: center;
+}
+
+/* Westward tooltips */
+.d3-tip.w:after {
+  content: "\25B6";
+  margin: -4px 0 0 -1px;
+  top: 50%;
+  left: 100%;
+}
+
+
+/* Responsive layout - makes the three columns stack on top of each other instead of next to each other */
+@media (max-width: 600px) {
+    .row {
+      -webkit-flex-direction: column;
+      flex-direction: column;
+    }
+}

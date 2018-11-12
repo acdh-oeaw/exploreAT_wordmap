@@ -94,11 +94,14 @@ class SparqlQueryBuilder{
         let s = d3.keys(queries_per_graph).map(e=>e.split('/')[e.split('/').length-1]);
         s = s.map(e=>e.split('_')[0]);
 
+        const selection = s.map(e=>" ?"+e).join("") + 
+            entries.map(e=>"?"+wrapper.nameOfEntity(wrapper.entityFromEntry(e))).join(' ');
+
         let query = "PREFIX "+ prefix + ": <"+ ontology + "#>";
-        query += "\n SELECT " + s.map(e=>" ?"+e).join("")
-        query += " " +entries.map(e=>"?"+wrapper.nameOfEntity(wrapper.entityFromEntry(e))).join(' ')+"\n";
+        query += "\n SELECT " + selection + "\n";
+        query += " (COUNT(?"+s[0]+") as ?n) \n"
         query += d3.keys(queries_per_graph).map(g=>"FROM <"+g+">").join("\n");
-        query += "WHERE {\n"+(()=>{
+        query += "\nWHERE {\n"+(()=>{
             let lines = "";
             for(let i=0; i<d3.keys(queries_per_graph).length-1;i++)
                 lines += "\nOPTIONAL{?" + s[i] + " ?" + p[i] + " ?" + s[i+1] +"}.";
@@ -108,9 +111,32 @@ class SparqlQueryBuilder{
             let lines = entry.value.map(e=>"?"+s[i]+" "+((e.search('http://')!=-1)?('<'+e+'>'):e)+" ?"+wrapper.nameOfEntity(e)+" .").join("\n");
             return(lines);
         }).join("\n");
-        query += "\n}\nLIMIT 100"
+        query += "\n}GROUP BY"+selection+"\nLIMIT 100"
 
         return(query);
+    }
+
+    oldQuery(){
+        return(
+            `   PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                PREFIX oldcan: <https://explorations4u.acdh.oeaw.ac.at/ontology/oldcan#>
+
+                Select ?questionnaire ?author ?title ?publicationYear ?lastName ?firstName  ?gender (COUNT(?question) as ?nQuestion) 
+                    from <http://exploreat.adaptcentre.ie/Questionnaire_graph>
+                    from <http://exploreat.adaptcentre.ie/Person_graph>
+                    from <http://exploreat.adaptcentre.ie/Question_graph>
+                WHERE {
+                    ?questionnaire oldcan:hasAuthor ?author.
+                    ?questionnaire oldcan:title ?title.
+                    ?questionnaire oldcan:publicationYear ?publicationYear. 
+                    ?author oldcan:FirstName ?firstName.
+                    ?author oldcan:LastName ?lastName.
+                    ?author foaf:gender ?gender.
+                    ?question oldcan:isQuestionOf ?questionnaire. 
+                } GROUP BY ?questionnaire ?title ?publicationYear ?author ?gender ?lastName ?firstName`
+            );
     }
 }
 

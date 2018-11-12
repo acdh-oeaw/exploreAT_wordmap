@@ -162,10 +162,6 @@ class EntitySelector extends React.Component{
 	 * @return {JSX} Content for the EntitySelector screen.
 	 */
 	renderContent(){
-		const filtered = (entity)=>(this.state.current_search!="" && entity.search(this.state.current_search)==-1);
-		const style = (entity)=>({"fill":filtered(entity)===true?"lightgrey":"#18bc9c"});
-		const action = (entity)=>(filtered(entity)===false?this.toggleEntitySelection(entity):()=>{});
-
 		/* Content for EntitySelector is created based on whether all graphs or specific
 		   predicates for the selected graph should be displayed*/
 		let content = "";
@@ -228,6 +224,8 @@ class EntitySelector extends React.Component{
 			        <div className="loader" ></div>
 			        <p>{this.state.current_state}</p>
 		        </div>
+
+
 
 		        <div className="content">
 			        <div className="tooltip" style={

@@ -16,7 +16,7 @@ class Dummy extends React.Component{
             
         };
 
-        this.analysisG = d3.select(this.domElement);
+        this.node = d3.select(this.node);
     }
 
     componentDidMount(){
@@ -26,6 +26,9 @@ class Dummy extends React.Component{
     }
 
     componentWillUpdate(nextProps, nextState){
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
     }
 
     render(){

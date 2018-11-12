@@ -54,7 +54,11 @@ class Explorer extends React.Component{
   }
 
   componentDidMount(){
-    const query = this.sparqlQueries.createDataSparqlQuery(this.entries, this.ontology, this.prefix);
+    let query = this.sparqlQueries.createDataSparqlQuery(this.entries, this.ontology, this.prefix);
+    console.log(query)
+    //query = this.sparqlQueries.oldQuery();//createDataSparqlQuery(this.entries, this.ontology, this.prefix);
+    //console.log(query)
+
     
     sparql(this.api_url, query, (err, data) => {
       if (data && !err) {
@@ -136,7 +140,7 @@ class Explorer extends React.Component{
 
     // An extra component for selecting new vis components
     visComponents.push(
-      <div key="selector">
+      <div key="selector" style={({display: this.state.loaded===true?'block':'none'})}>
         <VisSelectorWrapper width={this.state.layout.selector.w * Math.trunc(document.body.clientWidth/6) - 25} 
               height={this.state.layout.selector.h * 90 + (this.state.layout.selector.h - 1)*10 - 55}
               name={"Component Selector"}

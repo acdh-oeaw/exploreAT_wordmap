@@ -33,12 +33,12 @@ class Table extends React.Component{
         return(
             <div id="Table" className="visualization" style={size}>
                 <table>
-                <tbody>
                     <tr>
                         {this.props.entities.map((e,i)=>(<th key={i}>{e}</th>))}
                     </tr>
-                </tbody>
-                {this.props.data.map((e,i)=>(<tr key={"r"+i}>{this.props.entities.map(entity=>(<td key={entity+i}>{e[entity].toString()}</td>))}</tr>))}
+                    <tbody>
+                    {this.props.data.map((e,i)=>(<tr key={"r"+i}>{this.props.entities.map(entity=>(<td key={entity+i}>{e[entity].toString()}</td>))}</tr>))}
+                    </tbody>
                 </table>
             </div>
         );

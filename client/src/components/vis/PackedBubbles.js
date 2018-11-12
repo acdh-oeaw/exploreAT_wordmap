@@ -13,17 +13,7 @@ import * as legend from 'd3-svg-legend';
  * Data is provided as an array of objects
  */
 
-const options = [
-    { value: 'gender', label: 'Gender' },
-    { value: 'author', label: 'Author' },
-    { value: 'publication_year', label: 'Publication Year' },
-]
 
-const optionsMap = {
-    'gender' : 'gender',
-    'author' : 'lastName',
-    'publication_year' : 'publicationYear'
-}
 
 const xOffset = 350
 
@@ -31,9 +21,17 @@ class PackedBubbles extends React.Component{
     constructor(props){
         super(props);
 
+        this.options = [];
+        this.optionsMap = {};
+        
+        this.props.entities.map(e=>{
+            this.options.push({value: e,label: e});
+            this.optionsMap[e] = e;
+        });
+
         this.state = {
-            clusterOption: options[0],
-            colorOption: options[1],
+            clusterOption: this.options[0],
+            colorOption: this.options[1],
             xAxis: d3.axisBottom(),
             xScale: d3.scalePoint(),
             colorScale: d3.scaleOrdinal(schemeSet1),
@@ -73,11 +71,19 @@ class PackedBubbles extends React.Component{
     }
 
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps, prevState, snapshot) {
         if (this.state.shouldUpdateForce)
             this.updateForce()
         else 
             this.updateColors()
+
+        if(prevProps.width != this.props.width){
+            const t = d3.transition().duration(500);
+            
+            d3.select('.colorLegend').transition(t)
+                .attr("transform", `translate(${this.props.width - 120}, 100)`);
+        }
+
     }
 
 
@@ -92,7 +98,7 @@ class PackedBubbles extends React.Component{
         
 
         const radiusScale = d3.scaleLinear()
-                        .domain(d3.extent(data, d => d.nQuestion))
+                        .domain(d3.extent(data, d => d.n))
                         .range([4, 15])
 
         node.append("g")
@@ -112,7 +118,7 @@ class PackedBubbles extends React.Component{
                     .call(legendCircle)
 
 
-        const colorKeys = d3.map(data, d => d[optionsMap[colorOption.value]]).keys().sort()
+        const colorKeys = d3.map(data, d => d[this.optionsMap[colorOption.value]]).keys().sort()
         this.state.colorScale.domain(colorKeys)
 
         node.append("g")
@@ -125,12 +131,12 @@ class PackedBubbles extends React.Component{
 
 
         const tip = d3tip().attr('class', 'd3-tip').html(d => {
-                                                            return `<p>Questionnaire ${d.number}</p>
-                                                                    <p>${d.title}</p>
-                                                                    <p>${d.nQuestion} questions</p>
-                                                                    <p>${d.fullName}</p>
-                                                                    <p>Published in ${d.publicationYear}</p>`
-                                                        })
+            return `<p>Questionnaire ${d.Questionnaire}</p>
+                    <p>${d.title}</p>
+                    <p>${d.n} questions</p>
+                    <p>${d.LastName+','+d.FirstName}</p>
+                    <p>Published in ${d.publicationYear}</p>`
+        })
 
         node.call(tip)
 
@@ -140,8 +146,8 @@ class PackedBubbles extends React.Component{
                         .selectAll('circle')
                         .data(data)
                         .enter().append("circle")
-                        .attr("r", d=> radiusScale(d.nQuestion))
-                        .attr("fill", d=> this.state.colorScale(d[optionsMap[colorOption.value]]))
+                        .attr("r", d=> radiusScale(d.n))
+                        .attr("fill", d=> this.state.colorScale(d[this.optionsMap[colorOption.value]]))
                         .on('mouseover', tip.show)
                         .on('mouseout', tip.hide)
 
@@ -178,7 +184,7 @@ class PackedBubbles extends React.Component{
         const { clusterOption, colorOption } = this.state
 
         
-        const clusterKeys = d3.map(data, d => d[optionsMap[clusterOption.value]]).keys().sort()
+        const clusterKeys = d3.map(data, d => d[this.optionsMap[clusterOption.value]]).keys().sort()
         this.state.xScale
                 .domain(clusterKeys)
                 .range([xOffset, this.props.width - xOffset])
@@ -186,7 +192,7 @@ class PackedBubbles extends React.Component{
         this.state.xAxis.scale(this.state.xScale)
         
         
-        this.state.forceX.x((d) => this.state.xScale(d[optionsMap[clusterOption.value]]))
+        this.state.forceX.x((d) => this.state.xScale(d[this.optionsMap[clusterOption.value]]))
         this.state.forceY.y((d) => this.props.height / 2)
         
     }
@@ -209,19 +215,21 @@ class PackedBubbles extends React.Component{
         this.state.simulation
                 .force('x', this.state.forceX)
                 .force('y', this.state.forceY)
-        this.state.simulation.alpha(1).restart()
-    
+        this.state.simulation.alpha(1).restart()    
     }
 
     updateColors() {
         const { colorOption } = this.state
         const { data } = this.props
-        const colorKeys = d3.map(data, d => d[optionsMap[colorOption.value]]).keys().sort()
+        const colorKeys = d3.map(data, d => d[this.optionsMap[colorOption.value]]).keys().sort()
         this.state.colorScale.domain(colorKeys)
         this.state.colorLegend.scale(this.state.colorScale).title(colorOption.label)
-        d3.select('.colorLegend').call(this.state.colorLegend)
         const t = d3.transition().duration(500)
-        d3.select('.circles').selectAll('circle').transition(t).attr("fill", d=> this.state.colorScale(d[optionsMap[colorOption.value]]))
+        
+        d3.select('.colorLegend').call(this.state.colorLegend);
+
+        d3.select('.circles').selectAll('circle').transition(t)
+            .attr("fill", d=> this.state.colorScale(d[this.optionsMap[colorOption.value]]));     
     }
 
     updateHighlights(searchTerm) {
@@ -253,20 +261,18 @@ class PackedBubbles extends React.Component{
                             className='selector'
                             value={colorOption}
                             onChange={this.handleColorSelectChange}
-                            options={options}
+                            options={this.options}
                         />
-                </div>
-                <svg ref={node => this.node = node} width={this.props.width} height={this.props.height-300}>
-                </svg>
-                
-                <Select
+                    <Select
                     id='cluster-select'
                     className='selector'
                     value={clusterOption}
                     onChange={this.handleClusterSelectChange}
-                    options={options}
+                    options={this.options}
                 />
-                
+                </div>
+                <svg ref={node => this.node = node} width={this.props.width} height={this.props.height}>
+                </svg>
             </div>
         </div>)
 
