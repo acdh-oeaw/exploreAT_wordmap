@@ -62,7 +62,7 @@ class EntitySelector extends React.Component{
 		      			source: (e.entity.includes(this.ontology+'#')===false?e.entity:(this.prefix+':'+e.entity.split(this.ontology+'#')[1])),
 		      			relationship: (e.relationship.includes(this.ontology+'#')===false?e.relationship:(this.prefix+':'+e.relationship.split(this.ontology+'#')[1])),
 		      			target: (e.to.includes(this.ontology+'#')===false?e.to:(this.prefix+':'+e.to.split(this.ontology+'#')[1])),
-		      			value: 1,
+		      			value: 6.5,
 		      		}));
 
 		        	this.setState({ 
@@ -93,10 +93,13 @@ class EntitySelector extends React.Component{
 			// 	relationship 
 			// 	target
 			// 	value
+		const rect = this.svg.getBoundingClientRect(),
+	    width = rect.width,
+	    height = rect.height;
 
 		const sizeScale = d3.scaleLinear()
 			.domain([0,40000])
-			.range([12,30])
+			.range([20,50])
 			.clamp(true);
 
 		const nodehash = {};
@@ -108,13 +111,13 @@ class EntitySelector extends React.Component{
 			value: d.value
 		}));
 
-		const linkForce = d3.forceLink();
+		const linkForce = d3.forceLink().distance(200);
 
 		const simulation = d3.forceSimulation()
-			.force('charge', d3.forceManyBody().strength(-180))
-			.force('center', d3.forceCenter(500,250))
+			.force('charge', d3.forceManyBody().strength(-70))
+			.force('center', d3.forceCenter(width/2, height/3))
 			.force('collide', d3.forceCollide(function(d){
-			    return d.id === "j" ? 100 : 50
+			    sizeScale(nodehash[d.entity])*2.2
 			}))
 			.force('link', linkForce)
 			.nodes(this.state.entities)
@@ -125,17 +128,24 @@ class EntitySelector extends React.Component{
 		d3.select(this.node).selectAll("line.link")
 			.data(edges, d => `${d.source.entity}-${d.target.entity}`) 
 			.enter()
-			.append("line")
+			.append("line") //.attr("marker-end","url(#arrow)")
 			.attr("class", "link")
 			.style("stroke-opacity", .5)
 			.attr('stroke','grey')
-			.style("stroke-width", d => d.value);
+			.style("stroke-width", d => d.value)
+			.append("title")
+      			.text(d=>d.relationship);;
 
 		const nodeEnter = d3.select(this.node).selectAll('g.node')
 			.data(this.state.entities)
 			.enter()
 			.append('g')
-			.attr('class', 'node');
+			.attr('class', 'node')
+			.call(d3.drag()
+            .on("start",dragstarted)
+            .on("drag",dragged)
+            .on("end",dragended));
+ 
 		nodeEnter.append('circle')
 			.attr('r', e=>sizeScale(e.count))
 			.style('fill','lightblue');
@@ -143,15 +153,46 @@ class EntitySelector extends React.Component{
 			.style("text-anchor", "middle")
 			.attr("y", 25)
 			.text(d => d.entity);
+		nodeEnter.append("title")
+      		.text(d=>`${d.count} diferent entries`);
 
 		function forceTick() {
+			const rect = d3.select('svg').node().getBoundingClientRect(),
+		    width = rect.width,
+		    height = rect.height;
+
 			d3.selectAll("line.link")
 				.attr("x1", d => d.source.x)
 				.attr("x2", d => d.target.x)
 				.attr("y1", d => d.source.y)
 				.attr("y2", d => d.target.y);
+
 			d3.selectAll("g.node")
-				.attr("transform", d => "translate("+d.x+","+d.y+")");
+				.attr("transform", d => "translate("+
+					Math.max(sizeScale(d.count), Math.min(width - sizeScale(d.count), d.x))+
+					","+
+					Math.max(sizeScale(d.count), Math.min(height - sizeScale(d.count), d.y))+")");
+		}
+
+		function dragstarted(d)
+		{ 
+			simulation.restart();
+			simulation.alpha(1.0);
+			d.fx = d.x;
+			d.fy = d.y;
+		}
+
+		function dragged(d)
+		{
+			d.fx = d3.event.x;
+			d.fy = d3.event.y;
+		}
+
+		function dragended(d)
+		{
+			d.fx = null;
+			d.fy = null;
+			simulation.alphaTarget(0.1);
 		}
 	}
 
@@ -191,7 +232,14 @@ class EntitySelector extends React.Component{
 
 		        <div className="content">
 		        	<div id="graph">
-		        		<svg width="100%" height="1200" ref={node => this.node = node}></svg>
+		        		<svg width="100%" height="1200" ref={node => this.svg = node}>
+		        		  <defs>
+						    <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
+						      <path d="M0,0 L0,6 L9,3 z" fill="#f00" />
+						    </marker>
+						  </defs>
+						  <g ref={node => this.node = node}></g>
+		        		</svg>
 					</div>
 			      	<NavLink to={url} style={
 			      		(this.state.selected_entities.length>0)?{display:"block"}:{display:"none"}
