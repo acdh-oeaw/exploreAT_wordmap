@@ -23,6 +23,8 @@ class EntitySelector extends React.Component{
 			entities: [],
 			relationships: [],
 			selected_entities: [],
+			current_entity: "",
+			current_entity_attributes: [],
 			current_state: "Retrieving available entities"
 		};
 
@@ -30,6 +32,9 @@ class EntitySelector extends React.Component{
 		this.sparqlQueries = new SparqlQueryBuilder();
 		this.handleFilterChange = this.handleFilterChange.bind(this);
 		this.loadData = this.loadData.bind(this);
+		this.updateEntityDetails =this.updateEntityDetails.bind(this);
+		this.toggleCurrentEntity =this.toggleCurrentEntity.bind(this);
+		this.toggleEntitySelection = this.toggleEntitySelection.bind(this);
 
 		// Url query param based parameters
 		this.api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
@@ -76,9 +81,20 @@ class EntitySelector extends React.Component{
 		});
 	}
 
+	updateEntityDetails(entity){
+		if(entity && entity.length>0){
+			sparql(this.api_url, this.sparqlQueries.getEntityAttributes(this.ontology, this.prefix, entity), (err, data) => {
+		      	if (data && !err) {
+		        	this.setState({ current_entity_attributes: data});
+		      } else if (err) throw err
+			});
+		}else{
+
+		}
+	}
+
 	componentDidUpdate(prevProps, prevState, snapshot){
 		if(prevState.loaded === false && this.state.loaded === true){
-			console.log(this.state.entities, this.state.relationships);
 			this.createGraph();
 		}
 	}
@@ -86,6 +102,48 @@ class EntitySelector extends React.Component{
 	handleFilterChange(event){
 		this.setState({current_search: event.target.value});
 	};
+
+	toggleCurrentEntity(entity){
+		if(entity && entity.length>0){
+			this.setState(prevState=>{
+				if(prevState.current_entity != entity)
+					prevState.current_entity = entity;
+				else{
+					prevState.current_entity = "";
+					prevState.current_entity_attributes = []
+				}
+				return(prevState);
+			});
+			this.updateEntityDetails(entity);
+		}
+	}
+
+	/**
+	 * toggleEntitySelection
+	 * Adds or removes a triplet <?s ?p ?o> to the array of selected entities
+	 *		
+	 * @param {string} The entity
+	 */
+	toggleEntitySelection(entity){
+		this.setState((prevState)=>{
+			// predicateToSparql wrapps the predicate in <> if it does no use a prefix
+			const predicateToSparql = (p)=>((p.search('http://')!=-1)?('<'+p+'>'):p);
+
+			if(entity && entity.length>0)
+				if(prevState.selected_entities.includes(entity))
+					prevState.selected_entities = prevState.selected_entities.filter(e=>e!=entity)
+				else{
+					prevState.selected_entities.push(entity)
+					const subject = '?'+this.state.current_entity.replace(/:/g, ''),
+						  predicate = this.sparqlQueries.shorttenURIwithPrefix(this.ontology, this.prefix, entity),
+						  object = '?'+this.wrapper.nameOfEntity(predicate),
+						  new_entity = `${subject} ${predicateToSparql(predicate)} ${object}`;
+
+					alert(new_entity)
+				}
+			return(prevState);
+		});
+	}
 
 	createGraph(){
 		// this.state.relationships 
@@ -141,6 +199,7 @@ class EntitySelector extends React.Component{
 			.enter()
 			.append('g')
 			.attr('class', 'node')
+			.on("click",(d)=>this.toggleCurrentEntity(d.entity))
 			.call(d3.drag()
             .on("start",dragstarted)
             .on("drag",dragged)
@@ -231,8 +290,8 @@ class EntitySelector extends React.Component{
 		        </div>
 
 		        <div className="content">
-		        	<div id="graph">
-		        		<svg width="100%" height="1200" ref={node => this.svg = node}>
+		        	<div id="graph" width="100%" height="100%">
+		        		<svg width="100%" height="100%" ref={node => this.svg = node}>
 		        		  <defs>
 						    <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
 						      <path d="M0,0 L0,6 L9,3 z" fill="#f00" />
@@ -240,6 +299,17 @@ class EntitySelector extends React.Component{
 						  </defs>
 						  <g ref={node => this.node = node}></g>
 		        		</svg>
+					</div>
+					<div id="current_entity" style={({display: (this.state.current_entity_attributes.length>0 
+							&& this.state.current_entity!="")?'inline-block':'none'})}>
+						<h3>Entity : {this.state.current_entity}</h3>
+						<ul>
+							{this.state.current_entity_attributes.map(e=>(
+								<li key={e.attribute} onClick={()=>this.toggleEntitySelection(e.attribute)}>
+									{this.sparqlQueries.shorttenURIwithPrefix(this.ontology, this.prefix, e.attribute)}
+								</li>))
+							}
+						</ul>
 					</div>
 			      	<NavLink to={url} style={
 			      		(this.state.selected_entities.length>0)?{display:"block"}:{display:"none"}

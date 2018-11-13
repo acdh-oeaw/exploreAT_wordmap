@@ -29,6 +29,10 @@ class SparqlQueryBuilder{
           GRAPH ?graph { }
         }`);
     }
+
+    shorttenURIwithPrefix(ontology, prefix, uri){
+        return(uri.includes(ontology)===false?uri:prefix + ":" + uri.split(ontology+"#")[1])
+    }
         
     /**
      * getEntitiesOverviewQuery
@@ -121,6 +125,41 @@ class SparqlQueryBuilder{
     }
 
     /**
+     * getEntityAttributes
+     * Provides a SPARQL query for retrieving all attributes of a specific entity in the database
+     *
+     *
+     * @param {string} ontology - An ontology related to the case of study.
+     * @param {string} prefix - All entities and relationships will make use of it
+        to reduce the amount of characters used.
+     * @param {string} entity - The entity of which to retrieve the attributes
+     * @return {string} the SPARQL query, keys: entity, relationship, to.
+     */
+    getEntityAttributes(ontology, prefix, entity){
+        return(
+        `
+        PREFIX ${prefix}: <${ontology}#>
+        SELECT DISTINCT ?attribute
+        WHERE {
+          GRAPH ?g {?subject <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ${entity}}.
+          GRAPH ?g {?subject ?attribute ?object}.
+        }
+
+        LIMIT 25
+        `
+        );
+    }
+/*
+    createDataSparqlQuery(ontology, prefix, entries){
+        let query = ` PREFIX ${prefix}: <${ontology}#>`;
+        query += 'SELECT '
+
+        return(
+
+        );
+    }
+
+    /**
      * createDataSparqlQuery
      * Provides a query for retrieving data for all of the entities passed from EntitySelector screen
      *
@@ -128,7 +167,7 @@ class SparqlQueryBuilder{
      * @param {string} ontology Ontology that is going to be used for the database exploration.
      * @param {string} prefix Prefix used for the ontology.
      * @return {string} An SPARQL query
-     */
+    
     createDataSparqlQuery(entries, ontology, prefix){
         const wrapper = new UrlParamWrapper();
         let queries_per_graph = {};
@@ -164,7 +203,7 @@ class SparqlQueryBuilder{
         query += "\n}GROUP BY"+selection+"\nLIMIT 100"
 
         return(query);
-    }
+    } */
 
     oldQuery(){
         return(
