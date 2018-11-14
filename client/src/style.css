@@ -139,6 +139,11 @@ div#source_selector{
 
 /* Entities ---------------------------------------------------------------------------
 */
+div#explorer.entitySelector #link-to-dashboard{
+  color:white;
+  font-weight: bold;
+}
+
 div#explorer.entitySelector input{
 	height: 1.1em;
 	border-color: lightgrey;
@@ -155,46 +160,13 @@ div#explorer.entitySelector li.entity{
 }
 
 
-div#explorer.entitySelector div#graphs,
-div#explorer.entitySelector div.graphDetails #details{
-
-	padding:0.2em;
-	display: flex;
+div#explorer.entitySelector div.content{
+	display:flex;
 	flex-direction: row;
-	
 	justify-content: space-between;
-	flex-wrap: wrap;
-}
-
-div#explorer.entitySelector div.graph{
-	cursor:pointer;
-	width: 24%;
-	padding:0.5em;
-	height: inherit;
-	display: inline-block;
-}
-
-div#explorer.entitySelector div.graph:hover{
-	background-color: lightgrey;
-}
-
-div#explorer.entitySelector div.graphDetails p{
-	font-size: 1.2em;
-}
-
-div#explorer.entitySelector div.graphDetails li.entity{
-	cursor:pointer;
-	margin-bottom: 5px;
-	font-size: 1em;
-}
-
-div#explorer.entitySelector div.graphDetails h1{
-	font-size: 2em;
-}
-div#explorer.entitySelector div.graphDetails h2{
-	cursor:pointer;
-	font-size: 1.2em;
-	color: #18bc9c;
+	align-items: flex-start;
+	width: 100%;
+	height: 100%;
 }
 
 div#explorer.entitySelector .tooltip{
@@ -207,6 +179,26 @@ div#explorer.entitySelector .tooltip p{
 	color: grey;
 	margin:2px;
 	display:inline-block;
+}
+
+div#explorer.entitySelector div#current_entity{
+  height: 100%;
+	width: 500px;
+	padding-left: 20px;
+	background-color: lightcyan;
+
+}
+
+div#explorer.entitySelector div#current_entity li{cursor: pointer;}
+
+div#explorer.entitySelector div#current_entity li:hover{text-decoration: underline;}
+
+div#explorer.entitySelector div#current_entity h3{
+	font-size: 1.5em;
+}
+
+div#explorer.entitySelector div#graph, div#explorer.entitySelector svg{
+	height:100%;
 }
 
 /* Explorer ---------------------------------------------------------------------------
