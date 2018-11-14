@@ -59,7 +59,7 @@ class EntitySelector extends React.Component{
 	}
 
 	componentWillUnmount(){
-		console.log('adios')
+		this.simulation.stop();
 	}
 
 	loadData(){
@@ -252,6 +252,8 @@ class EntitySelector extends React.Component{
 			.on('tick', forceTick);
 
 		simulation.force("link").links(edges);
+
+		this.simulation = simulation;
 
 		d3.select(this.node).selectAll("line.link")
 			.data(edges, d => `${d.source.entity}-${d.target.entity}`) 
