@@ -5,6 +5,13 @@ import { sparql } from 'd3-sparql'
 import UrlParamWrapper from '../aux/UrlParamWrapper';
 import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
 
+const params = {
+	nodeColor: 'lightgreen',
+	activeNodeColor: 'red',
+	edgeColor: 'grey',
+	activeEdgeColor: 'red'
+};
+
 /**
  * EntitySelector
  * Component for displaying entities and relationships in the SPARQL database 	
@@ -25,7 +32,9 @@ class EntitySelector extends React.Component{
 			selected_entities: [],
 			current_entity: "",
 			current_entity_attributes: [],
-			current_state: "Retrieving available entities"
+			current_state: "Retrieving available entities",
+			active_nodes: [],
+			active_edges: []
 		};
 
 		this.wrapper = new UrlParamWrapper();
@@ -35,6 +44,8 @@ class EntitySelector extends React.Component{
 		this.updateEntityDetails =this.updateEntityDetails.bind(this);
 		this.toggleCurrentEntity =this.toggleCurrentEntity.bind(this);
 		this.toggleEntitySelection = this.toggleEntitySelection.bind(this);
+		this.updateActiveEdges = this.updateActiveEdges.bind(this);
+		this.updateActiveNodes = this.updateActiveNodes.bind(this);
 
 		// Url query param based parameters
 		this.api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
@@ -125,24 +136,67 @@ class EntitySelector extends React.Component{
 	 * @param {string} The entity
 	 */
 	toggleEntitySelection(entity){
-		this.setState((prevState)=>{
-			// predicateToSparql wrapps the predicate in <> if it does no use a prefix
-			const predicateToSparql = (p)=>((p.search('http://')!=-1)?('<'+p+'>'):p);
+		// predicateToSparql wrapps the predicate in <> if it does no use a prefix
+		const predicateToSparql = (p)=>((p.search('http://')!=-1)?('<'+p+'>'):p);
 
-			if(entity && entity.length>0)
-				if(prevState.selected_entities.includes(entity))
-					prevState.selected_entities = prevState.selected_entities.filter(e=>e!=entity)
-				else{
-					prevState.selected_entities.push(entity)
-					const subject = '?'+this.state.current_entity.replace(/:/g, ''),
-						  predicate = this.sparqlQueries.shorttenURIwithPrefix(this.ontology, this.prefix, entity),
-						  object = '?'+this.wrapper.nameOfEntity(predicate),
-						  new_entity = `${subject} ${predicateToSparql(predicate)} ${object}`;
+		// predicateToRelationshipConsecuent returns the consecuent in the relationship
+		// where the given predicate is the relationship, if it does happen to be
+		const predicateToRelationshipConsecuent = (p)=>{
+			for(let i=0; i<this.state.relationships.length; i++){
+				const entry = this.state.relationships[i]; 
+				if(entry.relationship == p)
+					return(entry.target);
+			}
+			return(p)
+		}
 
-					alert(new_entity)
-				}
+		if(entity && entity.length>0)
+			if(this.state.selected_entities.includes(entity)){
+				this.state.selected_entities = this.state.selected_entities.filter(e=>e!=entity)
+			}
+			else{
+				this.state.selected_entities.push(entity)
+				
+				let   subject = '?'+this.wrapper.nameOfEntity( this.state.current_entity),
+					  predicate = this.sparqlQueries.shorttenURIwithPrefix(this.ontology, this.prefix, entity),
+					  object = '?'+this.wrapper.nameOfEntity( predicateToRelationshipConsecuent(predicate)),
+					  new_entity = `${subject} ${predicateToSparql(predicate)} ${object}`;
+
+					  this.updateActiveEdges(this.state.current_entity, predicate);
+					  this.updateActiveNodes(this.state.current_entity);
+				alert(new_entity)
+			}
+			//this.setState(prevState=>{return(prevState.push(new_entity))})				
+	}
+
+	updateActiveEdges(source, relationship){
+		this.setState(prevState=>{
+			const id = `${this.wrapper.nameOfEntity(source)}${this.wrapper.nameOfEntity(relationship)}`;
+
+			if(prevState.active_edges.includes(source+relationship)){
+				prevState.active_edges = prevState.active_edges.filter(e=>e!=source+relationship)
+				d3.select(id)
+					.attr('stroke', params.edgeColor);
+			}
+			else{
+				prevState.active_edges.push(source+relationship)
+				d3.select(id)
+					.attr('stroke', params.activeEdgeColor);
+			}
+
 			return(prevState);
-		});
+		})
+	}
+
+	updateActiveNodes(entity){
+		this.setState(prevState=>{
+			if(!prevState.active_nodes.includes(entity)){
+				prevState.active_nodes.push(entity)
+				console.log(`#${this.wrapper.nameOfEntity(entity)} circle`, d3.select(`#${this.wrapper.nameOfEntity(entity)} circle`))
+				d3.select(`#${this.wrapper.nameOfEntity(entity)} circle`).attr('fill', params.activeNodeColor);
+			}
+			return(prevState);
+		})
 	}
 
 	createGraph(){
@@ -172,8 +226,8 @@ class EntitySelector extends React.Component{
 		const linkForce = d3.forceLink().distance(200);
 
 		const simulation = d3.forceSimulation()
-			.force('charge', d3.forceManyBody().strength(-70))
-			.force('center', d3.forceCenter(width/2, height/3))
+			.force('charge', d3.forceManyBody().strength(-170))
+			.force('center', d3.forceCenter(400, 400))
 			.force('collide', d3.forceCollide(function(d){
 			    sizeScale(nodehash[d.entity])*2.2
 			}))
@@ -187,9 +241,10 @@ class EntitySelector extends React.Component{
 			.data(edges, d => `${d.source.entity}-${d.target.entity}`) 
 			.enter()
 			.append("line") //.attr("marker-end","url(#arrow)")
+			.attr('id', d=>`${this.wrapper.nameOfEntity(d.source.entity)}${this.wrapper.nameOfEntity(d.relationship)}`)
 			.attr("class", "link")
 			.style("stroke-opacity", .5)
-			.attr('stroke','grey')
+			.attr('stroke', params.edgeColor)
 			.style("stroke-width", d => d.value)
 			.append("title")
       			.text(d=>d.relationship);;
@@ -199,6 +254,7 @@ class EntitySelector extends React.Component{
 			.enter()
 			.append('g')
 			.attr('class', 'node')
+			.attr('id', d=>this.wrapper.nameOfEntity(d.entity))
 			.on("click",(d)=>this.toggleCurrentEntity(d.entity))
 			.call(d3.drag()
             .on("start",dragstarted)
@@ -207,7 +263,7 @@ class EntitySelector extends React.Component{
  
 		nodeEnter.append('circle')
 			.attr('r', e=>sizeScale(e.count))
-			.style('fill','lightblue');
+			.style('fill', params.nodeColor);
 		nodeEnter.append('text')
 			.style("text-anchor", "middle")
 			.attr("y", 25)
