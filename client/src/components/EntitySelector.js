@@ -139,16 +139,11 @@ class EntitySelector extends React.Component{
 		// predicateToSparql wrapps the predicate in <> if it does no use a prefix
 		const predicateToSparql = (p)=>((p.search('http://')!=-1)?('<'+p+'>'):p);
 
-		// predicateToRelationshipConsecuent returns the consecuent in the relationship
-		// where the given predicate is the relationship, if it does happen to be
-		const predicateToRelationshipConsecuent = (p)=>{
-			for(let i=0; i<this.state.relationships.length; i++){
-				const entry = this.state.relationships[i]; 
-				if(entry.relationship == p)
-					return(entry.target);
-			}
-			return(p)
-		}
+		// getAttributeForElement retrieves the desired attribute for the element
+		// of a given array. The accesor provides a way to compare by the type of
+		// the value given in "element"
+		const getAttributeForElement = (array, element, attribute, accesor)=>(
+			array.reduce((final, actual)=>(accesor(actual)==element?actual[attribute]:final), undefined));
 
 		if(entity && entity.length>0)
 			if(this.state.selected_entities.includes(entity)){
@@ -159,7 +154,10 @@ class EntitySelector extends React.Component{
 				
 				let   subject = '?'+this.wrapper.nameOfEntity( this.state.current_entity),
 					  predicate = this.sparqlQueries.shorttenURIwithPrefix(this.ontology, this.prefix, entity),
-					  object = '?'+this.wrapper.nameOfEntity( predicateToRelationshipConsecuent(predicate)),
+					  target = getAttributeForElement(this.state.relationships,predicate,'target',d=>d.relationship),
+
+					  //target != undefined when the predicate is a relationship (an edge)
+					  object = '?'+this.wrapper.nameOfEntity( target!=undefined?target:predicate),
 					  new_entity = `${subject} ${predicateToSparql(predicate)} ${object}`;
 
 					  this.updateActiveEdges(this.state.current_entity, predicate);
