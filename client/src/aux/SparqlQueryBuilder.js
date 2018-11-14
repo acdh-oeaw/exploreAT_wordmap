@@ -152,13 +152,14 @@ class SparqlQueryBuilder{
 
     createDataSparqlQuery(ontology, prefix, triples){
         const elements = triples.reduce((final,actual)=>final.concat(actual.split(" ")), []);
+        const graphs = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
         let query = "";
         query +=` PREFIX ${prefix}: <${ontology}#>\n`;
-        query += 'SELECT '+elements.filter(e=>e.includes('?')).join(', ');
+        query += 'SELECT '+elements.filter(e=>e.includes('?')).join(' ');
         query += '\nWHERE{ \n';
-        query += triples.map(triple=>`  GRAPH g {${triple}}.\n`).join('');
-        query += '}'
+        query += triples.map((triple,i)=>`  GRAPH ?${graphs[i]} {${triple}}.\n`).join('');
+        query += '}limit 100';
 
         return(query);
     }

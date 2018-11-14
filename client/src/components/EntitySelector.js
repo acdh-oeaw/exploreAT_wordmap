@@ -285,7 +285,7 @@ class EntitySelector extends React.Component{
 		nodeEnter.append('text')
 			.style("text-anchor", "middle")
 			.attr("y", 25)
-			.text(d => d.entity);
+			.text(d => this.wrapper.nameOfEntity(d.entity));
 		nodeEnter.append("title")
       		.text(d=>`${d.count} diferent entries`);
 
@@ -384,7 +384,7 @@ class EntitySelector extends React.Component{
 						<ul>
 							{this.state.current_entity_attributes.map(e=>(
 								<li key={e.attribute} onClick={()=>this.toggleEntitySelection(e.attribute)}>
-									{this.sparqlQueries.shorttenURIwithPrefix(this.ontology, this.prefix, e.attribute)}
+									{this.wrapper.nameOfEntity(e.attribute)}
 								</li>))
 							}
 						</ul>
