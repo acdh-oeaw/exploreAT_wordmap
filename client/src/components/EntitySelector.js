@@ -30,6 +30,7 @@ class EntitySelector extends React.Component{
 			entities: [],
 			relationships: [],
 			selected_entities: [],
+			triples: [],
 			current_entity: "",
 			current_entity_attributes: [],
 			current_state: "Retrieving available entities",
@@ -145,28 +146,35 @@ class EntitySelector extends React.Component{
 		const getAttributeForElement = (array, element, attribute, accesor)=>(
 			array.reduce((final, actual)=>(accesor(actual)==element?actual[attribute]:final), undefined));
 
-		if(entity && entity.length>0)
+		if(entity && entity.length>0){
+			const subject = '?'+this.wrapper.nameOfEntity( this.state.current_entity),
+				predicate = this.sparqlQueries.shorttenURIwithPrefix(this.ontology, this.prefix, entity),
+				target = getAttributeForElement(this.state.relationships,predicate,'target',d=>d.relationship),
+
+				//target != undefined when the predicate is a relationship (an edge)
+				object = '?'+this.wrapper.nameOfEntity( target!=undefined?target:predicate),
+				sparql_triple = `${subject} ${predicateToSparql(predicate)} ${object}`;
+
+
 			if(this.state.selected_entities.includes(entity)){
-				this.state.selected_entities = this.state.selected_entities.filter(e=>e!=entity)
+				this.setState(prevState=>{
+					prevState.selected_entities = prevState.selected_entities.filter(e=>e!=entity);
+					prevState.triples = prevState.triples.filter(e=>e!=sparql_triple);
+				});
 			}
 			else{
-				this.state.selected_entities.push(entity)
-				
-				let   subject = '?'+this.wrapper.nameOfEntity( this.state.current_entity),
-					  predicate = this.sparqlQueries.shorttenURIwithPrefix(this.ontology, this.prefix, entity),
-					  target = getAttributeForElement(this.state.relationships,predicate,'target',d=>d.relationship),
+				this.setState(prevState=>{
+					prevState.selected_entities.push(entity);
+					prevState.triples.push(sparql_triple);
+				});
 
-					  //target != undefined when the predicate is a relationship (an edge)
-					  object = '?'+this.wrapper.nameOfEntity( target!=undefined?target:predicate),
-					  new_entity = `${subject} ${predicateToSparql(predicate)} ${object}`;
-
-					  this.updateActiveEdges(this.state.current_entity, predicate);
-					  this.updateActiveNodes(this.state.current_entity);
 				alert(new_entity)
 			}
-			//this.setState(prevState=>{return(prevState.push(new_entity))})				
+		}
 	}
 
+	// La actualización de estado se puede hacer cuando se añade o elimina una
+	// relación. Refactorizar para que sólamente cambie la estética. Reducción de las actualziaciones.
 	updateActiveEdges(source, relationship){
 		this.setState(prevState=>{
 			const id = `${this.wrapper.nameOfEntity(source)}${this.wrapper.nameOfEntity(relationship)}`;
@@ -186,6 +194,9 @@ class EntitySelector extends React.Component{
 		})
 	}
 
+	// La actualización de estado se puede hacer cuando se añade o elimina un
+	// nodo. Refactorizar para que sólamente cambie la estética, o devuelva si ha de
+	// actualizarse. Reducción de las actualziaciones.
 	updateActiveNodes(entity){
 		this.setState(prevState=>{
 			if(!prevState.active_nodes.includes(entity)){
@@ -334,7 +345,8 @@ class EntitySelector extends React.Component{
 		            <span>
 			            Search for specific entities 
 			            <input type="text" value={this.state.current_search} onChange={this.handleFilterChange} />
-		            Current selected entities : {pretty_entities}</span>
+			            <span onClick={()=>alert(this.state.triples)}>Show triples </span>
+		            	Current selected entities : {pretty_entities}</span>
 		          </div>
 		        </div>
 
