@@ -149,14 +149,18 @@ class SparqlQueryBuilder{
         `
         );
     }
-/*
-    createDataSparqlQuery(ontology, prefix, entries){
-        let query = ` PREFIX ${prefix}: <${ontology}#>`;
-        query += 'SELECT '
 
-        return(
+    createDataSparqlQuery(ontology, prefix, triples){
+        const elements = triples.reduce((final,actual)=>final.concat(actual.split(" ")), []);
 
-        );
+        let query = "";
+        query +=` PREFIX ${prefix}: <${ontology}#>\n`;
+        query += 'SELECT '+elements.filter(e=>e.includes('?')).join(', ');
+        query += '\nWHERE{ \n';
+        query += triples.map(triple=>`  GRAPH g {${triple}}.\n`).join('');
+        query += '}'
+
+        return(query);
     }
 
     /**

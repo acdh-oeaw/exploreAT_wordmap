@@ -48,14 +48,16 @@ class Explorer extends React.Component{
     this.api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
     this.ontology = this.wrapper.paramToUrl(this.props.match.params.ontology);
     this.prefix = this.wrapper.paramToUrl(this.props.match.params.prefix);
-    this.entries = this.wrapper.paramToUrl(this.props.match.params.entities).split(',');
+    this.triples = this.wrapper.paramToUrl(this.props.match.params.entities).split(',').filter(d=>d!="");
+    console.log('hola', this.wrapper.paramToUrl(this.props.match.params.entities), this.triples)
 
     this.availableComponents = {"Dummy": Dummy, "Table": Table, "PackedBubbles": PackedBubbles};
   }
 
   componentDidMount(){
-    let query = this.sparqlQueries.createDataSparqlQuery(this.entries, this.ontology, this.prefix);
+    let query = this.sparqlQueries.createDataSparqlQuery(this.ontology, this.prefix, this.triples);
     console.log(query)
+    /*
     //query = this.sparqlQueries.oldQuery();//createDataSparqlQuery(this.entries, this.ontology, this.prefix);
     //console.log(query)
 
@@ -69,6 +71,7 @@ class Explorer extends React.Component{
         });
       } else if (err) throw err;
     });
+    */
   }
 
   /**
@@ -156,7 +159,7 @@ class Explorer extends React.Component{
   }
 
   render(){
-    const pretty_entities = this.entries.map(a=>this.wrapper.nameOfEntity(this.wrapper.entityFromEntry(a))).join(' , ');
+    //const pretty_entities = this.triples.map(a=>this.wrapper.nameOfEntity(this.wrapper.entityFromEntry(a))).join(' , ');
 
     return(<div id="explorer">
         <div className="header">
@@ -166,7 +169,7 @@ class Explorer extends React.Component{
               <span>Ontology : {this.ontology}</span>
               <span>Sparql entry point : {this.api_url}</span>
             </div>
-            <span>Current data available for entities : {pretty_entities}</span>
+            <span>Current data available for entities :</span>
           </div>
         </div>
         <div className="content">

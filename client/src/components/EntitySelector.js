@@ -58,6 +58,10 @@ class EntitySelector extends React.Component{
 		this.loadData();
 	}
 
+	componentWillUnmount(){
+		console.log('adios')
+	}
+
 	loadData(){
 		new Promise((resolve,reject)=>{
 			sparql(this.api_url, this.sparqlQueries.getAvailableEntities(this.ontology, this.prefix), (err, data) => {
@@ -157,15 +161,21 @@ class EntitySelector extends React.Component{
 
 
 			if(this.state.selected_entities.includes(entity)){
+				//if(target != undefined) es una arista
+					//seleccionas
 				this.setState(prevState=>{
 					prevState.selected_entities = prevState.selected_entities.filter(e=>e!=entity);
 					prevState.triples = prevState.triples.filter(e=>e!=sparql_triple);
+					return prevState;
 				});
 			}
 			else{
+				//if(target != undefined) es una arista
+					//deseleccionas
 				this.setState(prevState=>{
 					prevState.selected_entities.push(entity);
 					prevState.triples.push(sparql_triple);
+					return prevState;
 				});
 			}
 		}
@@ -199,7 +209,6 @@ class EntitySelector extends React.Component{
 		this.setState(prevState=>{
 			if(!prevState.active_nodes.includes(entity)){
 				prevState.active_nodes.push(entity)
-				console.log(`#${this.wrapper.nameOfEntity(entity)} circle`, d3.select(`#${this.wrapper.nameOfEntity(entity)} circle`))
 				d3.select(`#${this.wrapper.nameOfEntity(entity)} circle`).attr('fill', params.activeNodeColor);
 			}
 			return(prevState);
@@ -327,7 +336,7 @@ class EntitySelector extends React.Component{
 			"/explorer/ontology/" + this.props.match.params.ontology+
 			"/prefix/" +	this.props.match.params.prefix+
 			"/sparql/" + this.props.match.params.sparql+
-			"/entities/";
+			"/entities/" + this.state.triples.reduce((final, actual)=>final+this.wrapper.urlToParam(actual)+",","");
 
 		const pretty_entities = this.state.selected_entities.map(a=>a.split('#')[1]).join(' , ');
 

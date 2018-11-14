@@ -182,12 +182,17 @@ div#explorer.entitySelector .tooltip p{
 }
 
 div#explorer.entitySelector div#current_entity{
-  height: 100;
+  height: 100%;
 	width: 500px;
 	padding-left: 20px;
 	background-color: lightcyan;
 
 }
+
+div#explorer.entitySelector div#current_entity li{cursor: pointer;}
+
+div#explorer.entitySelector div#current_entity li:hover{text-decoration: underline;}
+
 div#explorer.entitySelector div#current_entity h3{
 	font-size: 1.5em;
 }
