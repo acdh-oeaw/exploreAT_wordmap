@@ -1,5 +1,5 @@
-# RDF Explorer
-This is the code repository of RDF-Explorer, a web platform containing visualization tools of RDF-based lexicography ontologies which is part of the
+# DH Dashboard
+This is the code repository of DH Dashboard, a web platform containing visualization tools of RDF-based lexicography ontologies which is part of the
 [ExploreAT!](http://www.oeaw.ac.at/acdh/de/exploreAT) project, a collaboration between the [Austrian Center for Digital Humanities](http://www.oeaw.ac.at) 
 and [VisUsal](http://visusal.usal.es/), the Visual Analytics and Information Visualization from University of Salamanca. 
 
