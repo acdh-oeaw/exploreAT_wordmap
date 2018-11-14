@@ -167,8 +167,6 @@ class EntitySelector extends React.Component{
 					prevState.selected_entities.push(entity);
 					prevState.triples.push(sparql_triple);
 				});
-
-				alert(new_entity)
 			}
 		}
 	}
@@ -348,6 +346,9 @@ class EntitySelector extends React.Component{
 			            <span onClick={()=>alert(this.state.triples)}>Show triples </span>
 		            	Current selected entities : {pretty_entities}</span>
 		          </div>
+		            <NavLink to={url} style={
+			      		(this.state.selected_entities.length>0)?{display:"block"}:{display:"none"}
+			      	} id="link-to-dashboard">Go to dashboard</NavLink>
 		        </div>
 
 		        <div id="loader" style={({display: this.state.loaded===true?'none':'flex'})}>
@@ -377,9 +378,6 @@ class EntitySelector extends React.Component{
 							}
 						</ul>
 					</div>
-			      	<NavLink to={url} style={
-			      		(this.state.selected_entities.length>0)?{display:"block"}:{display:"none"}
-			      	}>Go</NavLink>
 		        </div>
 		    </div>
 	    );

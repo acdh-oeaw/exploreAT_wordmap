@@ -139,6 +139,11 @@ div#source_selector{
 
 /* Entities ---------------------------------------------------------------------------
 */
+div#explorer.entitySelector #link-to-dashboard{
+  color:white;
+  font-weight: bold;
+}
+
 div#explorer.entitySelector input{
 	height: 1.1em;
 	border-color: lightgrey;
@@ -177,9 +182,10 @@ div#explorer.entitySelector .tooltip p{
 }
 
 div#explorer.entitySelector div#current_entity{
+  height: 100;
 	width: 500px;
 	padding-left: 20px;
-	background-color: light-grey;
+	background-color: lightcyan;
 
 }
 div#explorer.entitySelector div#current_entity h3{
