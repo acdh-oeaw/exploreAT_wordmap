@@ -291,7 +291,6 @@ class EntitySelector extends React.Component{
 			.attr('class', 'node')
 			.attr('id', d=>this.wrapper.nameOfEntity(d.entity))
 			.on("click",(d)=>{
-				this.basic_manageData("node",this.wrapper.nameOfEntity(d.entity));
 				d3.selectAll(".node.active").classed("active",false);
 				d3.select("#"+this.wrapper.nameOfEntity(d.entity)).classed("active", d3.select("#"+this.wrapper.nameOfEntity(d.entity)).classed("active") ? false : true);
 				this.toggleCurrentEntity(d.entity)
@@ -396,8 +395,8 @@ class EntitySelector extends React.Component{
 		        </div>
 
 		        <div className="content">
-					<div id="graph" width="800px" height="800px">
-		        		<svg width="800px" height="800px" ref={node => this.svg = node}>
+					<div id="graph" width="100%" height="100%">
+		        		<svg width="100%" height="100%" ref={node => this.svg = node}>
 		        		  <defs>
 						    <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
 						      <path d="M0,0 L0,6 L9,3 z" fill="#f00" />
