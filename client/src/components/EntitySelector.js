@@ -14,17 +14,17 @@ const params = {
 
 /**
  * EntitySelector
- * Component for displaying entities and relationships in the SPARQL database 	
+ * Component for displaying entities and relationships in the SPARQL database
  * and selecting some for further analysis.
  *
  * @param props
- * @return {React.Component} 
+ * @return {React.Component}
  */
 class EntitySelector extends React.Component{
 	constructor(props){
 		super(props);
 		this.state={
-			loaded: false, 
+			loaded: false,
 			loading:true, // For display issues
 			current_search: "",
 			entities: [],
@@ -48,13 +48,15 @@ class EntitySelector extends React.Component{
 		this.updateActiveEdges = this.updateActiveEdges.bind(this);
 		this.updateActiveNodes = this.updateActiveNodes.bind(this);
 
+		this.basic_HighlightAttribute = this.basic_HighlightAttribute.bind(this);
+
 		// Url query param based parameters
 		this.api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
 		this.ontology = this.wrapper.paramToUrl(this.props.match.params.ontology);
 		this.prefix = this.wrapper.paramToUrl(this.props.match.params.prefix);
 	}
 
-	componentDidMount(){	  
+	componentDidMount(){
 		this.loadData();
 	}
 
@@ -86,9 +88,9 @@ class EntitySelector extends React.Component{
 		      			value: 6.5,
 		      		}));
 
-		        	this.setState({ 
+		        	this.setState({
 		        		entities: curatedEntities,
-		        		relationships:curatedRelationships, 
+		        		relationships:curatedRelationships,
 		        		current_state:'Loaded successfuly',
 		        		loaded: true
 		        	});
@@ -134,13 +136,23 @@ class EntitySelector extends React.Component{
 		}
 	}
 
+	basic_HighlightAttribute(attribute){
+		var lis = $('#current_entity > ul > li');
+		for(var i=0; i<lis.length; i++){
+			if(lis[i].innerHTML == attribute){
+				$(lis[i]).toggleClass("li-selected")
+			}
+		}
+	}
+
 	/**
 	 * toggleEntitySelection
 	 * Adds or removes a triplet <?s ?p ?o> to the array of selected entities
-	 *		
+	 *
 	 * @param {string} The entity
 	 */
 	toggleEntitySelection(entity){
+
 		// predicateToSparql wrapps the predicate in <> if it does no use a prefix
 		const predicateToSparql = (p)=>((p.search('http://')!=-1)?('<'+p+'>'):p);
 
@@ -148,7 +160,9 @@ class EntitySelector extends React.Component{
 		// of a given array. The accesor provides a way to compare by the type of
 		// the value given in "element"
 		const getAttributeForElement = (array, element, attribute, accesor)=>(
-			array.reduce((final, actual)=>(accesor(actual)==element?actual[attribute]:final), undefined));
+			array.reduce((final, actual)=>(
+				accesor(actual)==element?actual[attribute]:final), undefined)
+			);
 
 		if(entity && entity.length>0){
 			const subject = '?'+this.wrapper.nameOfEntity( this.state.current_entity),
@@ -216,9 +230,9 @@ class EntitySelector extends React.Component{
 	}
 
 	createGraph(){
-		// this.state.relationships 
+		// this.state.relationships
 			// 	source
-			// 	relationship 
+			// 	relationship
 			// 	target
 			// 	value
 		const rect = this.svg.getBoundingClientRect(),
@@ -255,17 +269,20 @@ class EntitySelector extends React.Component{
 
 		this.simulation = simulation;
 
-		d3.select(this.node).selectAll("line.link")
-			.data(edges, d => `${d.source.entity}-${d.target.entity}`) 
+		const edgeEnter = d3.select(this.node).selectAll("line.link")
+			.data(edges, d => `${d.source.entity}-${d.target.entity}`)
 			.enter()
 			.append("line") //.attr("marker-end","url(#arrow)")
-			.attr('id', d=>`${this.wrapper.nameOfEntity(d.source.entity)}${this.wrapper.nameOfEntity(d.relationship)}`)
+			.attr('id', d=>`${this.wrapper.nameOfEntity(d.source.entity)}${this.wrapper.nameOfEntity(d.relationship)}${this.wrapper.nameOfEntity(d.target.entity)}`)
 			.attr("class", "link")
-			.style("stroke-opacity", .5)
-			.attr('stroke', params.edgeColor)
+			.on("click",(d)=>{
+				d3.select("#"+`${this.wrapper.nameOfEntity(d.source.entity)}${this.wrapper.nameOfEntity(d.relationship)}${this.wrapper.nameOfEntity(d.target.entity)}`).classed("selected", d3.select("#"+`${this.wrapper.nameOfEntity(d.source.entity)}${this.wrapper.nameOfEntity(d.relationship)}${this.wrapper.nameOfEntity(d.target.entity)}`).classed("selected") ? false : true);
+			})
+			//.style("stroke-opacity", .5)
+			//.attr('stroke', params.edgeColor)
 			.style("stroke-width", d => d.value)
 			.append("title")
-      			.text(d=>d.relationship);;
+      			.text(d=>d.relationship);
 
 		const nodeEnter = d3.select(this.node).selectAll('g.node')
 			.data(this.state.entities)
@@ -273,19 +290,30 @@ class EntitySelector extends React.Component{
 			.append('g')
 			.attr('class', 'node')
 			.attr('id', d=>this.wrapper.nameOfEntity(d.entity))
-			.on("click",(d)=>this.toggleCurrentEntity(d.entity))
+			.on("click",(d)=>{
+				this.basic_manageData("node",this.wrapper.nameOfEntity(d.entity));
+				d3.selectAll(".node.active").classed("active",false);
+				d3.select("#"+this.wrapper.nameOfEntity(d.entity)).classed("active", d3.select("#"+this.wrapper.nameOfEntity(d.entity)).classed("active") ? false : true);
+				this.toggleCurrentEntity(d.entity)
+			})
 			.call(d3.drag()
             .on("start",dragstarted)
             .on("drag",dragged)
             .on("end",dragended));
- 
+
 		nodeEnter.append('circle')
 			.attr('r', e=>sizeScale(e.count))
-			.style('fill', params.nodeColor);
+			//.style('fill', params.nodeColor);
 		nodeEnter.append('text')
 			.style("text-anchor", "middle")
 			.attr("y", 25)
+			.attr("class","node-name")
 			.text(d => this.wrapper.nameOfEntity(d.entity));
+		nodeEnter.append('text')
+			.style("text-anchor", "middle")
+			.attr("y", 0)
+			.attr("class","node-count")
+			.text(d => d.count);
 		nodeEnter.append("title")
       		.text(d=>`${d.count} diferent entries`);
 
@@ -308,7 +336,7 @@ class EntitySelector extends React.Component{
 		}
 
 		function dragstarted(d)
-		{ 
+		{
 			simulation.restart();
 			simulation.alpha(1.0);
 			d.fx = d.x;
@@ -330,11 +358,11 @@ class EntitySelector extends React.Component{
 	}
 
 	renderContent(){
-		
+
 	}
 
 	render() {
-		const url = 
+		const url =
 			"/explorer/ontology/" + this.props.match.params.ontology+
 			"/prefix/" +	this.props.match.params.prefix+
 			"/sparql/" + this.props.match.params.sparql+
@@ -352,7 +380,7 @@ class EntitySelector extends React.Component{
 		              <span>Sparql entry point : {this.api_url}</span>
 		            </div>
 		            <span>
-			            Search for specific entities 
+			            Search for specific entities
 			            <input type="text" value={this.state.current_search} onChange={this.handleFilterChange} />
 			            <span onClick={()=>alert(this.state.triples)}>Show triples </span>
 		            	Current selected entities : {pretty_entities}</span>
@@ -368,8 +396,8 @@ class EntitySelector extends React.Component{
 		        </div>
 
 		        <div className="content">
-		        	<div id="graph" width="100%" height="100%">
-		        		<svg width="100%" height="100%" ref={node => this.svg = node}>
+					<div id="graph" width="800px" height="800px">
+		        		<svg width="800px" height="800px" ref={node => this.svg = node}>
 		        		  <defs>
 						    <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
 						      <path d="M0,0 L0,6 L9,3 z" fill="#f00" />
@@ -378,12 +406,15 @@ class EntitySelector extends React.Component{
 						  <g ref={node => this.node = node}></g>
 		        		</svg>
 					</div>
-					<div id="current_entity" style={({display: (this.state.current_entity_attributes.length>0 
+					<div id="current_entity" style={({display: (this.state.current_entity_attributes.length>0
 							&& this.state.current_entity!="")?'inline-block':'none'})}>
 						<h3>Entity : {this.state.current_entity}</h3>
 						<ul>
 							{this.state.current_entity_attributes.map(e=>(
-								<li key={e.attribute} onClick={()=>this.toggleEntitySelection(e.attribute)}>
+								<li key={e.attribute} onClick={()=>{
+									this.basic_HighlightAttribute(this.wrapper.nameOfEntity(e.attribute));
+									this.toggleEntitySelection(e.attribute)
+								}}>
 									{this.wrapper.nameOfEntity(e.attribute)}
 								</li>))
 							}
@@ -393,6 +424,6 @@ class EntitySelector extends React.Component{
 		    </div>
 	    );
 	}
-}	
+}
 
 export default EntitySelector;

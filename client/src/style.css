@@ -212,7 +212,64 @@ div#explorer div.content{
 	min-height: 100%;
 }
 
-/* Loader 
+/* SVG
+*/
+
+div#graph svg {
+
+}
+
+line.link {
+    stroke: black;
+    stroke-opacity: .5;
+}
+line.link.active {
+    stroke-opacity: .9;
+    stroke: rgb(102, 180, 58);
+}
+line.link.selected {
+    stroke-opacity: .9;
+	stroke: rgb(102, 180, 58);
+}
+line.link:hover{
+    stroke-opacity: .9;
+    cursor: pointer;
+}
+
+.node circle {
+    fill: rgb(198, 233, 140);
+}
+.node.active circle {
+    fill: rgb(102, 180, 58);
+}
+.node circle:hover {
+    fill: rgb(102, 180, 58);
+    cursor: pointer;
+}
+.node.selected circle, .node.active.selected circle {
+	fill: red;
+}
+
+.node-count {
+    font-weight: 700;
+    opacity: .3;
+    pointer-events: none;
+}
+.node-name {
+    font-weight: 700;
+    pointer-events: none;
+    text-transform: capitalize;
+}
+.link-name {
+    font-weight: 700;
+    pointer-events: none;
+}
+
+li.li-selected {
+    font-weight: 700;
+}
+
+/* Loader
 */
 div#loader{
 	display: flex;
@@ -304,7 +361,7 @@ button.button:hover{
 	height: 1em;
 	margin: 0;
 	font-weight: bold;
-	box-shadow: inset 0 0 5px 0px grey; 
+	box-shadow: inset 0 0 5px 0px grey;
 }
 
 /* Table -----------------------------------------------------------------------------
@@ -330,7 +387,7 @@ div#PackedBubbles svg {
     margin: 0;
 }
 
-div#PackedBubbles #top-container { 
+div#PackedBubbles #top-container {
 	display:flex;
 	flex-direction: row;
 	align-items: center;
@@ -355,7 +412,7 @@ div#PackedBubbles .react-search-field {
     margin: 0;
 }
 
-div#PackedBubbles #container { 
+div#PackedBubbles #container {
     text-align: center;
 }
 
