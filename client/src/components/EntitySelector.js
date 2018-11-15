@@ -189,6 +189,8 @@ class EntitySelector extends React.Component{
 				this.setState(prevState=>{
 					prevState.selected_entities = prevState.selected_entities.filter(e=>e!=entity);
 					prevState.triples = prevState.triples.filter(e=>e!=sparql_triple);
+					if(target!=undefined)
+						prevState.active_edges = prevState.active_edges.filter(e=>e!=target);
 					return prevState;
 				});
 			}
@@ -198,6 +200,8 @@ class EntitySelector extends React.Component{
 				this.setState(prevState=>{
 					prevState.selected_entities.push(entity);
 					prevState.triples.push(sparql_triple);
+					if(target!=undefined)
+						prevState.active_edges.push(target);
 					return prevState;
 				});
 			}
@@ -262,13 +266,13 @@ class EntitySelector extends React.Component{
 			value: d.value
 		}));
 
-		const linkForce = d3.forceLink().distance(200);
+		const linkForce = d3.forceLink().distance(120);
 
 		const simulation = d3.forceSimulation()
-			.force('charge', d3.forceManyBody().strength(-170))
-			.force('center', d3.forceCenter(400, 400))
+			.force('charge', d3.forceManyBody().strength(-220))
+			.force('center', d3.forceCenter(d3.select('svg').node().getBoundingClientRect().width/2, 250))
 			.force('collide', d3.forceCollide(function(d){
-			    sizeScale(nodehash[d.entity])*2.2
+			    sizeScale(nodehash[d.entity])*3.2
 			}))
 			.force('link', linkForce)
 			.nodes(this.state.entities)
@@ -338,9 +342,9 @@ class EntitySelector extends React.Component{
 
 			d3.selectAll("g.node")
 				.attr("transform", d => "translate("+
-					Math.max(sizeScale(d.count) + 20, Math.min(width - sizeScale(d.count) - 20, d.x))+
+					Math.max(sizeScale(d.count), Math.min(width - sizeScale(d.count), d.x))+
 					","+
-					Math.max(sizeScale(d.count) + 20, Math.min(height - sizeScale(d.count) - 20, d.y))+")");
+					Math.max(sizeScale(d.count), Math.min(height - sizeScale(d.count), d.y))+")");
 		}
 
 		function dragstarted(d)
@@ -417,9 +421,15 @@ class EntitySelector extends React.Component{
 					<div style={({display: (this.state.test_nodes.length>0!="")?'inline-block':'none'})} id="nodes">
 						<svg style={{height:'100%'}}>
 							{this.state.test_nodes.map((test_node,position)=>(
-							<g transform={`translate(${position*120},0)`}>
-								<circle r="20" cx="22" cy="22" fill="lightblue"></circle>
-								<text x="0" y="26">
+							<g transform={`translate(${position*300},0)`} key={position}>
+								<circle r="20" cx="22" cy="42" fill="lightblue"></circle>
+								{(position<(this.state.test_nodes.length-1))?(
+									<g>
+									<line x1={45} x2={300} y1={42} y2={42} stroke={'grey'}></line>
+									<text x={80} y={45} fontSize={15} strokeWidth={.5} fontWeight={'bold'} stroke={'white'}>{this.wrapper.nameOfEntity(this.state.active_edges[position])}</text>
+									</g>
+								):""}
+								<text x="0" y="15">
 									{this.wrapper.nameOfEntity(test_node.name)}
 								</text>
 								{test_node.attributes.map((e,i)=>(
@@ -428,7 +438,7 @@ class EntitySelector extends React.Component{
 											this.basic_HighlightAttribute(this.wrapper.nameOfEntity(e.attribute))
 											this.toggleEntitySelection(e.attribute, test_node.name);
 										}}
-										transform={`translate(0,${i*15 + 70})`}>
+										transform={`translate(0,${i*15 + 80})`}>
 										{this.wrapper.nameOfEntity(e.attribute)}
 									</text>))
 								}
