@@ -31,8 +31,6 @@ class EntitySelector extends React.Component{
 			relationships: [],
 			selected_entities: [],
 			triples: [],
-			current_entity: "",
-			current_entity_attributes: [],
 			current_state: "Retrieving available entities",
 			active_nodes: [],
 			active_edges: [],
@@ -41,13 +39,12 @@ class EntitySelector extends React.Component{
 
 		this.wrapper = new UrlParamWrapper();
 		this.sparqlQueries = new SparqlQueryBuilder();
-		this.handleFilterChange = this.handleFilterChange.bind(this);
 		this.loadData = this.loadData.bind(this);
-		this.updateEntityDetails =this.updateEntityDetails.bind(this);
-		this.toggleCurrentEntity =this.toggleCurrentEntity.bind(this);
-		this.toggleEntitySelection = this.toggleEntitySelection.bind(this);
-		this.updateActiveEdges = this.updateActiveEdges.bind(this);
-		this.updateActiveNodes = this.updateActiveNodes.bind(this);
+
+		this.selectAttribute = this.selectAttribute.bind(this);
+		this.attributeToQuery = this.attributeToQuery.bind(this);
+		this.selectNode = this.selectNode.bind(this);
+		this.selectRelationship = this.selectRelationship.bind(this);
 
 		this.basic_HighlightAttribute = this.basic_HighlightAttribute.bind(this);
 
@@ -100,35 +97,100 @@ class EntitySelector extends React.Component{
 		});
 	}
 
-	updateEntityDetails(entity){
-		if(entity && entity.length>0){
-			sparql(this.api_url, this.sparqlQueries.getEntityAttributes(this.ontology, this.prefix, entity), (err, data) => {
-		      	if (data && !err) {
-		        	this.setState(prevState=>{ 
-		        			prevState.current_entity_attributes= data;
-		        			prevState.test_nodes.push({
-		        				name: prevState.current_entity,
-		        				attributes: data
-		        			});
-		        			return(prevState);
-
-		        	});
-		      } else if (err) throw err
-			});
-		}else{
-
-		}
-	}
-
 	componentDidUpdate(prevProps, prevState, snapshot){
 		if(prevState.loaded === false && this.state.loaded === true){
 			this.createGraph();
 		}
 	}
 
-	handleFilterChange(event){
-		this.setState({current_search: event.target.value});
-	};
+	attributeToQuery(attribute, origin){
+		// predicateToSparql wrapps the predicate in <> if it does no use a prefix
+		const predicateToSparql = (p)=>((p.search('http://')!=-1)?('<'+p+'>'):p);
+
+		// getAttributeForElement retrieves the desired attribute for the element
+		// of a given array. The accesor provides a way to compare by the type of
+		// the value given in "element"
+		const getAttributeForElement = (array, element, attribute, accesor)=>(
+			array.reduce((final, actual)=>(
+				accesor(actual)==element?actual[attribute]:final), undefined)
+			);
+
+		let object = {};
+
+		if(attribute && attribute.length>0){
+			object.subject = '?'+this.wrapper.nameOfEntity( origin);
+			object.predicate = this.sparqlQueries.shorttenURIwithPrefix(this.ontology, this.prefix, attribute);
+			object.target = getAttributeForElement(this.state.relationships, object.predicate,'target',d=>d.relationship);
+
+			//target != undefined when the predicate is a relationship (an edge)
+			object.object = '?'+this.wrapper.nameOfEntity( object.target!=undefined?object.target:object.predicate);
+			object.sparql_triple = `${object.subject} ${predicateToSparql(object.predicate)} ${object.object}`;
+		}
+		return(object);
+	}
+
+	selectNode(entity){
+		if(this.state.test_nodes.length==0){
+			if(entity && entity.length>0){
+			sparql(this.api_url, this.sparqlQueries.getEntityAttributes(this.ontology, this.prefix, entity), (err, data) => {
+		      	if (data && !err) {
+		        	this.setState(prevState=>{
+		        			prevState.test_nodes.push({	name: entity, attributes: data});
+		        			prevState.active_nodes.push(entity)
+		        			return(prevState);
+		        	});
+		      	} else if (err) throw err
+				});
+			}
+		}
+	}
+
+	selectRelationship(relationship){
+		if(relationship && relationship.source.entity == this.state.active_nodes[this.state.active_nodes.length-1]){
+			const query = this.attributeToQuery(relationship.relationship ,relationship.source.entity)
+			sparql(this.api_url, this.sparqlQueries.getEntityAttributes(this.ontology, this.prefix, query.target), (err, data) => {
+		      	if (data && !err) {
+		        	this.setState(prevState=>{
+		        			prevState.test_nodes.push({	name: query.target, attributes: data});
+		        			prevState.triples.push(query.sparql_triple);
+		        			prevState.selected_entities.push(relationship.relationship)
+		        			prevState.active_edges.push(relationship.relationship);
+		        			prevState.active_nodes.push(query.target);
+		        			return(prevState);
+		        	});
+		      	} else if (err) throw err
+			});
+		}
+	}
+
+	selectAttribute(attribute, origin){
+		if(attribute && origin){
+			const {predicate, target, object, sparql_triple} = this.attributeToQuery(attribute, origin);
+
+			if(this.state.selected_entities.includes(attribute)){
+				//if(target != undefined) es una arista
+					//seleccionas
+				this.setState(prevState=>{
+					prevState.selected_entities = prevState.selected_entities.filter(e=>e!=attribute);
+					prevState.triples = prevState.triples.filter(e=>e!=sparql_triple);
+					if(target!=undefined)
+						prevState.active_edges = prevState.active_edges.filter(e=>e!=target);
+					return prevState;
+				});
+			}
+			else{
+				//if(target != undefined) es una arista
+					//deseleccionas
+				this.setState(prevState=>{
+					prevState.selected_entities.push(attribute);
+					prevState.triples.push(sparql_triple);
+					if(target!=undefined)
+						prevState.active_edges.push(target);
+					return prevState;
+				});
+			}
+		}
+	}
 
 	toggleCurrentEntity(entity){
 		if(entity && entity.length>0){
@@ -152,94 +214,6 @@ class EntitySelector extends React.Component{
 				$(lis[i]).toggleClass("li-selected")
 			}
 		}
-	}
-
-	/**
-	 * toggleEntitySelection
-	 * Adds or removes a triplet <?s ?p ?o> to the array of selected entities
-	 *
-	 * @param {string} The entity
-	 */
-	toggleEntitySelection(entity, origin){
-
-		// predicateToSparql wrapps the predicate in <> if it does no use a prefix
-		const predicateToSparql = (p)=>((p.search('http://')!=-1)?('<'+p+'>'):p);
-
-		// getAttributeForElement retrieves the desired attribute for the element
-		// of a given array. The accesor provides a way to compare by the type of
-		// the value given in "element"
-		const getAttributeForElement = (array, element, attribute, accesor)=>(
-			array.reduce((final, actual)=>(
-				accesor(actual)==element?actual[attribute]:final), undefined)
-			);
-
-		if(entity && entity.length>0){
-			const subject = '?'+this.wrapper.nameOfEntity( origin),
-				predicate = this.sparqlQueries.shorttenURIwithPrefix(this.ontology, this.prefix, entity),
-				target = getAttributeForElement(this.state.relationships,predicate,'target',d=>d.relationship),
-
-				//target != undefined when the predicate is a relationship (an edge)
-				object = '?'+this.wrapper.nameOfEntity( target!=undefined?target:predicate),
-				sparql_triple = `${subject} ${predicateToSparql(predicate)} ${object}`;
-
-
-			if(this.state.selected_entities.includes(entity)){
-				//if(target != undefined) es una arista
-					//seleccionas
-				this.setState(prevState=>{
-					prevState.selected_entities = prevState.selected_entities.filter(e=>e!=entity);
-					prevState.triples = prevState.triples.filter(e=>e!=sparql_triple);
-					if(target!=undefined)
-						prevState.active_edges = prevState.active_edges.filter(e=>e!=target);
-					return prevState;
-				});
-			}
-			else{
-				//if(target != undefined) es una arista
-					//deseleccionas
-				this.setState(prevState=>{
-					prevState.selected_entities.push(entity);
-					prevState.triples.push(sparql_triple);
-					if(target!=undefined)
-						prevState.active_edges.push(target);
-					return prevState;
-				});
-			}
-		}
-	}
-
-	// La actualización de estado se puede hacer cuando se añade o elimina una
-	// relación. Refactorizar para que sólamente cambie la estética. Reducción de las actualziaciones.
-	updateActiveEdges(source, relationship){
-		this.setState(prevState=>{
-			const id = `${this.wrapper.nameOfEntity(source)}${this.wrapper.nameOfEntity(relationship)}`;
-
-			if(prevState.active_edges.includes(source+relationship)){
-				prevState.active_edges = prevState.active_edges.filter(e=>e!=source+relationship)
-				d3.select(id)
-					.attr('stroke', params.edgeColor);
-			}
-			else{
-				prevState.active_edges.push(source+relationship)
-				d3.select(id)
-					.attr('stroke', params.activeEdgeColor);
-			}
-
-			return(prevState);
-		})
-	}
-
-	// La actualización de estado se puede hacer cuando se añade o elimina un
-	// nodo. Refactorizar para que sólamente cambie la estética, o devuelva si ha de
-	// actualizarse. Reducción de las actualziaciones.
-	updateActiveNodes(entity){
-		this.setState(prevState=>{
-			if(!prevState.active_nodes.includes(entity)){
-				prevState.active_nodes.push(entity)
-				d3.select(`#${this.wrapper.nameOfEntity(entity)} circle`).attr('fill', params.activeNodeColor);
-			}
-			return(prevState);
-		})
 	}
 
 	createGraph(){
@@ -290,6 +264,7 @@ class EntitySelector extends React.Component{
 			.attr("class", "link")
 			.on("click",(d)=>{
 				d3.select("#"+`${this.wrapper.nameOfEntity(d.source.entity)}${this.wrapper.nameOfEntity(d.relationship)}${this.wrapper.nameOfEntity(d.target.entity)}`).classed("selected", d3.select("#"+`${this.wrapper.nameOfEntity(d.source.entity)}${this.wrapper.nameOfEntity(d.relationship)}${this.wrapper.nameOfEntity(d.target.entity)}`).classed("selected") ? false : true);
+				this.selectRelationship(d);
 			})
 			//.style("stroke-opacity", .5)
 			//.attr('stroke', params.edgeColor)
@@ -306,7 +281,7 @@ class EntitySelector extends React.Component{
 			.on("click",(d)=>{
 				d3.selectAll(".node.active").classed("active",false);
 				d3.select("#"+this.wrapper.nameOfEntity(d.entity)).classed("active", d3.select("#"+this.wrapper.nameOfEntity(d.entity)).classed("active") ? false : true);
-				this.toggleCurrentEntity(d.entity)
+				this.selectNode(d.entity)
 			})
 			.call(d3.drag()
             .on("start",dragstarted)
@@ -374,6 +349,7 @@ class EntitySelector extends React.Component{
 	}
 
 	render() {
+		console.log(this.state)
 		const url =
 			"/explorer/ontology/" + this.props.match.params.ontology+
 			"/prefix/" +	this.props.match.params.prefix+
@@ -393,7 +369,7 @@ class EntitySelector extends React.Component{
 		            </div>
 		            <span>
 			            Search for specific entities
-			            <input type="text" value={this.state.current_search} onChange={this.handleFilterChange} />
+			            <input type="text" value={this.state.current_search}/>
 			            <span onClick={()=>alert(this.state.triples)}>Show triples </span>
 		            	Current selected entities : {pretty_entities}</span>
 		          </div>
@@ -436,7 +412,7 @@ class EntitySelector extends React.Component{
 									<text key={e.attribute} 
 										onClick={()=>{
 											this.basic_HighlightAttribute(this.wrapper.nameOfEntity(e.attribute))
-											this.toggleEntitySelection(e.attribute, test_node.name);
+											this.selectAttribute(e.attribute, test_node.name);
 										}}
 										transform={`translate(0,${i*15 + 80})`}>
 										{this.wrapper.nameOfEntity(e.attribute)}
