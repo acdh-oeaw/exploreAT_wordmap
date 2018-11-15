@@ -160,7 +160,7 @@ class EntitySelector extends React.Component{
 	 *
 	 * @param {string} The entity
 	 */
-	toggleEntitySelection(entity){
+	toggleEntitySelection(entity, origin){
 
 		// predicateToSparql wrapps the predicate in <> if it does no use a prefix
 		const predicateToSparql = (p)=>((p.search('http://')!=-1)?('<'+p+'>'):p);
@@ -174,7 +174,7 @@ class EntitySelector extends React.Component{
 			);
 
 		if(entity && entity.length>0){
-			const subject = '?'+this.wrapper.nameOfEntity( this.state.current_entity),
+			const subject = '?'+this.wrapper.nameOfEntity( origin),
 				predicate = this.sparqlQueries.shorttenURIwithPrefix(this.ontology, this.prefix, entity),
 				target = getAttributeForElement(this.state.relationships,predicate,'target',d=>d.relationship),
 
@@ -338,9 +338,9 @@ class EntitySelector extends React.Component{
 
 			d3.selectAll("g.node")
 				.attr("transform", d => "translate("+
-					Math.max(sizeScale(d.count), Math.min(width - sizeScale(d.count), d.x))+
+					Math.max(sizeScale(d.count) + 20, Math.min(width - sizeScale(d.count) - 20, d.x))+
 					","+
-					Math.max(sizeScale(d.count), Math.min(height - sizeScale(d.count), d.y))+")");
+					Math.max(sizeScale(d.count) + 20, Math.min(height - sizeScale(d.count) - 20, d.y))+")");
 		}
 
 		function dragstarted(d)
@@ -404,8 +404,8 @@ class EntitySelector extends React.Component{
 		        </div>
 
 		        <div className="content">
-					<div id="graph" width="100%" height="100%">
-		        		<svg width="100%" height="100%" ref={node => this.svg = node}>
+					<div id="graph" width="100%" height="50%">
+		        		<svg width="100%" height="50%" ref={node => this.svg = node}>
 		        		  <defs>
 						    <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
 						      <path d="M0,0 L0,6 L9,3 z" fill="#f00" />
@@ -414,22 +414,21 @@ class EntitySelector extends React.Component{
 						  <g ref={node => this.node = node}></g>
 		        		</svg>
 					</div>
-					<div style={({display: (this.state.current_entity_attributes.length>0 
-							&& this.state.current_entity!="")?'inline-block':'none'})} id="nodes">
+					<div style={({display: (this.state.test_nodes.length>0!="")?'inline-block':'none'})} id="nodes">
 						<svg style={{height:'100%'}}>
 							{this.state.test_nodes.map((test_node,position)=>(
 							<g transform={`translate(${position*120},0)`}>
-								<circle r="10" cx="10" cy="10" fill="lightblue"></circle>
-								<text x="0" y="20">
+								<circle r="20" cx="22" cy="22" fill="lightblue"></circle>
+								<text x="0" y="26">
 									{this.wrapper.nameOfEntity(test_node.name)}
 								</text>
 								{test_node.attributes.map((e,i)=>(
 									<text key={e.attribute} 
 										onClick={()=>{
 											this.basic_HighlightAttribute(this.wrapper.nameOfEntity(e.attribute))
-											this.toggleEntitySelection(e.attribute);
+											this.toggleEntitySelection(e.attribute, test_node.name);
 										}}
-										transform={`translate(0,${i*15 + 50})`}>
+										transform={`translate(0,${i*15 + 70})`}>
 										{this.wrapper.nameOfEntity(e.attribute)}
 									</text>))
 								}

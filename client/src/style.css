@@ -162,12 +162,13 @@ div#explorer.entitySelector li.entity{
 
 div#explorer.entitySelector div.content{
 	display:flex;
-	flex-direction: row;
-	justify-content: space-between;
-	align-items: flex-start;
+	flex-direction: column;
+	align-items: center;
 	width: 100%;
 	height: 100%;
 }
+
+div#explorer.entitySelector div.content div{height: 50%; width: 100%; padding:1em;}
 
 div#explorer.entitySelector .tooltip{
 	width:100%;
@@ -181,24 +182,9 @@ div#explorer.entitySelector .tooltip p{
 	display:inline-block;
 }
 
-div#explorer.entitySelector div#current_entity{
-  height: 100%;
-	width: 500px;
-	padding-left: 20px;
-	background-color: lightcyan;
-
-}
-
-div#explorer.entitySelector div#current_entity li{cursor: pointer;}
-
-div#explorer.entitySelector div#current_entity li:hover{text-decoration: underline;}
-
-div#explorer.entitySelector div#current_entity h3{
-	font-size: 1.5em;
-}
-
-div#explorer.entitySelector div#graph, div#explorer.entitySelector svg{
-	height:100%;
+div#explorer.entitySelector svg{
+  height:100%;
+  width:100%; 
 }
 
 /* Explorer ---------------------------------------------------------------------------
