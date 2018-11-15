@@ -265,7 +265,7 @@ line.link:hover{
     pointer-events: none;
 }
 
-li.li-selected {
+text.li-selected {
     font-weight: 700;
 }
 

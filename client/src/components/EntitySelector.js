@@ -24,7 +24,7 @@ class EntitySelector extends React.Component{
 	constructor(props){
 		super(props);
 		this.state={
-			loaded: false,
+			loaded: false, 
 			loading:true, // For display issues
 			current_search: "",
 			entities: [],
@@ -35,7 +35,8 @@ class EntitySelector extends React.Component{
 			current_entity_attributes: [],
 			current_state: "Retrieving available entities",
 			active_nodes: [],
-			active_edges: []
+			active_edges: [],
+			test_nodes : [],
 		};
 
 		this.wrapper = new UrlParamWrapper();
@@ -103,7 +104,15 @@ class EntitySelector extends React.Component{
 		if(entity && entity.length>0){
 			sparql(this.api_url, this.sparqlQueries.getEntityAttributes(this.ontology, this.prefix, entity), (err, data) => {
 		      	if (data && !err) {
-		        	this.setState({ current_entity_attributes: data});
+		        	this.setState(prevState=>{ 
+		        			prevState.current_entity_attributes= data;
+		        			prevState.test_nodes.push({
+		        				name: prevState.current_entity,
+		        				attributes: data
+		        			});
+		        			return(prevState);
+
+		        	});
 		      } else if (err) throw err
 			});
 		}else{
@@ -405,19 +414,30 @@ class EntitySelector extends React.Component{
 						  <g ref={node => this.node = node}></g>
 		        		</svg>
 					</div>
-					<div id="current_entity" style={({display: (this.state.current_entity_attributes.length>0
-							&& this.state.current_entity!="")?'inline-block':'none'})}>
-						<h3>Entity : {this.state.current_entity}</h3>
-						<ul>
-							{this.state.current_entity_attributes.map(e=>(
-								<li key={e.attribute} onClick={()=>{
-									this.basic_HighlightAttribute(this.wrapper.nameOfEntity(e.attribute));
-									this.toggleEntitySelection(e.attribute)
-								}}>
-									{this.wrapper.nameOfEntity(e.attribute)}
-								</li>))
-							}
-						</ul>
+					<div style={({display: (this.state.current_entity_attributes.length>0 
+							&& this.state.current_entity!="")?'inline-block':'none'})} id="nodes">
+						<svg style={{height:'100%'}}>
+							{this.state.test_nodes.map((test_node,position)=>(
+							<g transform={`translate(${position*120},0)`}>
+								<circle r="10" cx="10" cy="10" fill="lightblue"></circle>
+								<text x="0" y="20">
+									{this.wrapper.nameOfEntity(test_node.name)}
+								</text>
+								{test_node.attributes.map((e,i)=>(
+									<text key={e.attribute} 
+										onClick={()=>{
+											this.basic_HighlightAttribute(this.wrapper.nameOfEntity(e.attribute))
+											this.toggleEntitySelection(e.attribute);
+										}}
+										transform={`translate(0,${i*15 + 50})`}>
+										{this.wrapper.nameOfEntity(e.attribute)}
+									</text>))
+								}
+							</g>
+
+						))}
+
+						</svg>
 					</div>
 		        </div>
 		    </div>
