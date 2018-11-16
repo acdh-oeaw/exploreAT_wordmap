@@ -188,7 +188,7 @@ div#explorer.entitySelector .tooltip p{
 
 div#explorer.entitySelector svg{
   height:100%;
-  width:100%; 
+  width:100%;
 }
 
 div#explorer div.content div#nodes svg{height:180%;}
@@ -406,14 +406,17 @@ div#PackedBubbles svg {
 }
 
 div#PackedBubbles #top-container {
-	display:flex;
+	/* display:flex;*/
 	flex-direction: row;
 	align-items: center;
 	justify-content: space-between;
+    display: table;
+    width: 100%;
+    text-align: center;
 }
 
 div#PackedBubbles #top-container div{
-	display: inline-block;
+	/* display: inline-block; */
 }
 
 
@@ -425,9 +428,43 @@ div#PackedBubbles .selector {
 
 
 div#PackedBubbles .react-search-field {
-    max-width: 220px;
-    display: block;
-    margin: 0;
+    border: 1px solid rgb(221, 221, 221);
+    display: inline-flex;
+    justify-content: space-between;
+    height: 35px !important;
+    width: 80%;
+}
+
+div#PackedBubbles .react-search-field-input {
+    max-width: 200px;
+}
+
+div#PackedBubbles #color-select, div#PackedBubbles #cluster-select {
+    display: table-cell;
+    width: 30%;
+    padding: 20px;
+    margin: 0 auto;
+}
+
+div#PackedBubbles #color-select > div:first-of-type {
+    margin-top: 10px;
+    max-height: 20px;
+}
+div#PackedBubbles #color-select > div:first-of-type > div:first-of-type {
+    max-height: 20px;
+}
+
+div#PackedBubbles #cluster-select > div:first-of-type {
+    margin-top: 10px;
+    max-height: 20px;
+}
+div#PackedBubbles #cluster-select > div:first-of-type > div:first-of-type {
+    max-height: 20px;
+}
+
+div#PackedBubbles #color-select > div:nth-child(3), div#PackedBubbles #cluster-select div:nth-child(3) {
+    margin-top: 0px!important;
+    padding-top: 0px!important;
 }
 
 div#PackedBubbles #container {
