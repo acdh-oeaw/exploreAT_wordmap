@@ -13,6 +13,7 @@ import VisWrapper from './vis/VisWrapper'
 import Dummy from './vis/Dummy'
 import Table from './vis/Table'
 import PackedBubbles from './vis/PackedBubbles'
+import PieChart from './vis/PieChart'
 import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
 
 const ReactGridLayout = WidthProvider(RGL);
@@ -50,13 +51,11 @@ class Explorer extends React.Component{
     this.prefix = this.wrapper.paramToUrl(this.props.match.params.prefix);
     this.triples = this.wrapper.paramToUrl(this.props.match.params.entities).split(',').filter(d=>d!="");
 
-    this.availableComponents = {"Dummy": Dummy, "Table": Table, "PackedBubbles": PackedBubbles};
+    this.availableComponents = {"Dummy": Dummy, "Table": Table, "PieChart": PieChart};
   }
 
   componentDidMount(){
-    let query = this.sparqlQueries.createDataSparqlQuery(this.ontology, this.prefix, this.triples);
-    console.log(query)
-    
+    let query = this.sparqlQueries.createDataSparqlQuery(this.ontology, this.prefix, this.triples);    
     //query = this.sparqlQueries.oldQuery();//createDataSparqlQuery(this.entries, this.ontology, this.prefix);
         
     sparql(this.api_url, query, (err, data) => {
