@@ -45,6 +45,7 @@ class EntitySelector extends React.Component{
 		this.attributeToQuery = this.attributeToQuery.bind(this);
 		this.selectNode = this.selectNode.bind(this);
 		this.selectRelationship = this.selectRelationship.bind(this);
+		this.updateHighlights = this.updateHighlights.bind(this);
 
 		this.basic_HighlightAttribute = this.basic_HighlightAttribute.bind(this);
 
@@ -137,6 +138,7 @@ class EntitySelector extends React.Component{
 		        	this.setState(prevState=>{
 		        			prevState.test_nodes.push({	name: entity, attributes: data});
 		        			prevState.active_nodes.push(entity)
+		        			this.updateHighlights(prevState);
 		        			return(prevState);
 		        	});
 		      	} else if (err) throw err
@@ -156,6 +158,7 @@ class EntitySelector extends React.Component{
 		        			prevState.selected_entities.push(relationship.relationship)
 		        			prevState.active_edges.push(relationship.relationship);
 		        			prevState.active_nodes.push(query.target);
+		        			this.updateHighlights(prevState);
 		        			return(prevState);
 		        	});
 		      	} else if (err) throw err
@@ -216,6 +219,25 @@ class EntitySelector extends React.Component{
 		}
 	}
 
+	updateHighlights(newState){
+		const links = d3.select(this.node).selectAll("line.link");
+		links.style('stroke', d=>{
+			const query = this.attributeToQuery(d.relationship, d.source.entity);
+			//console.log(d, query, newState.active_nodes[newState.active_nodes.length-1])
+			if(d.source.entity == newState.active_nodes[newState.active_nodes.length-1]){
+				return('blue')
+			}
+			if(newState.triples.includes(query.sparql_triple))
+				return('rgb(102, 180, 58)')
+			return('black');
+		});
+		const nodes = d3.select(this.node).selectAll('g.node circle').style('fill',d=>{
+			if(newState.test_nodes.map(t=>t.name).includes(d.entity))
+				return('rgb(102, 180, 58)')
+			return('rgb(198, 233, 140)')
+		})
+	}
+
 	createGraph(){
 		// this.state.relationships
 			// 	source
@@ -260,10 +282,8 @@ class EntitySelector extends React.Component{
 			.data(edges, d => `${d.source.entity}-${d.target.entity}`)
 			.enter()
 			.append("line") //.attr("marker-end","url(#arrow)")
-			.attr('id', d=>`${this.wrapper.nameOfEntity(d.source.entity)}${this.wrapper.nameOfEntity(d.relationship)}${this.wrapper.nameOfEntity(d.target.entity)}`)
 			.attr("class", "link")
 			.on("click",(d)=>{
-				d3.select("#"+`${this.wrapper.nameOfEntity(d.source.entity)}${this.wrapper.nameOfEntity(d.relationship)}${this.wrapper.nameOfEntity(d.target.entity)}`).classed("selected", d3.select("#"+`${this.wrapper.nameOfEntity(d.source.entity)}${this.wrapper.nameOfEntity(d.relationship)}${this.wrapper.nameOfEntity(d.target.entity)}`).classed("selected") ? false : true);
 				this.selectRelationship(d);
 			})
 			//.style("stroke-opacity", .5)
@@ -279,8 +299,6 @@ class EntitySelector extends React.Component{
 			.attr('class', 'node')
 			.attr('id', d=>this.wrapper.nameOfEntity(d.entity))
 			.on("click",(d)=>{
-				d3.selectAll(".node.active").classed("active",false);
-				d3.select("#"+this.wrapper.nameOfEntity(d.entity)).classed("active", d3.select("#"+this.wrapper.nameOfEntity(d.entity)).classed("active") ? false : true);
 				this.selectNode(d.entity)
 			})
 			.call(d3.drag()
@@ -349,7 +367,6 @@ class EntitySelector extends React.Component{
 	}
 
 	render() {
-		console.log(this.state)
 		const url =
 			"/explorer/ontology/" + this.props.match.params.ontology+
 			"/prefix/" +	this.props.match.params.prefix+
