@@ -46,8 +46,7 @@ class EntitySelector extends React.Component{
 		this.selectNode = this.selectNode.bind(this);
 		this.selectRelationship = this.selectRelationship.bind(this);
 		this.updateHighlights = this.updateHighlights.bind(this);
-
-		this.basic_HighlightAttribute = this.basic_HighlightAttribute.bind(this);
+		this.resetQuery = this.resetQuery.bind(this);
 
 		// Url query param based parameters
 		this.api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
@@ -170,6 +169,9 @@ class EntitySelector extends React.Component{
 		if(attribute && origin){
 			const {predicate, target, object, sparql_triple} = this.attributeToQuery(attribute, origin);
 
+			const svg_element = d3.select('#'+this.wrapper.nameOfEntity(origin)+this.wrapper.nameOfEntity(attribute));
+			svg_element.classed('attribute-selected', svg_element.classed('attribute-selected')?false:true);
+
 			if(this.state.selected_entities.includes(attribute)){
 				//if(target != undefined) es una arista
 					//seleccionas
@@ -210,13 +212,16 @@ class EntitySelector extends React.Component{
 		}
 	}
 
-	basic_HighlightAttribute(attribute){
-		var lis = $('#current_entity > ul > li');
-		for(var i=0; i<lis.length; i++){
-			if(lis[i].innerHTML == attribute){
-				$(lis[i]).toggleClass("li-selected")
-			}
-		}
+	resetQuery(){
+		this.setState(prevState=>{
+			prevState.selected_entities= [];
+			prevState.triples= [];
+			prevState.active_nodes= [];
+			prevState.active_edges= [];
+			prevState.test_nodes= [];
+			this.updateHighlights(prevState);
+			return(prevState);
+		});
 	}
 
 	updateHighlights(newState){
@@ -265,7 +270,7 @@ class EntitySelector extends React.Component{
 		const linkForce = d3.forceLink().distance(140);
 
 		const simulation = d3.forceSimulation()
-			.force('charge', d3.forceManyBody().strength(-20))
+			.force('charge', d3.forceManyBody().strength(-300))
 			.force('center', d3.forceCenter(d3.select('svg').node().getBoundingClientRect().width/2, 200))
 			.force('collide', d3.forceCollide(function(d){
 			    sizeScale(nodehash[d.entity])*4
@@ -327,11 +332,18 @@ class EntitySelector extends React.Component{
 		    width = rect.width,
 		    height = rect.height;
 
+		    /*
 			d3.selectAll("line.link")
 				.attr("x1", d => d.source.x)
 				.attr("x2", d => d.target.x)
 				.attr("y1", d => d.source.y)
-				.attr("y2", d => d.target.y);
+				.attr("y2", d => d.target.y);*/
+
+			d3.selectAll("line.link")
+				.attr("x1", d => Math.max(30, Math.min(width-30, d.source.x)))
+				.attr("x2", d => Math.max(30, Math.min(width-30, d.target.x)))
+				.attr("y1", d => Math.max(30, Math.min(height-30, d.source.y)))
+				.attr("y2", d => Math.max(30, Math.min(height-30, d.target.y)))
 
 			d3.selectAll("g.node")
 				.attr("transform", d => "translate("+
@@ -410,7 +422,7 @@ class EntitySelector extends React.Component{
 		        		</svg>
 					</div>
 					<div style={({display: this.state.loaded===true?'inline-block':'none'})} id="nodes">
-						<svg style={{height:'100%'}}>
+						<svg>
 							<g>
 								<circle r="20" cx="22" cy="42" fill="grey"></circle>
 									<g>
@@ -439,7 +451,7 @@ class EntitySelector extends React.Component{
 								
 							</g>
 							{this.state.test_nodes.map((test_node,position)=>(
-							<g transform={`translate(${(position+1)*300},0)`} key={position}>
+							<g transform={`translate(${(position+1)*300},0)`} key={position} className="entity">
 								<circle r="20" cx="22" cy="42" fill="rgb(102, 180, 58)"></circle>
 								{(position<(this.state.test_nodes.length-1))?(
 									<g>
@@ -453,19 +465,24 @@ class EntitySelector extends React.Component{
 									{this.wrapper.nameOfEntity(test_node.name)}
 								</text>
 								{test_node.attributes.map((e,i)=>(
-									<text key={e.attribute} 
+									<text 
+										key={e.attribute} 
+										class="attribute" 
+										id={`${this.wrapper.nameOfEntity(test_node.name)}${this.wrapper.nameOfEntity(e.attribute)}`}
 										onClick={()=>{
-											this.basic_HighlightAttribute(this.wrapper.nameOfEntity(e.attribute))
 											this.selectAttribute(e.attribute, test_node.name);
 										}}
-										transform={`translate(0,${i*15 + 80})`}>
+										transform={`translate(0,${i*18 + 80})`}>
 										{this.wrapper.nameOfEntity(e.attribute)}
 									</text>))
 								}
 							</g>
-
-						))}
-
+							))}
+							<g 
+								transform={`translate(${d3.select('body').node().getBoundingClientRect().width - 160},100)`} 
+								style={({display: this.state.test_nodes.length>0?'inherit':'none'})}>
+								<text id="resetQueryButton" onClick={()=>this.resetQuery()}>reset the query</text>
+							</g>
 						</svg>
 					</div>
 		        </div>
@@ -475,3 +492,4 @@ class EntitySelector extends React.Component{
 }
 
 export default EntitySelector;
+
