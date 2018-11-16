@@ -57,7 +57,7 @@ class Explorer extends React.Component{
   componentDidMount(){
     let query = this.sparqlQueries.createDataSparqlQuery(this.ontology, this.prefix, this.triples);    
     //query = this.sparqlQueries.oldQuery();//createDataSparqlQuery(this.entries, this.ontology, this.prefix);
-        
+    console.log(query)
     sparql(this.api_url, query, (err, data) => {
       if (data && !err) {
         this.setState({

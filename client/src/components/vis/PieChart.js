@@ -14,12 +14,13 @@ class PieChart extends React.Component{
 
         this.state = {
             sector_dimension:"",
-            data: {valor1: 23, valor2: 24, valor3: 15},
-            total: 62
+            data: {a: this.props.data.length},
+            total: this.props.data.length
         };
 
         this.node = d3.select(this.node);
         this.createSectors = this.createSectors.bind(this);
+        this.selectAttribute = this.selectAttribute.bind(this);
     }
 
     componentDidMount(){
@@ -32,6 +33,17 @@ class PieChart extends React.Component{
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
+    }
+
+    selectAttribute(attribute){
+        const data = {};
+        this.props.data.map((e,i)=>{
+            if(data[e[attribute]])
+                data[e[attribute]] += 1;
+            else
+                data[e[attribute]] = 1;
+        });
+        this.setState({data:data, sector_dimension:attribute})
     }
 
     createSectors(dimensions){
@@ -67,12 +79,14 @@ class PieChart extends React.Component{
             let path = describeArc(dimensions.width/2, dimensions.height/2, dimensions.radius, rotationAccumulated, endAngle);
             path +=` L${dimensions.width/2},${dimensions.height/2}`
             const sector = (<path
-                key={d.key}
                 d={path}
                 fill={colorScale(i)}
                 ></path>);
             rotationAccumulated = endAngle;
-            return(sector);
+            return(<g key={d.key}>
+                {sector}
+                <title>{d.key} ( {d.value} )</title>
+            </g>);
         });
 
         return sectors;
@@ -85,24 +99,41 @@ class PieChart extends React.Component{
         }
 
         const chartDimensions = {
-            width: this.props.width,
+            width: (this.props.width * 0.8),
             height: (this.props.height - 50),
             radius: Math.min((this.props.height - 100), this.props.width)/2
         }
 
+        const style = (e)=>this.state.sector_dimension==e?{cursor:"pointer",color:"#18bc9c", marginLeft:"5px"}:
+        {cursor:"pointer",color:"black", marginLeft:"5px"};
+
         return(
             <div id="PieChart" className="visualization" style={size} ref={node => this.domElement = node}>
-                <p style={{margin:0}}>Table for {this.props.entities.map(e=>(<span key={e}>{e}</span>))} {this.props.height}</p>
-                <svg style={{width:chartDimensions.width+'px', height:(chartDimensions.height+'px')}}>
+                <p style={{margin:0}}>Select the attribute used for the sectors : {this.props.entities.map(e=>(
+                    <span key={e} onClick={()=>this.selectAttribute(e)} className="option" style={style(e)}> {e} </span>
+                ))}</p>
+                <svg style={{width:size.width, height:(chartDimensions.height+'px')}}>
                     <g>
                         <circle 
                             cx={chartDimensions.width/2} 
                             cy={chartDimensions.height/2} 
                             r={chartDimensions.radius}
-                            fill="lightgrey">
+                            fill="lightgrey"> 
 
                         </circle>
                         {this.createSectors(chartDimensions)}
+                    </g>
+                    <g transform={`translate(${chartDimensions.width/2 + chartDimensions.radius + 20 },${30})`}>
+                        {(()=>{
+                            const colorScale = d3.scaleOrdinal( d3.schemeSet1);
+                            const legend = d3.entries(this.state.data).map((d,i)=>(
+                                <g transform={`translate(0,${i*15})`} key={d.key}>
+                                    <circle cx="0" cy="0" r="6" fill={colorScale(i)}></circle>
+                                    <text x="5" y="5">{d.key} ( {d.value} )</text>
+                                </g>
+                            ));
+                            return(legend);
+                        })()}
                     </g>
                 </svg>
             </div>
