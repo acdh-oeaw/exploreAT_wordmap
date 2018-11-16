@@ -228,7 +228,7 @@ class EntitySelector extends React.Component{
 
 		const sizeScale = d3.scaleLinear()
 			.domain([0,40000])
-			.range([20,50])
+			.range([25,45])
 			.clamp(true);
 
 		const nodehash = {};
@@ -240,13 +240,13 @@ class EntitySelector extends React.Component{
 			value: d.value
 		}));
 
-		const linkForce = d3.forceLink().distance(120);
+		const linkForce = d3.forceLink().distance(140);
 
 		const simulation = d3.forceSimulation()
-			.force('charge', d3.forceManyBody().strength(-220))
-			.force('center', d3.forceCenter(d3.select('svg').node().getBoundingClientRect().width/2, 250))
+			.force('charge', d3.forceManyBody().strength(-20))
+			.force('center', d3.forceCenter(d3.select('svg').node().getBoundingClientRect().width/2, 200))
 			.force('collide', d3.forceCollide(function(d){
-			    sizeScale(nodehash[d.entity])*3.2
+			    sizeScale(nodehash[d.entity])*4
 			}))
 			.force('link', linkForce)
 			.nodes(this.state.entities)
@@ -356,8 +356,6 @@ class EntitySelector extends React.Component{
 			"/sparql/" + this.props.match.params.sparql+
 			"/entities/" + this.state.triples.reduce((final, actual)=>final+this.wrapper.urlToParam(actual)+",","");
 
-		const pretty_entities = this.state.selected_entities.map(a=>a.split('#')[1]).join(' , ');
-
 	    return (
 	    	<div id="explorer" className="entitySelector">
 	    		<div className="header">
@@ -370,12 +368,12 @@ class EntitySelector extends React.Component{
 		            <span>
 			            Search for specific entities
 			            <input type="text" value={this.state.current_search}/>
-			            <span onClick={()=>alert(this.state.triples)}>Show triples </span>
-		            	Current selected entities : {pretty_entities}</span>
+			            <span onClick={()=>alert(this.state.triples)} style={{cursor:'pointer'}}>Show triples </span>
+		            	</span>
 		          </div>
 		            <NavLink to={url} style={
 			      		(this.state.selected_entities.length>0)?{display:"block"}:{display:"none"}
-			      	} id="link-to-dashboard">Go to dashboard</NavLink>
+			      	} id="link-to-dashboard"> Go to dashboard</NavLink>
 		        </div>
 
 		        <div id="loader" style={({display: this.state.loaded===true?'none':'flex'})}>
@@ -394,15 +392,44 @@ class EntitySelector extends React.Component{
 						  <g ref={node => this.node = node}></g>
 		        		</svg>
 					</div>
-					<div style={({display: (this.state.test_nodes.length>0!="")?'inline-block':'none'})} id="nodes">
+					<div style={({display: this.state.loaded===true?'inline-block':'none'})} id="nodes">
 						<svg style={{height:'100%'}}>
+							<g>
+								<circle r="20" cx="22" cy="42" fill="grey"></circle>
+									<g>
+									<line x1={45} x2={300} y1={42} y2={42} stroke={'grey'}></line>
+									<text fill="grey" x={80} y={35} fontSize={15}>[Name of the relationship]</text>
+									</g>
+								):""}
+								<text x="0" y="15" fill="grey">
+									[Name of the entity]
+								</text>
+								<text transform={`translate(0,95)`} fill="grey"> Atribute 1</text>
+								<text transform={`translate(0,110)`} fill="grey"> Atribute 2</text>
+								<text transform={`translate(0,125)`} fill="grey"> Atribute 3</text>
+
+								{this.state.test_nodes.length==0?
+								<text transform={`translate(0,155)`} fill="grey">Select a node from the graph to start building the query.</text>:
+								(
+									<g>
+									<text transform={`translate(0,155)`} fill="grey">Select attributes from each node to add</text>
+									<text transform={`translate(0,170)`} fill="grey">them to the query or select available </text>
+									<text transform={`translate(0,185)`} fill="grey">edges in the graph to add a new entity</text>
+									<text transform={`translate(0,200)`} fill="grey">to the selection.</text>
+									<text transform={`translate(0,225)`} fill="grey">Attributes in the query appear in green.</text>
+									</g>
+								)}
+								
+							</g>
 							{this.state.test_nodes.map((test_node,position)=>(
-							<g transform={`translate(${position*300},0)`} key={position}>
-								<circle r="20" cx="22" cy="42" fill="lightblue"></circle>
+							<g transform={`translate(${(position+1)*300},0)`} key={position}>
+								<circle r="20" cx="22" cy="42" fill="rgb(102, 180, 58)"></circle>
 								{(position<(this.state.test_nodes.length-1))?(
 									<g>
 									<line x1={45} x2={300} y1={42} y2={42} stroke={'grey'}></line>
-									<text x={80} y={45} fontSize={15} strokeWidth={.5} fontWeight={'bold'} stroke={'white'}>{this.wrapper.nameOfEntity(this.state.active_edges[position])}</text>
+									<text x={80} y={35} fontSize={15} fontWeight={'bold'} fill="rgb(102, 180, 58)">
+										{this.wrapper.nameOfEntity(this.state.active_edges[position])}
+									</text>
 									</g>
 								):""}
 								<text x="0" y="15">

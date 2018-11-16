@@ -142,6 +142,9 @@ div#source_selector{
 div#explorer.entitySelector #link-to-dashboard{
   color:white;
   font-weight: bold;
+  font-size: 1.3em;
+  padding-left: 10px;
+  padding-bottom: 6px;
 }
 
 div#explorer.entitySelector input{
@@ -166,6 +169,10 @@ div#explorer.entitySelector div.content{
 	align-items: center;
 	width: 100%;
 	height: 100%;
+}
+
+div#explorer.entitySelector div.content div#graph{
+  border-bottom: solid cadetblue;
 }
 
 div#explorer.entitySelector div.content div{height: 50%; width: 100%; padding:1em;}
