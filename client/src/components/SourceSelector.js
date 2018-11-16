@@ -66,6 +66,9 @@ class SourceSelector extends React.Component{
 		      	<NavLink to={url} style={
 		      		(this.state.ontology.length>0 && this.state.sparql.length>0 && this.state.prefix.length>0)?{display:"block"}:{display:"none"}
 		      	}>Go</NavLink>
+		      	<NavLink to={url} style={
+		      		(this.state.ontology.length>0 && this.state.sparql.length>0 && this.state.prefix.length>0)?{display:"block"}:{display:"none"}
+		      	}>Use results from last analysis</NavLink>
 	      	</div>
 	    );
 	}
