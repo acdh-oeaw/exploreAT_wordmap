@@ -4,6 +4,7 @@ import * as d3 from 'd3';
 import { sparql } from 'd3-sparql'
 import UrlParamWrapper from '../aux/UrlParamWrapper';
 import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
+import relationships from './relationships_sparql_oldcan.js'
 
 const params = {
 	nodeColor: 'lightgreen',
@@ -71,6 +72,18 @@ class EntitySelector extends React.Component{
 		      } else if (err) throw err
 			});
 		}).then((entities)=>{
+			const curatedEntities = entities.map(e=>({
+      			entity : (e.entity.includes(this.ontology+'#')===false?e.entity:(this.prefix+':'+e.entity.split(this.ontology+'#')[1])),
+      			count : +e.count
+      		}));
+			this.setState({
+        		entities: curatedEntities,
+        		relationships:relationships,
+        		current_state:'Loaded successfuly',
+        		loaded: true
+        	});
+
+			/*
 			sparql(this.api_url, this.sparqlQueries.getEntityRelationships(this.ontology, this.prefix), (err, data) => {
 		      	if (data && !err) {
 
@@ -93,7 +106,7 @@ class EntitySelector extends React.Component{
 		        		loaded: true
 		        	});
 		      } else if (err) throw err
-			});
+			});*/
 		});
 	}
 
