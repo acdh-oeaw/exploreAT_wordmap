@@ -5,6 +5,7 @@ import { sparql } from 'd3-sparql'
 import UrlParamWrapper from '../aux/UrlParamWrapper';
 import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
 import relationships from './relationships_sparql_oldcan.js'
+import EntityForceLayout from './EntityForceLayout.js';
 
 const params = {
 	nodeColor: 'lightgreen',
@@ -59,10 +60,6 @@ class EntitySelector extends React.Component{
 		this.loadData();
 	}
 
-	componentWillUnmount(){
-		this.simulation.stop();
-	}
-
 	loadData(){
 		new Promise((resolve,reject)=>{
 			sparql(this.api_url, this.sparqlQueries.getAvailableEntities(this.ontology, this.prefix), (err, data) => {
@@ -72,17 +69,17 @@ class EntitySelector extends React.Component{
 		      } else if (err) throw err
 			});
 		}).then((entities)=>{
-//			const curatedEntities = entities.map(e=>({
-//      			entity : (e.entity.includes(this.ontology+'#')===false?e.entity:(this.prefix+':'+e.entity.split(this.ontology+'#')[1])),
-//      			count : +e.count
-//      		}));
-//			this.setState({
-//        		entities: curatedEntities,
-//        		relationships:relationships,
-//        		current_state:'Loaded successfuly',
-//        		loaded: true
-//        	});
-
+			const curatedEntities = entities.map(e=>({
+      			entity : (e.entity.includes(this.ontology+'#')===false?e.entity:(this.prefix+':'+e.entity.split(this.ontology+'#')[1])),
+      			count : +e.count
+      		}));
+			this.setState({
+        		entities: curatedEntities,
+        		relationships:relationships,
+        		current_state:'Loaded successfuly',
+        		loaded: true
+        	});
+/*
 			sparql(this.api_url, this.sparqlQueries.getEntityRelationships(this.ontology, this.prefix), (err, data) => {
 		      	if (data && !err) {
 
@@ -106,6 +103,7 @@ class EntitySelector extends React.Component{
 		        	});
 		      } else if (err) throw err
 			});
+*/
 		});
 	}
 
@@ -423,7 +421,23 @@ class EntitySelector extends React.Component{
 		        </div>
 
 		        <div className="content">
-					<div id="graph" width="100%" height="50%">
+                    <EntityForceLayout 
+                         width={'100%'}
+                         height={'50%'}
+                         entities={this.state.entities}
+                         relationships={this.state.relationships}
+                         selectEntity={this.selectNode}
+                         selectRelationship={this.selectRelationship}
+                         active_nodes={this.state.active_nodes}
+                         active_edges={this.state.active_edges}
+                         triples={this.state.triples}
+                         test_nodes={this.state.test_nodes}
+                         prefix={this.prefix}
+                         ontology={this.ontology}
+                         sparql={this.sparql}
+                         dataAvailable={this.state.loaded}
+                    /> 
+					<div id="graph" width="1" height="1" style={{display:'none'}}>
 		        		<svg width="100%" height="50%" ref={node => this.svg = node}>
 		        		  <defs>
 						    <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
