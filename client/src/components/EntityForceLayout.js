@@ -1,7 +1,5 @@
 import React from "react";
-import { BrowserRouter as Route, NavLink } from "react-router-dom";
 import * as d3 from 'd3';
-import { sparql } from 'd3-sparql'
 import UrlParamWrapper from '../aux/UrlParamWrapper';
 import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
 
@@ -96,12 +94,7 @@ class EntityForceLayout extends React.Component{
 	}
 
 	createGraph(){
-        console.log('creando el grafo', this.props)
-		// this.state.relationships
-			// 	source
-			// 	relationship
-			// 	target
-			// 	value
+
 		const rect = this.svg.getBoundingClientRect(),
 	    width = rect.width,
 	    height = rect.height;
