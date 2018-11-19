@@ -46,7 +46,6 @@ class EntityForceLayout extends React.Component{
             this.setState({loaded: true});
         }
 		if(this.state.loaded === true){
-            console.info('updateing highlights',this.props);
             this.updateHighlights(this.props);
         }
 	}
