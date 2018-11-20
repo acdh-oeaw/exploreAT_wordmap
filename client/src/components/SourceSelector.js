@@ -2,6 +2,8 @@ import React from "react";
 import { BrowserRouter as Route, NavLink } from "react-router-dom";
 import UrlParamWrapper from '../aux/UrlParamWrapper';
 
+const xmlparser = require('fast-xml-parser');
+
 /**
  * Explorer
  * Component for the initial exploration screen. Ontology url and prefix, 
@@ -11,47 +13,44 @@ import UrlParamWrapper from '../aux/UrlParamWrapper';
  * @return {React.Component} 
  */
 class SourceSelector extends React.Component{
-	constructor(props){
-		super(props);
-		this.state={
+    constructor(props){
+        super(props);
+        this.state={
             prefix:"oldcan",
             sparql:"http://localhost:3030/oldcan/query",
-			ontology_url:"https://explorations4u.acdh.oeaw.ac.at/ontology/oldcan",
+            ontology_url:"https://explorations4u.acdh.oeaw.ac.at/ontology/oldcan",
             ontology_file:"",
             ontology:"",
             ontology_from_file : true
-		};
+        };
 
-		this.wrapper = new UrlParamWrapper();
-		this.handleOntologyUrlChange = this.handleOntologyUrlChange.bind(this);
-		this.handlePrefixChange = this.handlePrefixChange.bind(this);
-		this.handleSparqlChange = this.handleSparqlChange.bind(this);
+        this.wrapper = new UrlParamWrapper();
+        this.handleOntologyUrlChange = this.handleOntologyUrlChange.bind(this);
+        this.handlePrefixChange = this.handlePrefixChange.bind(this);
+        this.handleSparqlChange = this.handleSparqlChange.bind(this);
         this.parseOntology = this.parseOntology.bind(this);
         this.handleOntologyFileChange = this.handleOntologyFileChange.bind(this);
         this.toggleOntologySource = this.toggleOntologySource.bind(this);
         this.loadFileOntolgy = this.loadFileOntolgy.bind(this);
         this.loadUrlOntology = this.loadUrlOntology.bind(this);
 
-	}
+    }
 
     parseOntology(){
         const ontology_promise = (this.state.ontology_from_file===true)?this.loadFileOntolgy():this.loadUrlOntology();
         ontology_promise.then((ontology=>{
-        
-            const parser=new DOMParser();
-            const r =parser.parseFromString(ontology,"text/xml");
-
-            console.log('ontology ->',r)
-            this.setState({ontology: r.documentElement})
+            const options = {ignoreAttributes:false, attrValueProcessor:attr=>attr, attributeNamePrefix : ""};
+            const ontology_json = xmlparser.parse(ontology,options);
+            console.log('json',ontology_json)
+            
+            this.setState({ontology: ontology_json})
         }));
     }
 
     loadFileOntolgy(){
-        console.log(this.state.ontology_file)
         return(new Promise((resolve, reject)=>{
             const fr = new FileReader()
             fr.onload = function(e) {
-                console.log(e.target)
                 resolve(e.target.result)
             }
 
