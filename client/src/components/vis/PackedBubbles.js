@@ -81,7 +81,7 @@ class PackedBubbles extends React.Component{
             const t = d3.transition().duration(500);
             
             d3.select('.colorLegend').transition(t)
-                .attr("transform", `translate(${this.props.width - 120}, 100)`);
+                .attr("transform", `translate(${this.props.width - 170}, 100)`);
         }
 
     }
@@ -98,7 +98,7 @@ class PackedBubbles extends React.Component{
         
 
         const radiusScale = d3.scaleLinear()
-                        .domain(d3.extent(data, d => d.n))
+                        .domain([0,2])//d3.extent(data, d => d.n))
                         .range([4, 15])
 
         node.append("g")
@@ -133,7 +133,7 @@ class PackedBubbles extends React.Component{
         const tip = d3tip().attr('class', 'd3-tip').html(d => {
             return `<p>Questionnaire ${d.Questionnaire}</p>
                     <p>${d.title}</p>
-                    <p>${d.n} questions</p>
+                    <p>? questions</p>
                     <p>${d.LastName+','+d.FirstName}</p>
                     <p>Published in ${d.publicationYear}</p>`
         })
@@ -146,7 +146,7 @@ class PackedBubbles extends React.Component{
                         .selectAll('circle')
                         .data(data)
                         .enter().append("circle")
-                        .attr("r", d=> radiusScale(d.n))
+                        .attr("r", d=> radiusScale(1))
                         .attr("fill", d=> this.state.colorScale(d[this.optionsMap[colorOption.value]]))
                         .on('mouseover', tip.show)
                         .on('mouseout', tip.hide)

@@ -29,7 +29,7 @@ div#app div.content, div#app div#source_selector{
 }
 
 #footer {
-  flex: 0 1 100px;
+  flex: 0 1 60px;
 }
 
 /* Header ---------------------------------------------------------------------------
@@ -142,6 +142,9 @@ div#source_selector{
 div#explorer.entitySelector #link-to-dashboard{
   color:white;
   font-weight: bold;
+  font-size: 1.3em;
+  padding-left: 10px;
+  padding-bottom: 6px;
 }
 
 div#explorer.entitySelector input{
@@ -161,13 +164,15 @@ div#explorer.entitySelector li.entity{
 
 
 div#explorer.entitySelector div.content{
-	display:flex;
-	flex-direction: row;
-	justify-content: space-between;
-	align-items: flex-start;
 	width: 100%;
 	height: 100%;
 }
+
+div#explorer.entitySelector div.content div#graph{
+  border-bottom: solid cadetblue;
+}
+
+div#explorer.entitySelector div.content div{height: 50%; width: 100%; padding:1em;}
 
 div#explorer.entitySelector .tooltip{
 	width:100%;
@@ -181,38 +186,108 @@ div#explorer.entitySelector .tooltip p{
 	display:inline-block;
 }
 
-div#explorer.entitySelector div#current_entity{
-  height: 100%;
-	width: 500px;
-	padding-left: 20px;
-	background-color: lightcyan;
-
+div#explorer.entitySelector svg{
+  height:100%;
+  width:100%;
 }
 
-div#explorer.entitySelector div#current_entity li{cursor: pointer;}
+div#explorer div.content div#nodes svg{height:180%;}
 
-div#explorer.entitySelector div#current_entity li:hover{text-decoration: underline;}
-
-div#explorer.entitySelector div#current_entity h3{
-	font-size: 1.5em;
+div#explorer div.content div#nodes{
+  overflow-y: scroll;
 }
 
-div#explorer.entitySelector div#graph, div#explorer.entitySelector svg{
-	height:100%;
+
+line.link {
+    stroke: black;
+    stroke-opacity: .5;
 }
+line.link.active {
+    stroke-opacity: .9;
+    stroke: rgb(102, 180, 58);
+}
+line.link.selected {
+    stroke-opacity: .9;
+  stroke: rgb(102, 180, 58);
+}
+line.link:hover{
+    stroke-opacity: .9;
+    cursor: pointer;
+}
+
+.node circle {
+    fill: rgb(198, 233, 140);
+}
+.node.active circle {
+    fill: rgb(102, 180, 58);
+}
+.node circle:hover {
+    fill: rgb(102, 180, 58);
+    cursor: pointer;
+}
+.node.selected circle, .node.active.selected circle {
+  fill: red;
+}
+
+.node-count {
+    font-weight: 700;
+    opacity: .3;
+    pointer-events: none;
+}
+.node-name {
+    font-weight: 700;
+    pointer-events: none;
+    text-transform: capitalize;
+}
+.link-name {
+    font-weight: 700;
+    pointer-events: none;
+}
+
+g.entity text.attribute{
+  cursor: pointer;
+  opacity: 0.5;
+}
+
+g.entity text.attribute:hover{
+  opacity: 1;
+}
+
+g.entity text.attribute-selected {
+  opacity: 1;
+  font-weight: 700;
+  fill:rgb(102, 180, 58);
+}
+
 
 /* Explorer ---------------------------------------------------------------------------
  * https://projects.lukehaas.me/css-loaders/
 */
 div#explorer, div#explorer div.content{
-	height: 100%;
+  height: 100%;
 }
 
 div#explorer div.content{
-	min-height: 100%;
+  min-height: 100%;
 }
 
-/* Loader 
+
+div#explorer div.content div#nodes text{
+  font-size: 0.85em;
+}
+
+div#explorer div.content text#resetQueryButton{
+  fill:indianred;
+  stroke:indianred;
+  cursor:pointer;
+}
+
+div#explorer div.content text#resetQueryButton:hover{
+  fill:crimson;
+  stroke:crimson;
+}
+
+/* Loader
 */
 div#loader{
 	display: flex;
@@ -304,7 +379,7 @@ button.button:hover{
 	height: 1em;
 	margin: 0;
 	font-weight: bold;
-	box-shadow: inset 0 0 5px 0px grey; 
+	box-shadow: inset 0 0 5px 0px grey;
 }
 
 /* Table -----------------------------------------------------------------------------
@@ -330,15 +405,18 @@ div#PackedBubbles svg {
     margin: 0;
 }
 
-div#PackedBubbles #top-container { 
-	display:flex;
+div#PackedBubbles #top-container {
+	/* display:flex;*/
 	flex-direction: row;
 	align-items: center;
 	justify-content: space-between;
+    display: table;
+    width: 100%;
+    text-align: center;
 }
 
 div#PackedBubbles #top-container div{
-	display: inline-block;
+	/* display: inline-block; */
 }
 
 
@@ -350,19 +428,53 @@ div#PackedBubbles .selector {
 
 
 div#PackedBubbles .react-search-field {
-    max-width: 220px;
-    display: block;
-    margin: 0;
+    border: 1px solid rgb(221, 221, 221);
+    display: inline-flex;
+    justify-content: space-between;
+    height: 35px !important;
+    width: 80%;
 }
 
-div#PackedBubbles #container { 
+div#PackedBubbles .react-search-field-input {
+    max-width: 200px;
+}
+
+div#PackedBubbles #color-select, div#PackedBubbles #cluster-select {
+    display: table-cell;
+    width: 30%;
+    padding: 20px;
+    margin: 0 auto;
+}
+
+div#PackedBubbles #color-select > div:first-of-type {
+    margin-top: 10px;
+    max-height: 20px;
+}
+div#PackedBubbles #color-select > div:first-of-type > div:first-of-type {
+    max-height: 20px;
+}
+
+div#PackedBubbles #cluster-select > div:first-of-type {
+    margin-top: 10px;
+    max-height: 20px;
+}
+div#PackedBubbles #cluster-select > div:first-of-type > div:first-of-type {
+    max-height: 20px;
+}
+
+div#PackedBubbles #color-select > div:nth-child(3), div#PackedBubbles #cluster-select div:nth-child(3) {
+    margin-top: 0px!important;
+    padding-top: 0px!important;
+}
+
+div#PackedBubbles #container {
     text-align: center;
 }
 
 /* Style the footer */
 div#PackedBubbles .footer {
     background-color: #f1f1f1;
-    padding: 10px;
+    padding: 5px;
     text-align: center;
 }
 
