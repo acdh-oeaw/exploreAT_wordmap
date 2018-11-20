@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter as Route, NavLink } from "react-router-dom";
+import * as d3 from 'd3';
 import UrlParamWrapper from '../aux/UrlParamWrapper';
 
 const xmlparser = require('fast-xml-parser');
@@ -40,8 +41,33 @@ class SourceSelector extends React.Component{
         const ontology_promise = (this.state.ontology_from_file===true)?this.loadFileOntolgy():this.loadUrlOntology();
         ontology_promise.then((ontology=>{
             const options = {ignoreAttributes:false, attrValueProcessor:attr=>attr, attributeNamePrefix : ""};
-            const ontology_json = xmlparser.parse(ontology,options);
-            console.log('json',ontology_json)
+            const ontology_json = xmlparser.parse(ontology,options)['rdf:RDF'];
+            const claves = d3.keys(ontology_json).filter(d=>!d.includes('xmlns'))
+            
+            const ontology_base = ontology_json['xml:base']?ontology_json['xml:base']:"";
+
+            let clases = claves.includes('rdfs:Class')?ontology_json['rdfs:Class']:[]
+            clases.push(...claves.includes('owl:Class')?ontology_json['owl:Class']:[]);
+
+            clases = clases.map(d=>{
+                let entry = {};
+                const attributes = d3.keys(d);
+                
+                entry.name = (!d['rdf:about'].includes(ontology_base)?
+                    d['rdf:about']:
+                    `${this.state.prefix}:${d['rdf:about'].split('#')[1]}`);
+
+                if(attributes.includes('rdfs:comment'))
+                    entry.description = d['rdfs:comment'];
+                
+                if(attributes.includes('rdfs:subClassOf'))
+                    entry.herency = d['rdfs:subClassOf'];
+
+                return(entry);
+            });
+
+
+            console.log(`Atributos de primer nivel para ${ontology_json['xml:base']} > `, clases)
             
             this.setState({ontology: ontology_json})
         }));
