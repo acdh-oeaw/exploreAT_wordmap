@@ -5,6 +5,8 @@ import { sparql } from 'd3-sparql'
 import UrlParamWrapper from '../aux/UrlParamWrapper';
 import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
 import relationships from './relationships_sparql_oldcan.js'
+import EntityForceLayout from './EntityForceLayout.js';
+import SparqlQueryCreator from './SparqlQueryCreator.js';
 
 const params = {
 	nodeColor: 'lightgreen',
@@ -46,7 +48,6 @@ class EntitySelector extends React.Component{
 		this.attributeToQuery = this.attributeToQuery.bind(this);
 		this.selectNode = this.selectNode.bind(this);
 		this.selectRelationship = this.selectRelationship.bind(this);
-		this.updateHighlights = this.updateHighlights.bind(this);
 		this.resetQuery = this.resetQuery.bind(this);
 
 		// Url query param based parameters
@@ -59,10 +60,6 @@ class EntitySelector extends React.Component{
 		this.loadData();
 	}
 
-	componentWillUnmount(){
-		this.simulation.stop();
-	}
-
 	loadData(){
 		new Promise((resolve,reject)=>{
 			sparql(this.api_url, this.sparqlQueries.getAvailableEntities(this.ontology, this.prefix), (err, data) => {
@@ -72,17 +69,17 @@ class EntitySelector extends React.Component{
 		      } else if (err) throw err
 			});
 		}).then((entities)=>{
-//			const curatedEntities = entities.map(e=>({
-//      			entity : (e.entity.includes(this.ontology+'#')===false?e.entity:(this.prefix+':'+e.entity.split(this.ontology+'#')[1])),
-//      			count : +e.count
-//      		}));
-//			this.setState({
-//        		entities: curatedEntities,
-//        		relationships:relationships,
-//        		current_state:'Loaded successfuly',
-//        		loaded: true
-//        	});
-
+			const curatedEntities = entities.map(e=>({
+      			entity : (e.entity.includes(this.ontology+'#')===false?e.entity:(this.prefix+':'+e.entity.split(this.ontology+'#')[1])),
+      			count : +e.count
+      		}));
+			this.setState({
+        		entities: curatedEntities,
+        		relationships:relationships,
+        		current_state:'Loaded successfuly',
+        		loaded: true
+        	});
+/*
 			sparql(this.api_url, this.sparqlQueries.getEntityRelationships(this.ontology, this.prefix), (err, data) => {
 		      	if (data && !err) {
 
@@ -106,13 +103,11 @@ class EntitySelector extends React.Component{
 		        	});
 		      } else if (err) throw err
 			});
+*/
 		});
 	}
 
 	componentDidUpdate(prevProps, prevState, snapshot){
-		if(prevState.loaded === false && this.state.loaded === true){
-			this.createGraph();
-		}
 	}
 
 	attributeToQuery(attribute, origin){
@@ -149,7 +144,6 @@ class EntitySelector extends React.Component{
 		        	this.setState(prevState=>{
 		        			prevState.test_nodes.push({	name: entity, attributes: data});
 		        			prevState.active_nodes.push(entity)
-		        			this.updateHighlights(prevState);
 		        			return(prevState);
 		        	});
 		      	} else if (err) throw err
@@ -169,7 +163,6 @@ class EntitySelector extends React.Component{
 		        			prevState.selected_entities.push(relationship.relationship)
 		        			prevState.active_edges.push(relationship.relationship);
 		        			prevState.active_nodes.push(query.target);
-		        			this.updateHighlights(prevState);
 		        			return(prevState);
 		        	});
 		      	} else if (err) throw err
@@ -231,163 +224,8 @@ class EntitySelector extends React.Component{
 			prevState.active_nodes= [];
 			prevState.active_edges= [];
 			prevState.test_nodes= [];
-			this.updateHighlights(prevState);
 			return(prevState);
 		});
-	}
-
-	updateHighlights(newState){
-		const links = d3.select(this.node).selectAll("line.link");
-		links.style('stroke', d=>{
-			const query = this.attributeToQuery(d.relationship, d.source.entity);
-			//console.log(d, query, newState.active_nodes[newState.active_nodes.length-1])
-			if(d.source.entity == newState.active_nodes[newState.active_nodes.length-1]){
-				return('blue')
-			}
-			if(newState.triples.includes(query.sparql_triple))
-				return('rgb(102, 180, 58)')
-			return('black');
-		});
-		const nodes = d3.select(this.node).selectAll('g.node circle').style('fill',d=>{
-			if(newState.test_nodes.map(t=>t.name).includes(d.entity))
-				return('rgb(102, 180, 58)')
-			return('rgb(198, 233, 140)')
-		})
-	}
-
-	createGraph(){
-		// this.state.relationships
-			// 	source
-			// 	relationship
-			// 	target
-			// 	value
-		const rect = this.svg.getBoundingClientRect(),
-	    width = rect.width,
-	    height = rect.height;
-
-		const sizeScale = d3.scaleLinear()
-			.domain([0,40000])
-			.range([25,45])
-			.clamp(true);
-
-		const nodehash = {};
-		this.state.entities.map(e=>{nodehash[e.entity] = e});
-		const edges = this.state.relationships.map(d=>({
-			source : nodehash[d.source],
-			target : nodehash[d.target],
-			relationship : d.relationship,
-			value: d.value
-		}));
-
-		const linkForce = d3.forceLink().distance(140);
-
-		const simulation = d3.forceSimulation()
-			.force('charge', d3.forceManyBody().strength(-300))
-			.force('center', d3.forceCenter(d3.select('svg').node().getBoundingClientRect().width/2, 200))
-			.force('collide', d3.forceCollide(function(d){
-			    sizeScale(nodehash[d.entity])*4
-			}))
-			.force('link', linkForce)
-			.nodes(this.state.entities)
-			.on('tick', forceTick);
-
-		simulation.force("link").links(edges);
-
-		this.simulation = simulation;
-
-		const edgeEnter = d3.select(this.node).selectAll("line.link")
-			.data(edges, d => `${d.source.entity}-${d.target.entity}`)
-			.enter()
-			.append("line") //.attr("marker-end","url(#arrow)")
-			.attr("class", "link")
-			.on("click",(d)=>{
-				this.selectRelationship(d);
-			})
-			//.style("stroke-opacity", .5)
-			//.attr('stroke', params.edgeColor)
-			.style("stroke-width", d => d.value)
-			.append("title")
-      			.text(d=>this.wrapper.nameOfEntity(d.relationship));
-
-		const nodeEnter = d3.select(this.node).selectAll('g.node')
-			.data(this.state.entities)
-			.enter()
-			.append('g')
-			.attr('class', 'node')
-			.attr('id', d=>this.wrapper.nameOfEntity(d.entity))
-			.on("click",(d)=>{
-				this.selectNode(d.entity)
-			})
-			.call(d3.drag()
-            .on("start",dragstarted)
-            .on("drag",dragged)
-            .on("end",dragended));
-
-		nodeEnter.append('circle')
-			.attr('r', e=>sizeScale(e.count))
-			//.style('fill', params.nodeColor);
-		nodeEnter.append('text')
-			.style("text-anchor", "middle")
-			.attr("y", 25)
-			.attr("class","node-name")
-			.text(d => this.wrapper.nameOfEntity(d.entity));
-		nodeEnter.append('text')
-			.style("text-anchor", "middle")
-			.attr("y", 0)
-			.attr("class","node-count")
-			.text(d => d.count);
-		nodeEnter.append("title")
-      		.text(d=>`${d.count} diferent entries`);
-
-		function forceTick() {
-			const rect = d3.select('svg').node().getBoundingClientRect(),
-		    width = rect.width,
-		    height = rect.height;
-
-		    /*
-			d3.selectAll("line.link")
-				.attr("x1", d => d.source.x)
-				.attr("x2", d => d.target.x)
-				.attr("y1", d => d.source.y)
-				.attr("y2", d => d.target.y);*/
-
-			d3.selectAll("line.link")
-				.attr("x1", d => Math.max(30, Math.min(width-30, d.source.x)))
-				.attr("x2", d => Math.max(30, Math.min(width-30, d.target.x)))
-				.attr("y1", d => Math.max(30, Math.min(height-30, d.source.y)))
-				.attr("y2", d => Math.max(30, Math.min(height-30, d.target.y)))
-
-			d3.selectAll("g.node")
-				.attr("transform", d => "translate("+
-					Math.max(sizeScale(d.count), Math.min(width - sizeScale(d.count), d.x))+
-					","+
-					Math.max(sizeScale(d.count), Math.min(height - sizeScale(d.count), d.y))+")");
-		}
-
-		function dragstarted(d)
-		{
-			simulation.restart();
-			simulation.alpha(1.0);
-			d.fx = d.x;
-			d.fy = d.y;
-		}
-
-		function dragged(d)
-		{
-			d.fx = d3.event.x;
-			d.fy = d3.event.y;
-		}
-
-		function dragended(d)
-		{
-			d.fx = null;
-			d.fy = null;
-			simulation.alphaTarget(0.1);
-		}
-	}
-
-	renderContent(){
-
 	}
 
 	render() {
@@ -423,80 +261,29 @@ class EntitySelector extends React.Component{
 		        </div>
 
 		        <div className="content">
-					<div id="graph" width="100%" height="50%">
-		        		<svg width="100%" height="50%" ref={node => this.svg = node}>
-		        		  <defs>
-						    <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
-						      <path d="M0,0 L0,6 L9,3 z" fill="#f00" />
-						    </marker>
-						  </defs>
-						  <g ref={node => this.node = node}></g>
-		        		</svg>
-					</div>
-					<div style={({display: this.state.loaded===true?'inline-block':'none'})} id="nodes">
-						<svg>
-							<g>
-								<circle r="20" cx="22" cy="42" fill="grey"></circle>
-									<g>
-									<line x1={45} x2={300} y1={42} y2={42} stroke={'grey'}></line>
-									<text fill="grey" x={80} y={35} fontSize={15}>[Name of the relationship]</text>
-									</g>
-								):""}
-								<text x="0" y="15" fill="grey">
-									[Name of the entity]
-								</text>
-								<text transform={`translate(0,95)`} fill="grey"> Atribute 1</text>
-								<text transform={`translate(0,110)`} fill="grey"> Atribute 2</text>
-								<text transform={`translate(0,125)`} fill="grey"> Atribute 3</text>
-
-								{this.state.test_nodes.length==0?
-								<text transform={`translate(0,155)`} fill="grey">Select a node from the graph to start building the query.</text>:
-								(
-									<g>
-									<text transform={`translate(0,155)`} fill="grey">Select attributes from each node to add</text>
-									<text transform={`translate(0,170)`} fill="grey">them to the query or select available </text>
-									<text transform={`translate(0,185)`} fill="grey">edges in the graph to add a new entity</text>
-									<text transform={`translate(0,200)`} fill="grey">to the selection.</text>
-									<text transform={`translate(0,225)`} fill="grey">Attributes in the query appear in green.</text>
-									</g>
-								)}
-								
-							</g>
-							{this.state.test_nodes.map((test_node,position)=>(
-							<g transform={`translate(${(position+1)*300},0)`} key={position} className="entity">
-								<circle r="20" cx="22" cy="42" fill="rgb(102, 180, 58)"></circle>
-								{(position<(this.state.test_nodes.length-1))?(
-									<g>
-									<line x1={45} x2={300} y1={42} y2={42} stroke={'grey'}></line>
-									<text x={80} y={35} fontSize={15} fontWeight={'bold'} fill="rgb(102, 180, 58)">
-										{this.wrapper.nameOfEntity(this.state.active_edges[position])}
-									</text>
-									</g>
-								):""}
-								<text x="0" y="15">
-									{this.wrapper.nameOfEntity(test_node.name)}
-								</text>
-								{test_node.attributes.map((e,i)=>(
-									<text 
-										key={e.attribute} 
-										class="attribute" 
-										id={`${this.wrapper.nameOfEntity(test_node.name)}${this.wrapper.nameOfEntity(e.attribute)}`}
-										onClick={()=>{
-											this.selectAttribute(e.attribute, test_node.name);
-										}}
-										transform={`translate(0,${i*18 + 80})`}>
-										{this.wrapper.nameOfEntity(e.attribute)}
-									</text>))
-								}
-							</g>
-							))}
-							<g 
-								transform={`translate(${d3.select('body').node().getBoundingClientRect().width - 160},100)`} 
-								style={({display: this.state.test_nodes.length>0?'inherit':'none'})}>
-								<text id="resetQueryButton" onClick={()=>this.resetQuery()}>reset the query</text>
-							</g>
-						</svg>
-					</div>
+                    <EntityForceLayout 
+                         width={'100%'}
+                         height={'50%'}
+                         entities={this.state.entities}
+                         relationships={this.state.relationships}
+                         selectEntity={this.selectNode}
+                         selectRelationship={this.selectRelationship}
+                         active_nodes={this.state.active_nodes}
+                         active_edges={this.state.active_edges}
+                         triples={this.state.triples}
+                         test_nodes={this.state.test_nodes}
+                         prefix={this.prefix}
+                         ontology={this.ontology}
+                         sparql={this.sparql}
+                         dataAvailable={this.state.loaded}
+                    /> 
+                    <SparqlQueryCreator 
+                          test_nodes={this.state.test_nodes}
+                          active_edges={this.state.active_edges}
+                          selectAttribute={this.selectAttribute}
+                          resetQuery={this.resetQuery}
+                          loaded={this.state.loaded}
+                    />
 		        </div>
 		    </div>
 	    );
