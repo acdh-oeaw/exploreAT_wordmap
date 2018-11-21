@@ -137,6 +137,19 @@ div#source_selector{
 	justify-content: center;
 }
 
+/* Sources ---------------------------------------------------------------------------
+*/
+
+div#source_selector label#extra-label{
+  display: block;
+  margin-bottom: 17px;
+}
+
+div#source_selector span.toggleSource{
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 /* Entities ---------------------------------------------------------------------------
 */
 div#explorer.entitySelector #link-to-dashboard{

@@ -105,20 +105,20 @@ class SourceSelector extends React.Component{
 	    return (
 	    	<div id="source_selector">
 		      	<form>
-                    <span style={{display:this.state.ontology_from_file===true?'inherit':'none'}}>
-                        <label>
-                          Ontology file:
-                          <input id="uploadInput" type="file" name="myFiles" onChange={this.handleOntologyFileChange}/>
+                    <span style={{display:this.state.ontology_from_file===true?'inherit':'none', marginBottom:'29px'}}>
+                        <label id="extra-label">
+                          Ontology file <span className="toggleSource" onClick={()=>this.toggleOntologySource()}>(or load from url)</span> :
                         </label>
-                        <p onClick={()=>this.toggleOntologySource()}>Load from url</p>
+                        <label>
+                          <input id="uploadInput" type="file" name="myFiles" onInput={this.handleOntologyFileChange}/>
+                        </label>
                     </span>
 
                     <span style={{display:this.state.ontology_from_file===false?'inherit':'none'}}>
                         <label>
-                          Url to ontology:
+                          Url to ontology <span className="toggleSource" onClick={()=>this.toggleOntologySource()}>(or load from local file)</span> :<br/>
                           <input type="text" value={this.state.ontology_url} onChange={this.handleOntologyUrlChange} />
                         </label>
-                        <p onClick={()=>this.toggleOntologySource()}>Load from file</p>
                     </span>
                     
 			        <label>
