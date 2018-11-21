@@ -18,6 +18,8 @@ import * as d3 from 'd3';
 function parseOntologyJson(json){
     const shorttenUriWithPrefix = (uri,base,prefix)=>(!uri.includes(base)?uri:`${prefix}:${uri.split('#')[1]}`);
     const ontology_parsed = {};
+    if(d3.keys(json).length == 1)
+        json = json[d3.keys(json)[0]];
 
     // Prefixes for external referenced ontologies
     ontology_parsed.prefixes = d3.entries(json)
@@ -31,8 +33,11 @@ function parseOntologyJson(json){
     ontology_parsed.ontology_prefix = base_fields.length > 0?base_fields[base_fields.length-1]:"not_defined";
 
     // Entity and inheritance extraction
-    const classes = ontology_parsed.fields.includes('rdfs:Class')?json['rdfs:Class']:[]
-    classes.push(...ontology_parsed.fields.includes('owl:Class')?json['owl:Class']:[]);
+    const classes = [];
+    if(ontology_parsed.fields.includes('rdfs:Class'))
+        classes.push(...json['rdfs:Class'].length==undefined?[json['rdfs:Class']]:json['rdfs:Class'])
+    if(ontology_parsed.fields.includes('owl:Class'))
+        classes.push(...json['owl:Class'].length==undefined?[json['owl:Class']]:json['owl:Class'])
 
     ontology_parsed.entities = [];
     ontology_parsed.relationships = [];
@@ -74,7 +79,6 @@ function parseOntologyJson(json){
         }
 
     });
-
     // Attribute extraction
     // En owl DatatypeProperty define los tipos de datos que estarán accesibles en la
     // ontología. rdf:about tiene el nombre del atributo, si existe un rdfs:domain, entonces
@@ -91,26 +95,67 @@ function parseOntologyJson(json){
                 if(attr['rdfs:domain']){
                     const domain = attr['rdfs:domain'].length == undefined?[attr['rdfs:domain']]:attr['rdfs:domain'];
                     domain.map(d=>{
-                        entry.source = shorttenUriWithPrefix(
-                                d['rdf:resource'], 
-                                ontology_parsed.ontology_base, 
-                                ontology_parsed.ontology_prefix);
-                        
-                        ontology_parsed.attributes.push(entry)
+                        if(d['rdf:resource']){
+                            entry.source = shorttenUriWithPrefix(
+                                    d['rdf:resource'], 
+                                    ontology_parsed.ontology_base, 
+                                    ontology_parsed.ontology_prefix);
+                            
+                            ontology_parsed.attributes.push(entry)
+                        }
                     });
                 }else
                     ontology_parsed['non_classified_attributes'].push(entry)
             }
         });
     }
-/*
+
     // En owl 
     if(ontology_parsed.fields.includes('owl:ObjectProperty')){
-        ontology_parsed['owl:ObjectProperty'].map(attr=>{
-            
+        json['owl:ObjectProperty'].map(attr=>{
+            if(attr['rdf:about']){
+                const entry = {
+                    relationship: shorttenUriWithPrefix(
+                            attr['rdf:about'], 
+                            ontology_parsed.ontology_base, 
+                            ontology_parsed.ontology_prefix),
+                    value:2
+                }; 
+                if(attr['rdfs:domain'] && attr['rdfs:range']){
+                    const domain = attr['rdfs:domain'].length == undefined?[attr['rdfs:domain']]:attr['rdfs:domain'];
+                    const range  = attr['rdfs:range'].length == undefined?[attr['rdfs:range']]:attr['rdfs:range'];
+
+                    let combinations = [];
+
+                    if(domain.length > range.length)
+                        domain.map(dm=>range.map(rn=>{
+                            combinations.push({domain:dm, range:rn})
+                        }));
+                    else
+                        range.map(rn=>domain.map(dm=>{
+                            combinations.push({domain:dm, range:rn})
+                        }));
+
+                    combinations.map(combination=>{
+                        if(combination.domain['rdf:resource'] && combination.range['rdf:resource']){
+                            entry.source = shorttenUriWithPrefix(
+                                combination.domain['rdf:resource'], 
+                                ontology_parsed.ontology_base, 
+                                ontology_parsed.ontology_prefix);
+
+                            entry.target = shorttenUriWithPrefix(
+                                combination.range['rdf:resource'], 
+                                ontology_parsed.ontology_base, 
+                                ontology_parsed.ontology_prefix)
+                            
+                            ontology_parsed.relationships.push(entry)
+                        }
+                    });
+                }
+            }
         });
     }
-
+    /*
     // En rdf Property define todas las propiedades que las entidades tienen. Bien attributos o 
     // relaciones entre entidades definidas en la ontología. Para todas las entradas existen los
     // campos rdf:about con el nombre. Si incluye un campo rdfs:domain entonces podemos asignarle 
@@ -124,8 +169,7 @@ function parseOntologyJson(json){
 
     console.log(json)
 
-    // */console.log('parsed', ontology_parsed)
-
+    // */
     return(ontology_parsed)
 }
 

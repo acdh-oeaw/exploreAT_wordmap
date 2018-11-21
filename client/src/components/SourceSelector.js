@@ -42,11 +42,11 @@ class SourceSelector extends React.Component{
         const ontology_promise = (this.state.ontology_from_file===true)?this.loadFileOntolgy():this.loadUrlOntology();
         ontology_promise.then((ontology_raw=>{
             const options = {ignoreAttributes:false, attrValueProcessor:attr=>attr, attributeNamePrefix : ""};
-            const ontology_json = xmlparser.parse(ontology_raw,options)['rdf:RDF'];
+            const ontology_json = xmlparser.parse(ontology_raw,options);
             const ontology_parsed = parseOntologyJson(ontology_json)
 
 
-            //console.log(`Atributos de primer nivel para ${ontology_json['xml:base']} > `, ontology_json)
+            console.log(`Datos recuperados para ${ontology_parsed.ontology_base} > `, ontology_parsed)
             
             this.setState({ontology: ontology_json})
         }));
