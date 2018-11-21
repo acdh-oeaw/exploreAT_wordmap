@@ -79,6 +79,7 @@ function parseOntologyJson(json){
         }
 
     });
+
     // Attribute extraction
     // En owl DatatypeProperty define los tipos de datos que estarán accesibles en la
     // ontología. rdf:about tiene el nombre del atributo, si existe un rdfs:domain, entonces
@@ -119,22 +120,16 @@ function parseOntologyJson(json){
                             attr['rdf:about'], 
                             ontology_parsed.ontology_base, 
                             ontology_parsed.ontology_prefix),
-                    value:2
+                    value: 2
                 }; 
                 if(attr['rdfs:domain'] && attr['rdfs:range']){
                     const domain = attr['rdfs:domain'].length == undefined?[attr['rdfs:domain']]:attr['rdfs:domain'];
                     const range  = attr['rdfs:range'].length == undefined?[attr['rdfs:range']]:attr['rdfs:range'];
 
                     let combinations = [];
-
-                    if(domain.length > range.length)
-                        domain.map(dm=>range.map(rn=>{
-                            combinations.push({domain:dm, range:rn})
-                        }));
-                    else
-                        range.map(rn=>domain.map(dm=>{
-                            combinations.push({domain:dm, range:rn})
-                        }));
+                    domain.map(dm=>range.map(rn=>{
+                        combinations.push({domain:dm, range:rn})
+                    }));
 
                     combinations.map(combination=>{
                         if(combination.domain['rdf:resource'] && combination.range['rdf:resource']){
@@ -155,21 +150,62 @@ function parseOntologyJson(json){
             }
         });
     }
-    /*
+
+    
     // En rdf Property define todas las propiedades que las entidades tienen. Bien attributos o 
     // relaciones entre entidades definidas en la ontología. Para todas las entradas existen los
     // campos rdf:about con el nombre. Si incluye un campo rdfs:domain entonces podemos asignarle 
     // el atributo a una entidad en concreto; si tiene el atributo rdfs:range y el rdf:resource no
     // es una entidad entonces es un atributo y si no, una relación
     if(ontology_parsed.fields.includes('rdf:Property')){
-        ontology_parsed['rdf:Property'].map(attr=>{
-            
+        const entity_names = ontology_parsed.entities.map(d=>d.name);
+
+        json['rdf:Property'].map(attr=>{
+            if(attr['rdf:about'] && attr['rdfs:domain']){
+                const domain = attr['rdfs:domain'].length == undefined?[attr['rdfs:domain']]:attr['rdfs:domain'];
+                
+                domain.map(d=>{
+                    if(d['rdf:resource']){
+                        const entry = {source : shorttenUriWithPrefix(
+                                d['rdf:resource'], 
+                                ontology_parsed.ontology_base, 
+                                ontology_parsed.ontology_prefix)};
+
+                        const name = shorttenUriWithPrefix(
+                                attr['rdf:about'], 
+                                ontology_parsed.ontology_base, 
+                                ontology_parsed.ontology_prefix);
+                        
+                        if(attr['rdfs:range']){
+                            const range = attr['rdfs:range'].length == undefined?[attr['rdfs:range']]:attr['rdfs:range'];
+                            
+                            range.map(r=>{
+                                const r_name = shorttenUriWithPrefix(
+                                d['rdf:resource'], 
+                                ontology_parsed.ontology_base, 
+                                ontology_parsed.ontology_prefix);
+
+                                if(entity_names.includes(r_name)){
+                                    entry.relationship = name;
+                                    entry.target = r_name;
+                                    ontology_parsed.relationships.push(entry)
+                                }else{
+                                    entry.attr = name;
+                                    ontology_parsed.attributes.push(entry)
+                                }
+                                
+                            })
+                        }else{
+                            entry.attr = name;
+                            ontology_parsed.attributes.push(entry)
+                        }
+                    }
+                });
+            }
         });
     }
 
-    console.log(json)
-
-    // */
+    console.log(ontology_parsed)
     return(ontology_parsed)
 }
 

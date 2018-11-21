@@ -46,7 +46,7 @@ class SourceSelector extends React.Component{
             const ontology_parsed = parseOntologyJson(ontology_json)
 
 
-            console.log(`Datos recuperados para ${ontology_parsed.ontology_base} > `, ontology_parsed)
+            //console.log(`Datos recuperados para ${ontology_parsed.ontology_base} > `, ontology_parsed)
             
             this.setState({ontology: ontology_json})
         }));
