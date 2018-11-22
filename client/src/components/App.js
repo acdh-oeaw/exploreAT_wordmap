@@ -26,7 +26,7 @@ const App = (props) => {
             </div>
             <div id="links">
               <NavLink to="/">Home</NavLink>
-              <NavLink to="/sources">Explorer</NavLink>
+              <NavLink to="/entities">Explorer</NavLink>
             </div>
           </div>
         </div>
@@ -34,10 +34,8 @@ const App = (props) => {
         <div className="content">
           <Switch>
             <Route exact path="/" component={Home}/>
-            <Route exact path="/sources" component={SourceSelector}/>
-            <Route exact path="/explorer/ontology/:ontology/prefix/:prefix/sparql/:sparql" component={EntitySelector}/>
-            <Route exact path="/explorer/ontology/:ontology/prefix/:prefix/sparql/:sparql/entities" component={EntitySelector}/>
-            <Route exact path="/explorer/ontology/:ontology/prefix/:prefix/sparql/:sparql/entities/:entities" component={Explorer}/>
+            <Route exact path="/entities/" component={EntitySelector}/>
+            <Route exact path="/explorer/sparql/:sparql/prefixes/:prefixes/entities/:entities" component={Explorer}/>
             <Route component={Home}/>
           </Switch>
         </div>

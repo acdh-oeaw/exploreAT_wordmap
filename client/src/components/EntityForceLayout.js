@@ -33,16 +33,14 @@ class EntityForceLayout extends React.Component{
 	}
 
 	componentDidMount(){
+		this.createGraph();
+        this.setState({loaded: true});
 	}
 
 	componentWillUnmount(){
 		this.simulation.stop();
 	}
 	componentDidUpdate(prevProps, prevState, snapshot){
-        if(prevProps.dataAvailable === false && this.props.dataAvailable === true){
-            this.createGraph();
-            this.setState({loaded: true});
-        }
 		if(this.state.loaded === true){
             this.updateHighlights(this.props);
         }
@@ -94,7 +92,6 @@ class EntityForceLayout extends React.Component{
 	}
 
 	createGraph(){
-
 		const rect = this.svg.getBoundingClientRect(),
 	    width = rect.width,
 	    height = rect.height;
@@ -106,25 +103,31 @@ class EntityForceLayout extends React.Component{
 
 		const nodehash = {};
 		this.props.entities.map(e=>{nodehash[e.entity] = e});
-		const edges = this.props.relationships.map(d=>({
-			source : nodehash[d.source],
-			target : nodehash[d.target],
-			relationship : d.relationship,
-			value: d.value
-		}));
+		const edges = [];
+		this.props.relationships.map(d=>{
+			if(nodehash[d.source] && nodehash[d.target])
+				edges.push({
+					source : nodehash[d.source],
+					target : nodehash[d.target],
+					relationship : d.relationship,
+					value: d.value
+				});
+			}
+		);
 
-		const linkForce = d3.forceLink().distance(140);
+
+		const linkForce = d3.forceLink().distance(120);
 
 		const simulation = d3.forceSimulation()
-			.force('charge', d3.forceManyBody().strength(-300))
-			.force('center', d3.forceCenter(d3.select('svg').node().getBoundingClientRect().width/2, 200))
+			.force('charge', d3.forceManyBody().strength(-20))
+			.force('center', d3.forceCenter(d3.select('svg').node().getBoundingClientRect().width/2, 100))
 			.force('collide', d3.forceCollide(function(d){
 			    sizeScale(nodehash[d.entity])*4
 			}))
 			.force('link', linkForce)
-			.nodes(this.props.entities)
 			.on('tick', forceTick);
 
+		simulation.nodes(this.props.entities);
 		simulation.force("link").links(edges);
 
 		this.simulation = simulation;

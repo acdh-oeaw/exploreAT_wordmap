@@ -21,7 +21,7 @@ class SourceSelector extends React.Component{
             prefix:"oldcan",
             sparql:"http://localhost:3030/oldcan/query",
             ontology_url:"https://explorations4u.acdh.oeaw.ac.at/ontology/oldcan",
-            ontology:"https://explorations4u.acdh.oeaw.ac.at/ontology/oldcan",
+            ontology:null,
             ontology_from_file : false,
         };
 
@@ -35,8 +35,6 @@ class SourceSelector extends React.Component{
     }
 
     handleOntologyFileChange(event){
-        console.log(event.target.files[0])
-        
         function parseOntology(ontology_raw){
             const options = {ignoreAttributes:false, attrValueProcessor:attr=>attr, attributeNamePrefix : ""};
             const ontology_json = xmlparser.parse(ontology_raw,options);
@@ -45,7 +43,7 @@ class SourceSelector extends React.Component{
         }
 
         const fr = new FileReader()
-        fr.onload = (e)=> console.log(parseOntology(e.target.result));
+        fr.onload = (e)=> this.setState({ontology: (parseOntology(e.target.result))});
 
         fr.readAsText(event.target.files[0]);
     }
@@ -70,16 +68,6 @@ class SourceSelector extends React.Component{
     }
 
 	render() {
-		const url = 
-			"/explorer/file/"+
-            this.state.ontology_from_file+
-            "/ontology/"+
-            this.wrapper.urlToParam(this.state.ontology)+
-            "/prefix/"+
-            this.wrapper.urlToParam(this.state.prefix)+
-            "/sparql/"+
-            this.wrapper.urlToParam(this.state.sparql);
-
 	    return (
 	    	<div id="source_selector">
 		      	<form>
@@ -108,9 +96,9 @@ class SourceSelector extends React.Component{
 			          <input type="text" value={this.state.sparql} onChange={this.handleSparqlChange} />
 			        </label>
 		      	</form>
-                <NavLink to={url} style={
-                    (this.state.ontology.length>0 && this.state.sparql.length>0 && this.state.prefix.length>0)?{display:"block"}:{display:"none"}
-                }>Go</NavLink>
+                <a onClick={()=>this.props.setSources(this.state.ontology, this.state.sparql)} style={
+                    (this.state.ontology != null && this.state.sparql.length>0 && this.state.prefix.length>0)?{display:"block"}:{display:"none"}
+                }>Go</a>
 	      	</div>
 	    );
 	}

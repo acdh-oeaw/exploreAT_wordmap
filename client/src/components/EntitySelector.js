@@ -7,6 +7,7 @@ import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
 import relationships from './relationships_sparql_oldcan.js'
 import EntityForceLayout from './EntityForceLayout.js';
 import SparqlQueryCreator from './SparqlQueryCreator.js';
+import SourceSelector from './SourceSelector.js'
 
 const params = {
 	nodeColor: 'lightgreen',
@@ -27,87 +28,25 @@ class EntitySelector extends React.Component{
 	constructor(props){
 		super(props);
 		this.state={
-			loaded: false, 
-			loading:true, // For display issues
 			current_search: "",
-			entities: [],
-			relationships: [],
 			selected_entities: [],
 			triples: [],
-			current_state: "Retrieving available entities",
 			active_nodes: [],
 			active_edges: [],
 			test_nodes : [],
+			ontology:null
 		};
 
 		this.wrapper = new UrlParamWrapper();
 		this.sparqlQueries = new SparqlQueryBuilder();
-		this.loadData = this.loadData.bind(this);
 
 		this.selectAttribute = this.selectAttribute.bind(this);
 		this.attributeToQuery = this.attributeToQuery.bind(this);
 		this.selectNode = this.selectNode.bind(this);
 		this.selectRelationship = this.selectRelationship.bind(this);
 		this.resetQuery = this.resetQuery.bind(this);
-
-		// Url query param based parameters
-		this.api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
-		this.ontology = this.wrapper.paramToUrl(this.props.match.params.ontology);
-		this.prefix = this.wrapper.paramToUrl(this.props.match.params.prefix);
-	}
-
-	componentDidMount(){
-		this.loadData();
-	}
-
-	loadData(){
-		new Promise((resolve,reject)=>{
-			sparql(this.api_url, this.sparqlQueries.getAvailableEntities(this.ontology, this.prefix), (err, data) => {
-		      	if (data && !err) {
-		        	this.setState({ current_state:'Retrieving relationships'});
-		        	resolve(data)
-		      } else if (err) throw err
-			});
-		}).then((entities)=>{
-			const curatedEntities = entities.map(e=>({
-      			entity : (e.entity.includes(this.ontology+'#')===false?e.entity:(this.prefix+':'+e.entity.split(this.ontology+'#')[1])),
-      			count : +e.count
-      		}));
-			this.setState({
-        		entities: curatedEntities,
-        		relationships:relationships,
-        		current_state:'Loaded successfuly',
-        		loaded: true
-        	});
-/*
-			sparql(this.api_url, this.sparqlQueries.getEntityRelationships(this.ontology, this.prefix), (err, data) => {
-		      	if (data && !err) {
-
-		      		const curatedEntities = entities.map(e=>({
-		      			entity : (e.entity.includes(this.ontology+'#')===false?e.entity:(this.prefix+':'+e.entity.split(this.ontology+'#')[1])),
-		      			count : +e.count
-		      		}));
-
-		      		const curatedRelationships = data.map(e=>({
-		      			source: (e.entity.includes(this.ontology+'#')===false?e.entity:(this.prefix+':'+e.entity.split(this.ontology+'#')[1])),
-		      			relationship: (e.relationship.includes(this.ontology+'#')===false?e.relationship:(this.prefix+':'+e.relationship.split(this.ontology+'#')[1])),
-		      			target: (e.to.includes(this.ontology+'#')===false?e.to:(this.prefix+':'+e.to.split(this.ontology+'#')[1])),
-		      			value: 6.5,
-		      		}));
-
-		        	this.setState({
-		        		entities: curatedEntities,
-		        		relationships:curatedRelationships,
-		        		current_state:'Loaded successfuly',
-		        		loaded: true
-		        	});
-		      } else if (err) throw err
-			});
-*/
-		});
-	}
-
-	componentDidUpdate(prevProps, prevState, snapshot){
+		this.renderContent = this.renderContent.bind(this);
+		this.setSources = this.setSources.bind(this);
 	}
 
 	attributeToQuery(attribute, origin){
@@ -126,7 +65,7 @@ class EntitySelector extends React.Component{
 
 		if(attribute && attribute.length>0){
 			object.subject = '?'+this.wrapper.nameOfEntity( origin);
-			object.predicate = this.sparqlQueries.shorttenURIwithPrefix(this.ontology, this.prefix, attribute);
+			object.predicate = this.sparqlQueries.shorttenURIwithPrefix(this.state.ontology.ontology_base, this.state.ontology.prefix, attribute);
 			object.target = getAttributeForElement(this.state.relationships, object.predicate,'target',d=>d.relationship);
 
 			//target != undefined when the predicate is a relationship (an edge)
@@ -139,7 +78,7 @@ class EntitySelector extends React.Component{
 	selectNode(entity){
 		if(this.state.test_nodes.length==0){
 			if(entity && entity.length>0){
-			sparql(this.api_url, this.sparqlQueries.getEntityAttributes(this.ontology, this.prefix, entity), (err, data) => {
+			sparql(this.state.sparql, this.sparqlQueries.getEntityAttributes(this.state.ontology.ontology_base, this.state.ontology.prefix, entity), (err, data) => {
 		      	if (data && !err) {
 		        	this.setState(prevState=>{
 		        			prevState.test_nodes.push({	name: entity, attributes: data});
@@ -155,7 +94,7 @@ class EntitySelector extends React.Component{
 	selectRelationship(relationship){
 		if(relationship && relationship.source.entity == this.state.active_nodes[this.state.active_nodes.length-1]){
 			const query = this.attributeToQuery(relationship.relationship ,relationship.source.entity)
-			sparql(this.api_url, this.sparqlQueries.getEntityAttributes(this.ontology, this.prefix, query.target), (err, data) => {
+			sparql(this.state.sparql, this.sparqlQueries.getEntityAttributes(this.ontology, this.prefix, query.target), (err, data) => {
 		      	if (data && !err) {
 		        	this.setState(prevState=>{
 		        			prevState.test_nodes.push({	name: query.target, attributes: data});
@@ -228,6 +167,56 @@ class EntitySelector extends React.Component{
 		});
 	}
 
+	setSources(ontology, sparql){
+		if(ontology != null && sparql.length>0){
+			console.log(ontology)
+			this.setState({ontology:ontology, sparql:sparql});
+		}
+	}
+
+	renderContent(){
+		if(this.state.ontology == null){
+			return(
+				<SourceSelector 
+					setSources={this.setSources}
+				/>
+			);
+		}else{
+			const url =
+			"/explorer/ontology/" + this.props.match.params.ontology+
+			"/prefix/" +	this.props.match.params.prefix+
+			"/sparql/" + this.props.match.params.sparql+
+			"/entities/" + this.state.triples.reduce((final, actual)=>final+this.wrapper.urlToParam(actual)+",","");
+
+			return(
+				<div className="content">
+                    <EntityForceLayout 
+                         width={'100%'}
+                         height={'50%'}
+                         entities={this.state.ontology.entities.map(e=>({entity:e.name, count:20}))}
+                         relationships={this.state.ontology.relationships}
+                         selectEntity={this.selectNode}
+                         selectRelationship={this.selectRelationship}
+                         active_nodes={this.state.active_nodes}
+                         active_edges={this.state.active_edges}
+                         triples={this.state.triples}
+                         test_nodes={this.state.test_nodes}
+                         prefix={this.state.ontology.prefix}
+                         ontology={this.state.ontology.ontology_base}
+                         sparql={this.state.sparql}
+                    /> 
+                    <SparqlQueryCreator 
+                          test_nodes={this.state.test_nodes}
+                          active_edges={this.state.active_edges}
+                          selectAttribute={this.selectAttribute}
+                          resetQuery={this.resetQuery}
+                          loaded={true}
+                    />
+		        </div>
+		     );
+		}
+	}
+
 	render() {
 		const url =
 			"/explorer/ontology/" + this.props.match.params.ontology+
@@ -245,8 +234,6 @@ class EntitySelector extends React.Component{
 		              <span>Sparql entry point : {this.api_url}</span>
 		            </div>
 		            <span>
-			            Search for specific entities
-			            <input type="text" value={this.state.current_search}/>
 			            <span onClick={()=>alert(this.state.triples)} style={{cursor:'pointer'}}>Show triples </span>
 		            	</span>
 		          </div>
@@ -254,37 +241,7 @@ class EntitySelector extends React.Component{
 			      		(this.state.selected_entities.length>0)?{display:"block"}:{display:"none"}
 			      	} id="link-to-dashboard"> Go to dashboard</NavLink>
 		        </div>
-
-		        <div id="loader" style={({display: this.state.loaded===true?'none':'flex'})}>
-			        <div className="loader" ></div>
-			        <p>{this.state.current_state}</p>
-		        </div>
-
-		        <div className="content">
-                    <EntityForceLayout 
-                         width={'100%'}
-                         height={'50%'}
-                         entities={this.state.entities}
-                         relationships={this.state.relationships}
-                         selectEntity={this.selectNode}
-                         selectRelationship={this.selectRelationship}
-                         active_nodes={this.state.active_nodes}
-                         active_edges={this.state.active_edges}
-                         triples={this.state.triples}
-                         test_nodes={this.state.test_nodes}
-                         prefix={this.prefix}
-                         ontology={this.ontology}
-                         sparql={this.sparql}
-                         dataAvailable={this.state.loaded}
-                    /> 
-                    <SparqlQueryCreator 
-                          test_nodes={this.state.test_nodes}
-                          active_edges={this.state.active_edges}
-                          selectAttribute={this.selectAttribute}
-                          resetQuery={this.resetQuery}
-                          loaded={this.state.loaded}
-                    />
-		        </div>
+		        {this.renderContent()}		        
 		    </div>
 	    );
 	}

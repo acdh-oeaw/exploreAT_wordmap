@@ -160,7 +160,7 @@ div#explorer.entitySelector #link-to-dashboard{
   padding-bottom: 6px;
 }
 
-div#explorer.entitySelector input{
+div#explorer.entitySelector .content input{
 	height: 1.1em;
 	border-color: lightgrey;
 	display:inline-block;
