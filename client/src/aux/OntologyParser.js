@@ -3,17 +3,14 @@ import * as d3 from 'd3';
  * Una función que toma por entrada un json con la ontología y devuelve un objeto con el siguiente
  * formato :
  ontology_parsed
- \_
-  _
-  _
-  _
-  _
-  _
-  _
-  _
-  _
-  _ 
-
+ \_ attributes
+  _ entities
+  _ fields
+  _ non_classified
+  _ ontology_base
+  _ ontology_prefix
+  _ prefixes
+  _ relationships
  * */
 function parseOntologyJson(json){
     const shorttenUriWithPrefix = (uri,base,prefix)=>(!uri.includes(base)?uri:`${prefix}:${uri.split('#')[1]}`);
@@ -205,7 +202,6 @@ function parseOntologyJson(json){
         });
     }
 
-    console.log(ontology_parsed)
     return(ontology_parsed)
 }
 
