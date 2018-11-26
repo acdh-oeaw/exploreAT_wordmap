@@ -105,9 +105,9 @@ div.content div.header{
 }
 
 div.content div.header h2{
-	font-size: 2.5em;
+	font-size: 2em;
 	display: inline-block;
-	margin: 0 0 0 4em ;
+	margin: 0 0 0 5.3em ;
 }
 
 div.content div.header div.info{
@@ -116,15 +116,10 @@ div.content div.header div.info{
 	border-left: solid 3px #2c3e50;
 }
 
-div.content div.header div.info div:first-of-type{
-	border-bottom: solid 3px #2c3e50;
-}
-
 div.content div.header span{
 	font-size: 1.1em;
+  margin-right: 4em;
 }
-
-div.content div.header div.info div span{margin-right: 4em;}
 
 /* Sources ---------------------------------------------------------------------------
 */

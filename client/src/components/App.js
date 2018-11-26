@@ -2,7 +2,6 @@ import React from "react";
 import { BrowserRouter as Router, Route, NavLink } from "react-router-dom";
 import { Switch } from 'react-router';
 import { hot } from 'react-hot-loader';
-import SourceSelector from './SourceSelector';
 import EntitySelector from './EntitySelector';
 import Home from './Home';
 import Explorer from './Explorer';

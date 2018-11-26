@@ -155,17 +155,13 @@ class Explorer extends React.Component{
   }
 
   render(){
-    const pretty_entities = this.state.available_entities.map(a=>this.wrapper.nameOfEntity(a)).join(' , ');
-
     return(<div id="explorer">
         <div className="header">
           <h2>Explorer page</h2>
           <div className="info">
-            <div>
               <span>Ontology : {this.ontology}</span>
               <span>Sparql entry point : {this.api_url}</span>
-            </div>
-            <span>Current data available for entities : {pretty_entities}</span>
+              <span onClick={()=>alert(this.state.available_entities.map(e=>`${e}\n`))} style={{cursor:'pointer'}}>Show entities </span>
           </div>
         </div>
         <div className="content">

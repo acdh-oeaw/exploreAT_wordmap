@@ -11,7 +11,7 @@ import SparqlQueryCreator from './SparqlQueryCreator.js';
 import RdfBasedSourceSelector from './RdfBasedSourceSelector.js';
 import SparqlBasedSourceSelector from './SparqlBasedSourceSelector.js';
 
-const ENTITIES_FROM_RDF = false;
+const ENTITIES_FROM_RDF = true;
 const SourceSelector = (ENTITIES_FROM_RDF === true)?
 	RdfBasedSourceSelector:
 	SparqlBasedSourceSelector;	
@@ -221,21 +221,18 @@ class EntitySelector extends React.Component{
 
 	    return (
 	    	<div id="explorer" className="entitySelector">
+		        {this.state.ontology==null?"":
 	    		<div className="header">
 		          <h2>Entity selector</h2>
 		          <div className="info">
-		            <div>
-		              <span>Ontology : {this.ontology}</span>
-		              <span>Sparql entry point : {this.api_url}</span>
-		            </div>
-		            <span>
-			            <span onClick={()=>alert(this.state.triples)} style={{cursor:'pointer'}}>Show triples </span>
-		            	</span>
+		              	<span>Ontology : {this.state.ontology.ontology_base}</span>
+		              	<span>Sparql entry point : {this.state.sparql}</span>
 		          </div>
 		            <NavLink to={url} style={
 			      		(this.state.triples.length>0)?{display:"block"}:{display:"none"}
 			      	} id="link-to-dashboard"> Go to dashboard</NavLink>
 		        </div>
+		        }
 		        {this.renderContent()}		        
 		    </div>
 	    );
