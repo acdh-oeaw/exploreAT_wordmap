@@ -73,7 +73,7 @@ class EntityForceLayout extends React.Component{
 	}
 
 	updateHighlights(data){
-		const links = d3.select(this.node).selectAll("line.link");
+		const links = d3.select(this.node).selectAll("path.link");
 		links.style('stroke', d=>{
 			const query = this.attributeToQuery(d.relationship, d.source.entity);
 			//console.log(d, query, newState.active_nodes[newState.active_nodes.length-1])
@@ -116,13 +116,13 @@ class EntityForceLayout extends React.Component{
 		);
 
 
-		const linkForce = d3.forceLink().distance(120);
+		const linkForce = d3.forceLink().distance(160);
 
 		const simulation = d3.forceSimulation()
-			.force('charge', d3.forceManyBody().strength(-20))
+			.force('charge', d3.forceManyBody().strength(-45))
 			.force('center', d3.forceCenter(d3.select('svg').node().getBoundingClientRect().width/2, 100))
 			.force('collide', d3.forceCollide(function(d){
-			    sizeScale(nodehash[d.entity])*4
+			    sizeScale(nodehash[d.entity])*12
 			}))
 			.force('link', linkForce)
 			.on('tick', forceTick);
