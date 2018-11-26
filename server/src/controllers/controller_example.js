@@ -6,7 +6,7 @@ const wrapper = require('../aux/UrlParamWrapper');
 // Retrieves an external resource to evade cross origin restrictions
 router.route('/resource/:url')
     .get(function(req, res){
-    	fetch(wrapper.paramToUrl(req.params.url))
+    	fetch(wrapper.paramToUrl(req.params.url), {redirect:'no-redirect'})
 		    .then(a => a.text())
 		    .then(a=>{
 		    	res.type('text/xml')
