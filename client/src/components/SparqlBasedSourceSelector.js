@@ -1,10 +1,9 @@
 import React from "react";
 import { BrowserRouter as Route, NavLink } from "react-router-dom";
 import * as d3 from 'd3';
+import { sparql } from 'd3-sparql';
 import UrlParamWrapper from '../aux/UrlParamWrapper';
-import parseOntologyJson from '../aux/OntologyParser'
-
-const xmlparser = require('fast-xml-parser');
+import SparqlQueryBuilder from '../aux/SparqlQueryBuilder.js';
 
 /**
  * Explorer
@@ -20,36 +19,57 @@ class SparqlBasedSourceSelector extends React.Component{
         this.state={
             prefix:"oldcan",
             sparql:"http://localhost:3030/oldcan/query",
-            ontology_url:"https://explorations4u.acdh.oeaw.ac.at/ontology/oldcan",
-            ontology:null,
-            ontology_from_file : false,
+            ontology:"https://explorations4u.acdh.oeaw.ac.at/ontology/oldcan",
+            current_state: "",
+            loading: false
         };
 
+        this.sparqlQueries = new SparqlQueryBuilder();
         this.wrapper = new UrlParamWrapper();
         this.handleOntologyUrlChange = this.handleOntologyUrlChange.bind(this);
         this.handlePrefixChange = this.handlePrefixChange.bind(this);
         this.handleSparqlChange = this.handleSparqlChange.bind(this);
-        this.handleOntologyFileChange = this.handleOntologyFileChange.bind(this);
-        this.toggleOntologySource = this.toggleOntologySource.bind(this);
+        this.loadData = this.loadData.bind(this);
 
     }
 
-    handleOntologyFileChange(event){
-        function parseOntology(ontology_raw){
-            const options = {ignoreAttributes:false, attrValueProcessor:attr=>attr, attributeNamePrefix : ""};
-            const ontology_json = xmlparser.parse(ontology_raw,options);
-            const ontology_parsed = parseOntologyJson(ontology_json);
-            return(ontology_parsed);
-        }
-
-        const fr = new FileReader()
-        fr.onload = (e)=> this.setState({ontology: (parseOntology(e.target.result))});
-
-        fr.readAsText(event.target.files[0]);
+    loadData(){
+        this.setState({ loading: true, current_state:'Retrieving entities'});
+        new Promise((resolve,reject)=>{
+            sparql(this.state.sparql, this.sparqlQueries.getAvailableEntities(this.state.ontology, this.state.prefix), (err, data) => {
+                if (data && !err) {
+                    this.setState({ current_state:'Retrieving relationships'});
+                    resolve(data)
+              } else if (err) throw err
+            });
+        }).then((entities)=>{
+            sparql(this.state.sparql, this.sparqlQueries.getEntityRelationships(this.state.ontology, this.sparqlprefix), (err, data) => {
+                if (data && !err) {
+                    const curatedEntities = entities.map(e=>({
+                        name : (e.entity.includes(this.state.ontology+'#')===false?e.entity:(this.state.prefix+':'+e.entity.split(this.state.ontology+'#')[1])),
+                        count : +e.count
+                    }));
+                    const curatedRelationships = data.map(e=>({
+                        source: (e.entity.includes(this.state.ontology+'#')===false?e.entity:(this.state.prefix+':'+e.entity.split(this.state.ontology+'#')[1])),
+                        relationship: (e.relationship.includes(this.state.ontology+'#')===false?e.relationship:(this.state.prefix+':'+e.relationship.split(this.state.ontology+'#')[1])),
+                        target: (e.to.includes(this.state.ontology+'#')===false?e.to:(this.state.prefix+':'+e.to.split(this.state.ontology+'#')[1])),
+                        value: 6.5,
+                    }));
+                    const ontology = {
+                        prefixes:[{prefix:this.state.prefix, uri:this.state.ontology}],
+                        entities:curatedEntities,
+                        relationships:curatedRelationships,
+                        ontology_base:this.state.ontology,
+                        ontology_prefix:this.state.prefix,
+                    }
+                    this.props.setSources(ontology, this.state.sparql);
+              } else if (err) throw err
+            });
+        });
     }
-     
+
 	handleOntologyUrlChange(event){
-		this.setState({ontology_url: event.target.value, Ontology:event.target.value})
+		this.setState({ontology: event.target.value})
 	};
 
 	handleSparqlChange(event){
@@ -60,33 +80,14 @@ class SparqlBasedSourceSelector extends React.Component{
 		this.setState({prefix: event.target.value});
 	};
 
-    toggleOntologySource(){
-        this.setState(prevState=>{
-            prevState.ontology_from_file = !prevState.ontology_from_file;
-            return(prevState);
-        });
-    }
-
 	render() {
 	    return (
 	    	<div id="source_selector">
-		      	<form>
-                    <span style={{display:this.state.ontology_from_file===true?'inherit':'none', marginBottom:'29px'}}>
-                        <label id="extra-label">
-                          Ontology file <span className="toggleSource" onClick={()=>this.toggleOntologySource()}>(or load from url)</span> :
-                        </label>
-                        <label>
-                          <input id="uploadInput" type="file" name="myFiles" onInput={this.handleOntologyFileChange}/>
-                        </label>
-                    </span>
-
-                    <span style={{display:this.state.ontology_from_file===false?'inherit':'none'}}>
-                        <label>
-                          Url to ontology <span className="toggleSource" onClick={()=>this.toggleOntologySource()}>(or load from local file)</span> :<br/>
-                          <input type="text" value={this.state.ontology_url} onChange={this.handleOntologyUrlChange} />
-                        </label>
-                    </span>
-                    
+		      	<form style={({display: this.state.loading===false?'initial':'none'})}>
+                    <label>
+                      Url to ontology :<br/>
+                      <input type="text" value={this.state.ontology} onChange={this.handleOntologyUrlChange} />
+                    </label>
 			        <label>
 			          Prefix for the ontology:
 			          <input type="text" value={this.state.prefix} onChange={this.handlePrefixChange} />
@@ -96,9 +97,16 @@ class SparqlBasedSourceSelector extends React.Component{
 			          <input type="text" value={this.state.sparql} onChange={this.handleSparqlChange} />
 			        </label>
 		      	</form>
-                <a onClick={()=>this.props.setSources(this.state.ontology, this.state.sparql)} style={
-                    (this.state.ontology != null && this.state.sparql.length>0 && this.state.prefix.length>0)?{display:"block"}:{display:"none"}
-                }>Go</a>
+                <a onClick={()=>this.loadData()} style={
+                    (this.state.ontology.length>0 && 
+                        this.state.sparql.length>0 && 
+                        this.state.prefix.length>0 && 
+                        this.state.loading===false)?{display:"block"}:{display:"none"}
+                }>Load</a>
+                <div id="loader" style={({display: this.state.loading===false?'none':'flex'})}>
+                    <div className="loader" ></div>
+                    <p>{this.state.current_state}</p>
+                </div>
 	      	</div>
 	    );
 	}

@@ -11,7 +11,7 @@ import SparqlQueryCreator from './SparqlQueryCreator.js';
 import RdfBasedSourceSelector from './RdfBasedSourceSelector.js';
 import SparqlBasedSourceSelector from './SparqlBasedSourceSelector.js';
 
-const ENTITIES_FROM_RDF = true;
+const ENTITIES_FROM_RDF = false;
 const SourceSelector = (ENTITIES_FROM_RDF === true)?
 	RdfBasedSourceSelector:
 	SparqlBasedSourceSelector;	
@@ -65,8 +65,8 @@ class EntitySelector extends React.Component{
 
 		if(attribute && attribute.length>0){
 			object.subject = '?'+this.wrapper.nameOfEntity( origin);
-			object.predicate = this.sparqlQueries.shorttenURIwithPrefix(this.state.ontology.ontology_base, this.state.ontology.prefix, attribute);
-			object.target = getAttributeForElement(this.state.relationships, object.predicate,'target',d=>d.relationship);
+			object.predicate = this.sparqlQueries.shorttenURIwithPrefix(this.state.ontology.ontology_base, this.state.ontology.ontology_prefix, attribute);
+			object.target = getAttributeForElement(this.state.ontology.relationships, object.predicate,'target',d=>d.relationship);
 
 			//target != undefined when the predicate is a relationship (an edge)
 			object.object = '?'+this.wrapper.nameOfEntity( object.target!=undefined?object.target:object.predicate);
@@ -78,7 +78,7 @@ class EntitySelector extends React.Component{
 	selectNode(entity){
 		if(this.state.test_nodes.length==0){
 			if(entity && entity.length>0){
-			sparql(this.state.sparql, this.sparqlQueries.getEntityAttributes(this.state.ontology.ontology_base, this.state.ontology.prefix, entity), (err, data) => {
+			sparql(this.state.sparql, this.sparqlQueries.getEntityAttributes(this.state.ontology.ontology_base, this.state.ontology.ontology_prefix, entity), (err, data) => {
 		      	if (data && !err) {
 		        	this.setState(prevState=>{
 		        			prevState.test_nodes.push({	name: entity, attributes: data});
@@ -94,7 +94,7 @@ class EntitySelector extends React.Component{
 	selectRelationship(relationship){
 		if(relationship && relationship.source.entity == this.state.active_nodes[this.state.active_nodes.length-1]){
 			const query = this.attributeToQuery(relationship.relationship ,relationship.source.entity)
-			sparql(this.state.sparql, this.sparqlQueries.getEntityAttributes(this.ontology, this.prefix, query.target), (err, data) => {
+			sparql(this.state.sparql, this.sparqlQueries.getEntityAttributes(this.state.ontology.ontology_base, this.state.ontology.ontology_prefix, query.target), (err, data) => {
 		      	if (data && !err) {
 		        	this.setState(prevState=>{
 		        			prevState.test_nodes.push({	name: query.target, attributes: data});
@@ -169,7 +169,6 @@ class EntitySelector extends React.Component{
 
 	setSources(ontology, sparql){
 		if(ontology != null && sparql.length>0){
-			console.log(ontology)
 			this.setState({ontology:ontology, sparql:sparql});
 		}
 	}
@@ -182,12 +181,6 @@ class EntitySelector extends React.Component{
 				/>
 			);
 		}else{
-			const url =
-			"/explorer/ontology/" + this.props.match.params.ontology+
-			"/prefix/" +	this.props.match.params.prefix+
-			"/sparql/" + this.props.match.params.sparql+
-			"/entities/" + this.state.triples.reduce((final, actual)=>final+this.wrapper.urlToParam(actual)+",","");
-
 			return(
 				<div className="content">
                     <EntityForceLayout 
@@ -218,10 +211,12 @@ class EntitySelector extends React.Component{
 	}
 
 	render() {
-		const url =
-			"/explorer/ontology/" + this.props.match.params.ontology+
-			"/prefix/" +	this.props.match.params.prefix+
-			"/sparql/" + this.props.match.params.sparql+
+		
+		const url = (this.state.triples.length == 0)?"":
+			"/explorer/ontology/" + this.wrapper.urlToParam(this.state.ontology.ontology_base)+
+			"/prefix/" +	this.state.ontology.ontology_prefix+
+			"/prefixes/" + this.state.ontology.prefixes.reduce((final, actual)=>final+this.wrapper.urlToParam(actual.prefix+actual.uri)+",","") + 
+			"/sparql/" + this.wrapper.urlToParam(this.state.sparql)+
 			"/entities/" + this.state.triples.reduce((final, actual)=>final+this.wrapper.urlToParam(actual)+",","");
 
 	    return (
@@ -238,7 +233,7 @@ class EntitySelector extends React.Component{
 		            	</span>
 		          </div>
 		            <NavLink to={url} style={
-			      		(this.state.selected_entities.length>0)?{display:"block"}:{display:"none"}
+			      		(this.state.triples.length>0)?{display:"block"}:{display:"none"}
 			      	} id="link-to-dashboard"> Go to dashboard</NavLink>
 		        </div>
 		        {this.renderContent()}		        

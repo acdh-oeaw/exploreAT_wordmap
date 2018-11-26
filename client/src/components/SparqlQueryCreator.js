@@ -72,7 +72,7 @@ class SparqlQueryCreator extends React.Component{
                         {test_node.attributes.map((e,i)=>(
                             <text 
                                 key={e.attribute} 
-                                class="attribute" 
+                                className="attribute" 
                                 id={`${this.wrapper.nameOfEntity(test_node.name)}${this.wrapper.nameOfEntity(e.attribute)}`}
                                 onClick={()=>{
                                     this.props.selectAttribute(e.attribute, test_node.name);

@@ -69,7 +69,7 @@ function parseOntologyJson(json){
                         entry.value, 
                         ontology_parsed.ontology_base, 
                         ontology_parsed.ontology_prefix);
-                    relationship.value = 1;
+                    relationship.value = 5;
                     ontology_parsed.relationships.push(relationship)
                 }
             })
@@ -117,7 +117,7 @@ function parseOntologyJson(json){
                             attr['rdf:about'], 
                             ontology_parsed.ontology_base, 
                             ontology_parsed.ontology_prefix),
-                    value: 2
+                    value: 6.5
                 }; 
                 if(attr['rdfs:domain'] && attr['rdfs:range']){
                     const domain = attr['rdfs:domain'].length == undefined?[attr['rdfs:domain']]:attr['rdfs:domain'];
@@ -185,6 +185,7 @@ function parseOntologyJson(json){
                                 if(entity_names.includes(r_name)){
                                     entry.relationship = name;
                                     entry.target = r_name;
+                                    entry.value = 6.5;
                                     ontology_parsed.relationships.push(entry)
                                 }else{
                                     entry.attr = name;
