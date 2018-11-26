@@ -20,7 +20,7 @@ const SourceSelector = (ENTITIES_FROM_RDF === true)?
  * EntitySelector
  * Component for displaying entities and relationships in the SPARQL database
  * and selecting some for further analysis.
- *
+ *	
  * @param props
  * @return {React.Component}
  */
@@ -211,11 +211,21 @@ class EntitySelector extends React.Component{
 	}
 
 	render() {
+		const prefixes_used = {};
+
+		if(this.state.ontology != null){
+			const prefixes_available = this.state.ontology.prefixes.map(p=>p.prefix);
+			this.state.triples.map(t=>{
+				const predicate = t.split(' ')[1],
+				i = prefixes_available.indexOf(predicate.split(':')[0]);
+				if(i >= 0)
+					prefixes_used[predicate.split(':')[0]] = this.state.ontology.prefixes[i].uri;
+			});
+			prefixes_used[this.state.ontology.ontology_prefix]=this.state.ontology.ontology_base;
+		}
 		
 		const url = (this.state.triples.length == 0)?"":
-			"/explorer/ontology/" + this.wrapper.urlToParam(this.state.ontology.ontology_base)+
-			"/prefix/" +	this.state.ontology.ontology_prefix+
-			"/prefixes/" + this.state.ontology.prefixes.reduce((final, actual)=>final+this.wrapper.urlToParam(actual.prefix+actual.uri)+",","") + 
+			"/explorer/prefixes/" + d3.entries(prefixes_used).reduce((final, actual)=>final+this.wrapper.urlToParam(actual.key+'+'+actual.value)+",","") + 
 			"/sparql/" + this.wrapper.urlToParam(this.state.sparql)+
 			"/entities/" + this.state.triples.reduce((final, actual)=>final+this.wrapper.urlToParam(actual)+",","");
 

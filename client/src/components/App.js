@@ -34,7 +34,7 @@ const App = (props) => {
           <Switch>
             <Route exact path="/" component={Home}/>
             <Route exact path="/entities/" component={EntitySelector}/>
-            <Route exact path="/explorer/ontology/:ontology/prefix/:prefix/prefixes/:prefixes/sparql/:sparql/entities/:entities" component={Explorer}/>
+            <Route exact path="/explorer/prefixes/:prefixes/sparql/:sparql/entities/:entities" component={Explorer}/>
             <Route component={Home}/>
           </Switch>
         </div>

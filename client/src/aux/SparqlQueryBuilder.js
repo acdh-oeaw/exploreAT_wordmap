@@ -150,12 +150,12 @@ class SparqlQueryBuilder{
         );
     }
 
-    createDataSparqlQuery(ontology, prefix, triples){
+    createDataSparqlQuery(prefixes, triples){
         const elements = triples.reduce((final,actual)=>final.concat(actual.split(" ")), []);
         const graphs = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
         let query = "";
-        query +=` PREFIX ${prefix}: <${ontology}#>\n`;
+        query += prefixes.map(p=>p.prefix.length>0?` PREFIX ${p.prefix}: <${p.uri}#>\n`:"").join('\n');
         query += 'SELECT '+elements.filter(e=>e.includes('?')).join(' ');
         query += '\nWHERE{ \n';
         query += triples.map((triple,i)=>`  GRAPH ?${graphs[i]} {${triple}}.\n`).join('');

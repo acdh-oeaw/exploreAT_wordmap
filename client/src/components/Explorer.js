@@ -29,7 +29,6 @@ const ReactGridLayout = WidthProvider(RGL);
 class Explorer extends React.Component{
   constructor(props){
     super(props);    
-    console.log('explorer', this.props.match)
     
     this.state = {
       data : null,
@@ -48,17 +47,16 @@ class Explorer extends React.Component{
     this.removeComponent = this.removeComponent.bind(this);
     // Url query param based parameters
     this.api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
-    this.ontology = this.wrapper.paramToUrl(this.props.match.params.ontology);
-    this.prefix = this.wrapper.paramToUrl(this.props.match.params.prefix);
+    this.prefixes = this.wrapper.paramToUrl(this.props.match.params.prefixes).split(',').map(d=>({prefix:d.split('+')[0],uri:d.split('+')[1]}));
     this.triples = this.wrapper.paramToUrl(this.props.match.params.entities).split(',').filter(d=>d!="");
 
     this.availableComponents = {"Dummy": Dummy, "Table": Table, "PieChart": PieChart};
   }
 
   componentDidMount(){
-    let query = this.sparqlQueries.createDataSparqlQuery(this.ontology, this.prefix, this.triples);    
-    //query = this.sparqlQueries.oldQuery();//createDataSparqlQuery(this.entries, this.ontology, this.prefix);
+    let query = this.sparqlQueries.createDataSparqlQuery(this.prefixes, this.triples);    
     console.log(query)
+    //query = this.sparqlQueries.oldQuery();//createDataSparqlQuery(this.entries, this.ontology, this.prefix);
     sparql(this.api_url, query, (err, data) => {
       if (data && !err) {
         this.setState({
@@ -159,7 +157,7 @@ class Explorer extends React.Component{
         <div className="header">
           <h2>Explorer page</h2>
           <div className="info">
-              <span>Ontology : {this.ontology}</span>
+              <span>Ontologies referenced : {this.prefixes.map(p=>p.prefix).join(', ')}</span>
               <span>Sparql entry point : {this.api_url}</span>
               <span onClick={()=>alert(this.state.available_entities.map(e=>`${e}\n`))} style={{cursor:'pointer'}}>Show entities </span>
           </div>

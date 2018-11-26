@@ -21,7 +21,7 @@ function parseOntologyJson(json){
     // Prefixes for external referenced ontologies
     ontology_parsed.prefixes = d3.entries(json)
         .filter(d=>d.key.includes('xmlns'))
-        .map(d=>({prefix:d.key, uri:d.value}));
+        .map(d=>({prefix:d.key.includes(':')?d.key.split(':')[1]:d.key, uri:d.value}));
     ontology_parsed.fields = d3.keys(json).filter(d=>!d.includes('xmlns'))
             
     // Base uri and prefix for the current ontology
