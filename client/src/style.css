@@ -206,19 +206,20 @@ div#explorer div.content div#nodes{
 }
 
 
-line.link {
+path.link {
+    fill:none;
     stroke: black;
     stroke-opacity: .5;
 }
-line.link.active {
+path.link.active {
     stroke-opacity: .9;
     stroke: rgb(102, 180, 58);
 }
-line.link.selected {
+path.link.selected {
     stroke-opacity: .9;
   stroke: rgb(102, 180, 58);
 }
-line.link:hover{
+path.link:hover{
     stroke-opacity: .9;
     cursor: pointer;
 }

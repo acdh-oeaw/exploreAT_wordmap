@@ -132,10 +132,10 @@ class EntityForceLayout extends React.Component{
 
 		this.simulation = simulation;
 
-		const edgeEnter = d3.select(this.node).selectAll("line.link")
+		const edgeEnter = d3.select(this.node).selectAll("path.link")
 			.data(edges, d => `${d.source.entity}-${d.target.entity}`)
 			.enter()
-			.append("line") //.attr("marker-end","url(#arrow)")
+			.append("path") //.attr("marker-end","url(#arrow)")
 			.attr("class", "link")
 			.on("click",(d)=>{
 				this.props.selectRelationship(d);
@@ -180,17 +180,27 @@ class EntityForceLayout extends React.Component{
 		    width = rect.width,
 		    height = rect.height;
 
-			d3.selectAll("line.link")
-				.attr("x1", d => Math.max(30, Math.min(width-30, d.source.x)))
-				.attr("x2", d => Math.max(30, Math.min(width-30, d.target.x)))
-				.attr("y1", d => Math.max(30, Math.min(height-30, d.source.y)))
-				.attr("y2", d => Math.max(30, Math.min(height-30, d.target.y)))
+		    d3.select('svg').selectAll("path.link")
+				.attr("d", function(d) {
+			        const 
+			        	source_x = Math.max(30, Math.min(width-30, d.source.x)),
+			        	source_y = Math.max(30, Math.min(height-30, d.source.y)),
+			        	target_x = Math.max(30, Math.min(width-30, d.target.x)),
+			        	target_y = Math.max(30, Math.min(height-30, d.target.y)),
+			        	dx = target_x - source_x,
+			            dy = target_y - source_y,
+			            dr = Math.sqrt(dx * dx + dy * dy);
+			        return "M" + 
+			            source_x + "," + source_y
+			             + "A" + 
+			            dr + "," + dr + " 0 0,1 " + 
+			            target_x + "," + 
+			            target_y;
+			    });
 
-			d3.selectAll("g.node")
-				.attr("transform", d => "translate("+
-					Math.max(sizeScale(d.count), Math.min(width - sizeScale(d.count), d.x))+
-					","+
-					Math.max(sizeScale(d.count), Math.min(height - sizeScale(d.count), d.y))+")");
+			d3.selectAll("g.node").attr("transform", d=>`translate( 
+				${Math.max(sizeScale(d.count), Math.min(width - sizeScale(d.count), d.x))} , 
+				${Math.max(sizeScale(d.count), Math.min(height - sizeScale(d.count), d.y))})`);
 		}
 
 		function dragstarted(d)
