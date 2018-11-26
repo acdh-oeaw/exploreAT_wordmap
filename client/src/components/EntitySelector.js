@@ -7,14 +7,14 @@ import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
 import relationships from './relationships_sparql_oldcan.js'
 import EntityForceLayout from './EntityForceLayout.js';
 import SparqlQueryCreator from './SparqlQueryCreator.js';
-import SourceSelector from './SourceSelector.js'
 
-const params = {
-	nodeColor: 'lightgreen',
-	activeNodeColor: 'red',
-	edgeColor: 'grey',
-	activeEdgeColor: 'red'
-};
+import RdfBasedSourceSelector from './RdfBasedSourceSelector.js';
+import SparqlBasedSourceSelector from './SparqlBasedSourceSelector.js';
+
+const ENTITIES_FROM_RDF = true;
+const SourceSelector = (ENTITIES_FROM_RDF === true)?
+	RdfBasedSourceSelector:
+	SparqlBasedSourceSelector;	
 
 /**
  * EntitySelector
