@@ -19,7 +19,8 @@ class ComponentSelector extends React.Component{
             type: "",
             showComponents: false,
             data : [],
-            useful_visualizations: []
+            useful_visualizations: [],
+            vis_incompatibilities: []
         };
 
         this.handleNameChange = this.handleNameChange.bind(this);
@@ -96,8 +97,25 @@ class ComponentSelector extends React.Component{
     }
 
     showComponents(){
-        const useful_visualizations = this.props.availableComponents[0];
-        this.setState({showComponents:true, useful_visualizations:useful_visualizations});
+        let useful_visualizations = this.props.availableComponents;
+        const vis_incompatibilities = [];
+
+        this.state.attributes.map(a=>{
+            if(a.data_length > 120)
+                vis_incompatibilities.push(`${a.name} takes too many different values to be used with a Pie Chart.`)
+        })
+
+        if(false === this.state.attributes.reduce((a,b)=>a&&b.data_length<140,true)){
+            useful_visualizations = useful_visualizations.filter(vis=>vis!='PieChart')
+            vis_incompatibilities.push(`No attribute has less than 120 different values to be used with a Pie Chart.`)
+        }
+
+        if(false === this.state.attributes.reduce((a,b)=>a&&(b.data_length == this.state.attributes[0].data_length),true)){
+            useful_visualizations = useful_visualizations.filter(vis=>vis!='Table');
+            vis_incompatibilities.push(`All attributes must have the same amount of entries to be displayed in a table.`);
+        }
+
+        this.setState({showComponents:true, useful_visualizations:useful_visualizations, vis_incompatibilities:vis_incompatibilities});
     }
 
     backToEntities(){
@@ -115,11 +133,13 @@ class ComponentSelector extends React.Component{
                     <li>Type of component to be created :</li>
                     <li>
                         <Dropdown 
-                            options={this.props.availableComponents} 
+                            options={this.state.useful_visualizations} 
                             onChange={this.handleTypeChange} 
-                            value={this.state.useful_visualizations} 
-                            placeholder="Select an type" /></li>
+                            value={this.state.useful_visualizations[0]} 
+                            placeholder="Select an type" />
+                    </li>
                 </ul>
+                <a onClick={()=>alert(this.state.vis_incompatibilities.map(e=>`${e}\n`))} style={{cursor:'pointer'}}>Show incompatiblities </a>
                 <a onClick={this.createComponent}>Create component</a>
             </div>
             );
