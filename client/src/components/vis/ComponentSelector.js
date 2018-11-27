@@ -15,13 +15,18 @@ class ComponentSelector extends React.Component{
         this.state = {
             name: "",
             entities: [],
-            type: ""
+            dimensions:[],
+            type: "",
+            showComponents: false,
         };
 
         this.handleNameChange = this.handleNameChange.bind(this);
         this.toggleEntitySelection = this.toggleEntitySelection.bind(this);
         this.handleTypeChange = this.handleTypeChange.bind(this);
         this.createComponent = this.createComponent.bind(this);
+        this.renderMenu = this.renderMenu.bind(this);
+        this.showComponents = this.showComponents.bind(this);
+        this.backToEntities = this.backToEntities.bind(this);
     }
 
     handleNameChange(event){
@@ -46,29 +51,28 @@ class ComponentSelector extends React.Component{
     createComponent(){
         if(this.state.name != "" && this.state.entities.length>0 && this.state.type != ""){
             this.props.addComponent(this.state.name, this.state.entities, this.state.type);
-            this.setState({name: "", entities: []});
+            this.setState({name: "", entities: [], showComponents:false});
         }
     }
 
-    render(){
-        const size = {width: this.props.width+"px", height: this.props.height+"px"}
-        const style = (e)=>this.state.entities.includes(e)?{cursor:"pointer",color:"#18bc9c"}:{cursor:"pointer",color:"black"};
+    showComponents(){
+        this.setState({showComponents:true});
+    }
 
-        return(
-            <div style={size}>
+    backToEntities(){
+        this.setState({showComponents:false});
+    }
+
+    renderMenu(){
+        const styleEntities = (e)=>this.state.entities.includes(e)?{cursor:"pointer",color:"#18bc9c"}:{cursor:"pointer",color:"black"};
+        const styleDimensions = (e)=>this.state.dimensions.includes(e)?{cursor:"pointer",color:"#18bc9c"}:{cursor:"pointer",color:"black"};
+        if(this.state.name != "" && this.state.entities.length>0 && this.state.showComponents === true){
+            return(
+            <div className="menu-panel">
                 <ul>
-                    <li>Name for the new component :</li>
-                    <li><input type="text" value={this.state.name} onChange={this.handleNameChange} /></li>
-                </ul>
-                <ul>
-                    <li>Entity to explore on the new component :</li>
-                    <li>
-                    {this.props.entities.map(e=>(
-                        <span onClick={()=>this.toggleEntitySelection(e)} style={style(e)} key={e}> {e} </span>
-                        ))}
-                    </li>
-                </ul>
-                <ul>
+                    <li>Dimensions chosen <a onClick={()=>this.backToEntities()}>(back to selection)</a> :</li>
+                    <li>{this.state.entities.reduce((a,b)=>a+', '+b)}</li>
+                    <hr/><br/>
                     <li>Type of component to be created :</li>
                     <li>
                         <Dropdown 
@@ -78,6 +82,36 @@ class ComponentSelector extends React.Component{
                             placeholder="Select an type" /></li>
                 </ul>
                 <a onClick={this.createComponent}>Create component</a>
+            </div>
+            );
+        }else{
+            const selectionMade = this.state.name != "" && this.state.entities.length>0;
+            return(
+            <div className="menu-panel">
+            <ul>
+                <li>Name for the new component :</li>
+                <li><input type="text" value={this.state.name} onChange={this.handleNameChange} /></li>
+            </ul>
+            <ul>
+                <li>Entity to explore on the new component :</li>
+                <li>
+                {this.props.entities.map(e=>(
+                    <span onClick={()=>this.toggleEntitySelection(e)} style={styleEntities(e)} key={e}> {e} </span>
+                    ))}
+                </li>
+            </ul>
+            <a onClick={()=>this.showComponents()} style={{display:selectionMade===true?'initial':'none'}}>Choose visualization</a>
+            </div>
+            );
+        }
+    }
+
+    render(){
+        const size = {width: this.props.width+"px", height: this.props.height+"px"}
+
+        return(
+            <div style={size}>
+                {this.renderMenu()}
             </div>
         );
     }

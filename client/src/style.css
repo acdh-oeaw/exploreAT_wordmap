@@ -1,4 +1,4 @@
-a{ cursor:pointer; } p{ cursor:default; }
+a{ cursor:pointer; color:#18bc9c;} p{ cursor:default; }
 
 /* App ---------------------------------------------------------------------------
 */
@@ -383,6 +383,23 @@ div.visWrapper div.header p{
     
     margin: 0;
     font-weight: bold;
+}
+
+div.visWrapper hr{
+  color: #18bc9c;
+}
+
+div.visWrapper ul{
+  width:90%;
+  margin:8px;
+  padding:0;
+}
+
+div.visWrapper div.menu-panel{
+  width:100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* Buttons ---------------------------------------------------------------------------

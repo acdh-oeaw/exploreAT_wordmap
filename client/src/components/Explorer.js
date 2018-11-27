@@ -139,7 +139,7 @@ class Explorer extends React.Component{
     visComponents.push(
       <div key="selector" style={({display: this.state.loaded===true?'block':'none'})}>
         <VisSelectorWrapper width={this.state.layout.selector.w * Math.trunc(document.body.clientWidth/6) - 25} 
-              height={this.state.layout.selector.h * 90 + (this.state.layout.selector.h - 1)*10 - 45}
+              height={this.state.layout.selector.h * 90 + (this.state.layout.selector.h - 1)*10 - 30}
               name={"Component Selector"}
               addComponent={this.addComponent}
               entities={this.state.available_entities}
