@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import React from 'react';
 import Dropdown from 'react-dropdown';
 import 'react-dropdown/style.css'
+import OptionTags from './OptionTags.js';
 
 /* ComponentSelector
  * Allows the creation of new vis components by calling the addComponent function
@@ -14,44 +15,51 @@ class ComponentSelector extends React.Component{
 
         this.state = {
             name: "",
-            entities: [],
-            dimensions:[],
+            attributes: [],
             type: "",
             showComponents: false,
         };
 
         this.handleNameChange = this.handleNameChange.bind(this);
-        this.toggleEntitySelection = this.toggleEntitySelection.bind(this);
         this.handleTypeChange = this.handleTypeChange.bind(this);
         this.createComponent = this.createComponent.bind(this);
         this.renderMenu = this.renderMenu.bind(this);
         this.showComponents = this.showComponents.bind(this);
         this.backToEntities = this.backToEntities.bind(this);
+        this.addAttribute = this.addAttribute.bind(this);
+        this.removeAttribute = this.removeAttribute.bind(this);
     }
 
     handleNameChange(event){
         this.setState({name: event.target.value});
     };
 
-    toggleEntitySelection(entity){
-        if(entity && entity.length>0)
+    addAttribute(attribute){
+        if(attribute && attribute.length>0)
             this.setState((prevState)=>{
-                if(prevState.entities.includes(entity))
-                    prevState.entities = prevState.entities.filter(e=>e!=entity)
-                else
-                    prevState.entities.push(entity)
+                if(!prevState.attributes.includes(attribute))
+                    prevState.attributes.push(attribute)
                 return(prevState);
             });
-    };
+    }
+
+    removeAttribute(attribute){
+        if(attribute && attribute.length>0)
+            this.setState((prevState)=>{
+                if(prevState.attributes.includes(attribute))
+                    prevState.attributes = prevState.attributes.filter(e=>e!=attribute)
+                return(prevState);
+            });
+    }
 
     handleTypeChange(type){
         this.setState({type: type.value});
     };
 
     createComponent(){
-        if(this.state.name != "" && this.state.entities.length>0 && this.state.type != ""){
-            this.props.addComponent(this.state.name, this.state.entities, this.state.type);
-            this.setState({name: "", entities: [], showComponents:false});
+        if(this.state.name != "" && this.state.attributes.length>0 && this.state.type != ""){
+            this.props.addComponent(this.state.name, this.state.attributes, this.state.type);
+            this.setState({name: "", attributes: [], showComponents:false});
         }
     }
 
@@ -64,9 +72,7 @@ class ComponentSelector extends React.Component{
     }
 
     renderMenu(){
-        const styleEntities = (e)=>this.state.entities.includes(e)?{cursor:"pointer",color:"#18bc9c"}:{cursor:"pointer",color:"black"};
-        const styleDimensions = (e)=>this.state.dimensions.includes(e)?{cursor:"pointer",color:"#18bc9c"}:{cursor:"pointer",color:"black"};
-        if(this.state.name != "" && this.state.entities.length>0 && this.state.showComponents === true){
+        if(this.state.name != "" && this.state.attributes.length>0 && this.state.showComponents === true){
             return(
             <div className="menu-panel">
                 <ul>
@@ -85,7 +91,7 @@ class ComponentSelector extends React.Component{
             </div>
             );
         }else{
-            const selectionMade = this.state.name != "" && this.state.entities.length>0;
+            const selectionMade = this.state.name != "" && this.state.attributes.length>0;
             return(
             <div className="menu-panel">
             <ul>
@@ -95,9 +101,10 @@ class ComponentSelector extends React.Component{
             <ul>
                 <li>Entity to explore on the new component :</li>
                 <li>
-                {this.props.entities.map(e=>(
-                    <span onClick={()=>this.toggleEntitySelection(e)} style={styleEntities(e)} key={e}> {e} </span>
-                    ))}
+                    <OptionTags 
+                        tags={this.state.attributes}
+                        options={this.props.entities}
+                    />
                 </li>
             </ul>
             <a onClick={()=>this.showComponents()} style={{display:selectionMade===true?'initial':'none'}}>Choose visualization</a>
@@ -110,7 +117,7 @@ class ComponentSelector extends React.Component{
         const size = {width: this.props.width+"px", height: this.props.height+"px"}
 
         return(
-            <div style={size}>
+            <div id="ComponentSelector" style={size}>
                 {this.renderMenu()}
             </div>
         );
