@@ -14,8 +14,8 @@ class PieChart extends React.Component{
 
         this.state = {
             sector_dimension:"",
-            data: {a: this.props.data.length},
-            total: this.props.data.length
+            data: {'_': 1},
+            total: 1
         };
 
         this.node = d3.select(this.node);
@@ -36,14 +36,8 @@ class PieChart extends React.Component{
     }
 
     selectAttribute(attribute){
-        const data = {};
-        this.props.data.map((e,i)=>{
-            if(data[e[attribute]])
-                data[e[attribute]] += 1;
-            else
-                data[e[attribute]] = 1;
-        });
-        this.setState({data:data, sector_dimension:attribute})
+        console.log(attribute)
+        this.setState({data:attribute.data, sector_dimension:attribute.name, total:attribute.data_total})
     }
 
     createSectors(dimensions){
@@ -109,8 +103,8 @@ class PieChart extends React.Component{
 
         return(
             <div id="PieChart" className="visualization" style={size} ref={node => this.domElement = node}>
-                <p style={{margin:0}}>Select the attribute used for the sectors : {this.props.entities.map(e=>(
-                    <span key={e} onClick={()=>this.selectAttribute(e)} className="option" style={style(e)}> {e} </span>
+                <p style={{margin:0}}>Select the attribute used for the sectors : {this.props.attributes.map(e=>(
+                    <span key={e.name} onClick={()=>this.selectAttribute(e)} className="option" style={style(e.name)}> {e.name} </span>
                 ))}</p>
                 <svg style={{width:size.width, height:(chartDimensions.height+'px')}}>
                     <g>

@@ -159,7 +159,7 @@ class SparqlQueryBuilder{
         query += 'SELECT '+elements.filter(e=>e.includes('?')).join(' ');
         query += '\nWHERE{ \n';
         query += triples.map((triple,i)=>`  GRAPH ?${graphs[i]} {${triple}}.\n`).join('');
-        query += '}LIMIT 10000';
+        query += '}';
 
         return(query);
     }

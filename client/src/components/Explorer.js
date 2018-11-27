@@ -55,8 +55,6 @@ class Explorer extends React.Component{
 
   componentDidMount(){
     let query = this.sparqlQueries.createDataSparqlQuery(this.prefixes, this.triples);    
-    console.log(query)
-    //query = this.sparqlQueries.oldQuery();//createDataSparqlQuery(this.entries, this.ontology, this.prefix);
     sparql(this.api_url, query, (err, data) => {
       if (data && !err) {
         this.setState({
@@ -89,16 +87,16 @@ class Explorer extends React.Component{
    * component, and a new layout for displaying it on the dashboard.
    *
    * @param {string} name Name to handle components internally.
-   * @param {array} entities Array containing a subset of entities to handle in the vis component.
+   * @param {array} attributes Array containing a subset of attributes to handle in the vis component.
    * @param {string} type Name of the vis component. Should match a key in this.availableComponents.
    */
-  addComponent(name, entities, type){
+  addComponent(name, attributes, type){
     if(!d3.keys(this.state.components).includes(name)){
       let newInstance = React.createElement(this.availableComponents[type],{},null)
 
       this.setState(prevState=>{
         prevState.layout[name] = {x: 0, y: 0, w: 2, h: 4, isDraggable:true};
-        prevState.visComponents[name]={entities:entities,instance:newInstance};
+        prevState.visComponents[name]={attributes:attributes,instance:newInstance};
         return prevState;
       });
     }
@@ -127,8 +125,7 @@ class Explorer extends React.Component{
           <VisWrapper width={this.state.layout[c.key].w * Math.trunc(document.body.clientWidth/6)- 15} 
                       height={this.state.layout[c.key].h * 90 + (this.state.layout[c.key].h - 1)*10 - 30}
                       name={c.key}
-                      entities={c.value.entities}
-                      data={this.state.data}
+                      attributes={c.value.attributes}
                       removeComponent={this.removeComponent}>
                       {c.value.instance}
           </VisWrapper>
@@ -143,6 +140,7 @@ class Explorer extends React.Component{
               name={"Component Selector"}
               addComponent={this.addComponent}
               entities={this.state.available_entities}
+              data={this.state.data}
               availableComponents={d3.keys(this.availableComponents)}>
               <ComponentSelector/>
         </VisSelectorWrapper>

@@ -318,8 +318,9 @@ div#OptionTags div.tag{
   display: inline-block;
   min-width: 4em;
   border: solid 2px #18bc9c;
-  border-radius: 15%;
-  height:1.4em;
+  padding: 0 3px 0 3px;
+  margin: 3px;
+  height:1.6em;
 }
 
 div#OptionTags div.tag#add-tag{

@@ -23,21 +23,10 @@ class OptionTags extends React.Component{
         this.renderTags = this.renderTags.bind(this);
         this.toggleOptions = this.toggleOptions.bind(this);
         this.toggleSelection = this.toggleSelection.bind(this);
-
+        this.addTag = this.addTag.bind(this);
         this.aggregationOptions = ['none', 'count']
     }    
 
-    renderTags(){
-        return(
-            this.props.tags.map(tag=>(
-                <div className="tag" key={tag.name}>
-                    <span> {tag.type} </span>
-                    <span> {tag.name} </span>
-                    <span><a onClick={()=>this.props.remove(tag)}> X </a></span>
-                </div>
-            ))
-        );
-    }
 
     toggleOptions(){
         this.setState(prev=>{
@@ -56,6 +45,43 @@ class OptionTags extends React.Component{
                 return(prevState);
             });
     };
+
+    addTag(){
+        if(this.state.type.length>0 && this.state.attribute.length>0 &&
+           this.state.aggregation.length>0 && this.state.aggregation_term.length>0){
+            let name = this.state.attribute;
+            if(this.state.aggregation!='none' && this.state.aggregation_term!='none')
+                name += ' '+this.state.aggregation+' by '+this.state.aggregation_term;
+            
+            this.props.addTag({
+                name: name,
+                type: this.state.type,
+                attribute: this.state.attribute,
+                aggregation: this.state.aggregation,
+                aggregation_term: this.state.aggregation!='none'?this.state.aggregation_term:'none',
+            });
+            this.setState({
+                addingTag: false,
+                type: 'string',
+                attribute: '',
+                aggregation: 'none',
+                aggregation_term: 'none',
+            });
+        }
+    }
+    
+    renderTags(){
+        return(
+            this.props.tags.map(tag=>(
+                <div className="tag" key={tag.name}>
+                    <span> {tag.type} </span>
+                    <span> {tag.name} </span>
+                    <span> {tag.data_length} </span>
+                    <span><a onClick={()=>this.props.removeTag(tag)}> X </a></span>
+                </div>
+            ))
+        );
+    }
 
     render(){
         const style = (type, e)=>this.state[type] == e?{cursor:"pointer",color:"#18bc9c"}:{cursor:"pointer",color:"black"};
