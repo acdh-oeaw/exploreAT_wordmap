@@ -36,7 +36,6 @@ class PieChart extends React.Component{
     }
 
     selectAttribute(attribute){
-        console.log(attribute)
         this.setState({data:attribute.data, sector_dimension:attribute.name, total:attribute.data_total})
     }
 

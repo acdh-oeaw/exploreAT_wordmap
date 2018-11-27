@@ -478,6 +478,11 @@ div#Table{
 	overflow: scroll;
 }
 
+div#Table p{
+  margin: 0 10px 0 5px;
+  padding-top: 5px;
+}
+
 /* Old rdf explorer ------------------------------------------------------------------
 */
 
