@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack --mode production",
-    "dev": "webpack-dev-server --host 0.0.0.0 --mode development --hot"
+    "start": "webpack --mode production --env.ENTITIES_FROM_RDF",
+    "dev": "webpack-dev-server --host 0.0.0.0 --mode development --hot --env.ENTITIES_FROM_RDF"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

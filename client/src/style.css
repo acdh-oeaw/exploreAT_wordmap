@@ -353,17 +353,23 @@ div#loader p{
 
 /* VisWrapper ---------------------------------------------------------------------------
 */
+.react-grid-item > .react-resizable-handle{
+  right:-5px;
+}
+
 div.visWrapper{
-	border: solid 2px grey;
+	border: solid 2px lightgrey;
+  box-shadow: rgba(0, 0, 0, 0.14) 1px 2px 2px 0px, rgba(0, 0, 0, 0.2) 2px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 5px 9px 0px;
 }
 
 div.visWrapper div.header{
-	border: solid 2px black;
+	background-color: lightgrey;
 	display:flex;
 	flex-direction:row;
 	align-items: center;
 	justify-content: space-between;
 	padding:1px;
+  line-height: 1.1em;
 }
 
 div.visWrapper div.header p{
@@ -374,7 +380,7 @@ div.visWrapper div.header p{
     display: inline-block;
     padding-right: 7px;
     padding-left: 7px;
-    height: 1em;
+    
     margin: 0;
     font-weight: bold;
 }

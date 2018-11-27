@@ -36,6 +36,7 @@ class Dummy extends React.Component{
             width: this.props.width+"px",
             height: (this.props.height)+"px"
         }
+        console.log(this.props)
         return(
             <div id="Dummy" className="visualization" style={size} ref={node => this.domElement = node}>
                 <p style={{margin:0}}>Dummy component for {this.props.entities.map(e=>(<span key={e}>{e}</span>))} {this.props.height}</p>

@@ -124,8 +124,8 @@ class Explorer extends React.Component{
     // Display vis component intances through a wrapper class
     const visComponents = d3.entries(this.state.visComponents).map(c=>(
         <div key={c.key}>
-          <VisWrapper width={this.state.layout[c.key].w * Math.trunc(document.body.clientWidth/6)- 25} 
-                      height={this.state.layout[c.key].h * 90 + (this.state.layout[c.key].h - 1)*10 - 40}
+          <VisWrapper width={this.state.layout[c.key].w * Math.trunc(document.body.clientWidth/6)- 15} 
+                      height={this.state.layout[c.key].h * 90 + (this.state.layout[c.key].h - 1)*10 - 30}
                       name={c.key}
                       entities={c.value.entities}
                       data={this.state.data}
@@ -139,7 +139,7 @@ class Explorer extends React.Component{
     visComponents.push(
       <div key="selector" style={({display: this.state.loaded===true?'block':'none'})}>
         <VisSelectorWrapper width={this.state.layout.selector.w * Math.trunc(document.body.clientWidth/6) - 25} 
-              height={this.state.layout.selector.h * 90 + (this.state.layout.selector.h - 1)*10 - 55}
+              height={this.state.layout.selector.h * 90 + (this.state.layout.selector.h - 1)*10 - 45}
               name={"Component Selector"}
               addComponent={this.addComponent}
               entities={this.state.available_entities}
