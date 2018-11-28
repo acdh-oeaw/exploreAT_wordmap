@@ -1,19 +1,20 @@
 import React from "react";
 import * as d3 from 'd3';
-import { sparql } from 'd3-sparql'
+import { sparql } from 'd3-sparql';
 import gridStyleLayout from '../../node_modules/react-grid-layout/css/styles.css';
 import gridStyleResizable from '../../node_modules/react-resizable/css/styles.css';
 import { BrowserRouter as Route, NavLink } from "react-router-dom";
 import RGL, { WidthProvider } from "react-grid-layout";
 import UrlParamWrapper from '../aux/UrlParamWrapper';
 
-import ComponentSelector from './vis/ComponentSelector'
-import VisSelectorWrapper from './vis/VisSelectorWrapper'
-import VisWrapper from './vis/VisWrapper'
-import Dummy from './vis/Dummy'
-import Table from './vis/Table'
-import PackedBubbles from './vis/PackedBubbles'
-import PieChart from './vis/PieChart'
+import ComponentSelector from './vis/ComponentSelector';
+import VisSelectorWrapper from './vis/VisSelectorWrapper';
+import VisWrapper from './vis/VisWrapper';
+import Dummy from './vis/Dummy';
+import Table from './vis/Table';
+import PackedBubbles from './vis/PackedBubbles';
+import PieChart from './vis/PieChart';
+import Histogram from './vis/Histogram';
 import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
 
 const ReactGridLayout = WidthProvider(RGL);
@@ -26,7 +27,7 @@ const ReactGridLayout = WidthProvider(RGL);
  * @param props
  * @return {React.Component} 
  */
-class Explorer extends React.Component{
+class Explorer extends React.Component{ 
   constructor(props){
     super(props);    
     
@@ -50,7 +51,7 @@ class Explorer extends React.Component{
     this.prefixes = this.wrapper.paramToUrl(this.props.match.params.prefixes).split(',').map(d=>({prefix:d.split('+')[0],uri:d.split('+')[1]}));
     this.triples = this.wrapper.paramToUrl(this.props.match.params.entities).split(',').filter(d=>d!="");
 
-    this.availableComponents = {"Dummy": Dummy, "Table": Table, "PieChart": PieChart};
+    this.availableComponents = {"Dummy": Dummy, "Table": Table, "PieChart": PieChart, "Histogram":Histogram};
   }
 
   componentDidMount(){

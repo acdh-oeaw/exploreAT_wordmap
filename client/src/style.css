@@ -641,3 +641,11 @@ div#PackedBubbles .footer {
       flex-direction: column;
     }
 }
+
+/* Histogram ---------------------------------------------------------------------------
+*/
+
+div#Histogram g#bars text{
+  text-anchor: middle;
+  font-weight: bold;
+}
