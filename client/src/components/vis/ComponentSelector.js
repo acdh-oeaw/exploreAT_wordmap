@@ -103,11 +103,14 @@ class ComponentSelector extends React.Component{
         this.state.attributes.map(a=>{
             if(a.data_length > 120)
                 vis_incompatibilities.push(`${a.name} takes too many different values to be used with a Pie Chart.`)
+            vis_incompatibilities.push(`${a.name} takes too many different values to be used with an Histogram.`)
         })
 
         if(false === this.state.attributes.reduce((a,b)=>a&&b.data_length<140,true)){
             useful_visualizations = useful_visualizations.filter(vis=>vis!='PieChart')
             vis_incompatibilities.push(`No attribute has less than 120 different values to be used with a Pie Chart.`)
+            useful_visualizations = useful_visualizations.filter(vis=>vis!='Histogram')
+            vis_incompatibilities.push(`No attribute has less than 120 different values to be used with an Histogram.`)
         }
 
         if(false === this.state.attributes.reduce((a,b)=>a&&(b.data_length == this.state.attributes[0].data_length),true)){
