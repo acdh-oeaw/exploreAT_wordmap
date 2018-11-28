@@ -14,7 +14,7 @@ import Dummy from './vis/Dummy';
 import Table from './vis/Table';
 import PackedBubbles from './vis/PackedBubbles';
 import PieChart from './vis/PieChart';
-import Histogram from './vis/Histogram';
+import BarChart from './vis/BarChart';
 import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
 
 const ReactGridLayout = WidthProvider(RGL);
@@ -51,7 +51,7 @@ class Explorer extends React.Component{
     this.prefixes = this.wrapper.paramToUrl(this.props.match.params.prefixes).split(',').map(d=>({prefix:d.split('+')[0],uri:d.split('+')[1]}));
     this.triples = this.wrapper.paramToUrl(this.props.match.params.entities).split(',').filter(d=>d!="");
 
-    this.availableComponents = {"Dummy": Dummy, "Table": Table, "PieChart": PieChart, "Histogram":Histogram};
+    this.availableComponents = {"Dummy": Dummy, "Table": Table, "PieChart": PieChart, "BarChart":BarChart};
   }
 
   componentDidMount(){

@@ -1,14 +1,14 @@
 import * as d3 from 'd3';
 import React from 'react';
 
-/* Histogram
- * Histogram component to show aggregated data
+/* BarChart
+ * BarChart component to show aggregated data
  * Vis components are provided with width, height and data props
  *
  * Data is provided as an array of objects
  */
 
-class Histogram extends React.Component{
+class BarChart extends React.Component{
     constructor(props){
         super(props);
 
@@ -110,4 +110,4 @@ class Histogram extends React.Component{
     }
 }
 
-export default Histogram;
+export default BarChart;
