@@ -50,6 +50,7 @@ function parseOntologyJson(json){
             d['rdf:about'], 
             ontology_parsed.ontology_base, 
             ontology_parsed.ontology_prefix);
+        entity.count = 1;
 
         if(attributes.includes('rdfs:comment'))
             entity.description = d['rdfs:comment'];

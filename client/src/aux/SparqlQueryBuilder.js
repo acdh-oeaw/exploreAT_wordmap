@@ -44,7 +44,7 @@ class SparqlQueryBuilder{
     getEntitiesOverviewQuery(graph_uri){
         return(
         `
-        SELECT DISTINCT ?object (count (?subject) as ?count)
+        SELECT DISTINCT ?object (count (distinct ?subject) as ?count)
         from <`+graph_uri+`>
         WHERE {
             ?subject <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?object.
@@ -72,6 +72,23 @@ class SparqlQueryBuilder{
         }
         limit 60
         `);
+    }
+
+    /**
+     * getEntityCount
+     * Provides a SPARQL query to retirieve the count of different subjects for a specific entity.
+     *
+     * @param {string} URI for the graph it is intended to query for.
+     * @return {string} The query.
+     */
+    getEntityCountQuery(entity, prefix){
+        let query = "";
+        query += `PREFIX ${prefix.prefix}: <${prefix.uri}#>\n`;
+        query += 'SELECT (count (?subject) as ?count)';
+        query += '\nWHERE{ \n';
+        query += ` GRAPH ?g {?subject <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ${entity}}`;
+        query += '}';
+        return query;
     }
 
     /**

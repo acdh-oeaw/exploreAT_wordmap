@@ -213,7 +213,7 @@ class EntitySelector extends React.Component{
                     <EntityForceLayout 
                          width={'100%'}
                          height={'50%'}
-                         entities={this.state.ontology.entities.map(e=>({entity:e.name, count:20}))}
+                         entities={this.state.ontology.entities.map(e=>({entity:e.name, count:e.count}))}
                          relationships={this.state.ontology.relationships}
                          selectEntity={this.selectNode}
                          selectRelationship={this.selectRelationship}

@@ -2,7 +2,9 @@ import React from "react";
 import { BrowserRouter as Route, NavLink } from "react-router-dom";
 import * as d3 from 'd3';
 import UrlParamWrapper from '../aux/UrlParamWrapper';
-import parseOntologyJson from '../aux/OntologyParser'
+import parseOntologyJson from '../aux/OntologyParser';
+import SparqlQueryBuilder from '../aux/SparqlQueryBuilder.js';
+import { sparql } from 'd3-sparql';
 
 const xmlparser = require('fast-xml-parser');
 
@@ -25,12 +27,15 @@ class RdfBasedSourceSelector extends React.Component{
             ontology_from_file : false,
         };
 
+        this.sparql = sparql;
+        this.sparqlQueries = new SparqlQueryBuilder();
         this.wrapper = new UrlParamWrapper();
         this.handleOntologyUrlChange = this.handleOntologyUrlChange.bind(this);
         this.handlePrefixChange = this.handlePrefixChange.bind(this);
         this.handleSparqlChange = this.handleSparqlChange.bind(this);
         this.handleOntologyFileChange = this.handleOntologyFileChange.bind(this);
         this.toggleOntologySource = this.toggleOntologySource.bind(this);
+        this.setSources = this.setSources.bind(this);
 
     }
 
@@ -46,6 +51,33 @@ class RdfBasedSourceSelector extends React.Component{
         fr.onload = (e)=> this.setState({ontology: (parseOntology(e.target.result))});
 
         fr.readAsText(event.target.files[0]);
+    }
+
+    setSources(ontology, sparql){
+        let retrieved = 0;
+        let promises = [];
+        ontology.entities.map(e=>{
+            // A promise for the number of different entries in the database
+            promises.push(new Promise((resolve,reject)=>{
+                this.sparql(this.state.sparql, 
+                    this.sparqlQueries.getEntityCountQuery(e.name, {prefix:ontology.ontology_prefix, uri:ontology.ontology_base}), 
+                    (err, data) => {
+                        if (data && !err) {
+                            resolve(data)
+                        } else if (err) throw err
+                    });
+            }).then((count)=>{
+                retrieved += 1;
+                for(let i =0; i<ontology.entities.length; i++){
+                    if(ontology.entities[i].name == e.name){
+                        ontology.entities[i].count = count[0].count.valueOf();
+                        break;
+                    }
+                }
+                if(retrieved == ontology.entities.length)
+                    this.props.setSources(ontology, sparql);
+            }))
+        })
     }
      
 	handleOntologyUrlChange(event){
@@ -96,7 +128,7 @@ class RdfBasedSourceSelector extends React.Component{
 			          <input type="text" value={this.state.sparql} onChange={this.handleSparqlChange} />
 			        </label>
 		      	</form>
-                <a onClick={()=>this.props.setSources(this.state.ontology, this.state.sparql)} style={
+                <a onClick={()=>this.setSources(this.state.ontology, this.state.sparql)} style={
                     (this.state.ontology != null && this.state.sparql.length>0 && this.state.prefix.length>0)?{display:"block"}:{display:"none"}
                 }>Go</a>
 	      	</div>
