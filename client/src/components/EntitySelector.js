@@ -42,6 +42,7 @@ class EntitySelector extends React.Component{
 
 		this.selectAttribute = this.selectAttribute.bind(this);
 		this.attributeToQuery = this.attributeToQuery.bind(this);
+		this.relationshipToQuery = this.relationshipToQuery.bind(this);
 		this.selectNode = this.selectNode.bind(this);
 		this.selectRelationship = this.selectRelationship.bind(this);
 		this.resetQuery = this.resetQuery.bind(this);
@@ -75,6 +76,32 @@ class EntitySelector extends React.Component{
 		return(object);
 	}
 
+	relationshipToQuery(relationship){
+		const attribute = relationship.relationship, origin=relationship.source.entity;
+		// predicateToSparql wrapps the predicate in <> if it does no use a prefix
+		const predicateToSparql = (p)=>((p.search('http://')!=-1)?('<'+p+'>'):p);
+
+		// getAttributeForElement retrieves the desired attribute for the element
+		// of a given array. The accesor provides a way to compare by the type of
+		// the value given in "element"
+		const getAttributeForElement = (array, element, attribute, accesor)=>(
+			array.reduce((final, actual)=>(
+				accesor(actual)==element?actual[attribute]:final), undefined)
+			);
+
+		let object = {};
+
+		if(attribute && attribute.length>0){
+			object.subject = '?'+this.wrapper.nameOfEntity( origin);
+			object.predicate = this.sparqlQueries.shorttenURIwithPrefix(this.state.ontology.ontology_base, this.state.ontology.ontology_prefix, attribute);
+			
+			object.target = relationship.target.entity;
+			object.object = '?'+this.wrapper.nameOfEntity( relationship.target.entity);
+			object.sparql_triple = `${object.subject} ${predicateToSparql(object.predicate)} ${object.object}`;
+		}
+		return(object);
+	}
+
 	selectNode(entity){
 		if(this.state.test_nodes.length==0){
 			if(entity && entity.length>0){
@@ -93,7 +120,7 @@ class EntitySelector extends React.Component{
 
 	selectRelationship(relationship){
 		if(relationship && relationship.source.entity == this.state.active_nodes[this.state.active_nodes.length-1]){
-			const query = this.attributeToQuery(relationship.relationship ,relationship.source.entity)
+			const query = this.relationshipToQuery(relationship)
 			sparql(this.state.sparql, this.sparqlQueries.getEntityAttributes(this.state.ontology.ontology_base, this.state.ontology.ontology_prefix, query.target), (err, data) => {
 		      	if (data && !err) {
 		        	this.setState(prevState=>{
