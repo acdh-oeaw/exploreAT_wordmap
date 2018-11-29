@@ -119,6 +119,7 @@ class EntityForceLayout extends React.Component{
 		const linkForce = d3.forceLink().distance(160);
 
 		const simulation = d3.forceSimulation()
+			.alphaDecay(0.01)
 			.force('charge', d3.forceManyBody().strength(-45))
 			.force('center', d3.forceCenter(d3.select('svg').node().getBoundingClientRect().width/2, 100))
 			.force('collide', d3.forceCollide(function(d){
@@ -129,6 +130,7 @@ class EntityForceLayout extends React.Component{
 
 		simulation.nodes(this.props.entities);
 		simulation.force("link").links(edges);
+		simulation.current_ticks = 0;
 
 		this.simulation = simulation;
 
@@ -176,6 +178,7 @@ class EntityForceLayout extends React.Component{
       		.text(d=>`${d.count} diferent entries`);
 
 		function forceTick() {
+			simulation.current_ticks += 1;
 			const rect = d3.select('svg').node().getBoundingClientRect(),
 		    width = rect.width,
 		    height = rect.height;

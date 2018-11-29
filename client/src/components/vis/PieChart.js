@@ -122,7 +122,7 @@ class PieChart extends React.Component{
                             const legend = d3.entries(this.state.data).map((d,i)=>(
                                 <g transform={`translate(0,${i*15})`} key={d.key}>
                                     <circle cx="0" cy="0" r="6" fill={colorScale(i)}></circle>
-                                    <text x="5" y="5">{d.key} ( {d.value} , {Math.trunc(d.value*100/this.state.total)}% )</text>
+                                    <text x="5" y="5">{d.key} ( {d.value} )</text>
                                 </g>
                             ));
                             return(legend);

@@ -51,7 +51,7 @@ class BarChart extends React.Component{
             const bar = (<rect fill={colorScale(i)} 
                 x={0}
                 y={0}
-                width={bar_width-10}
+                width={bar_width-2}
                 height={yScale(d.value)}></rect>);
             console.log(0,d3.values(this.state.data).reduce((a,b)=>a>b?a:b,0), dimensions.height, d.value, yScale(d.value))
             

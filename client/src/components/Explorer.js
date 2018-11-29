@@ -10,12 +10,12 @@ import UrlParamWrapper from '../aux/UrlParamWrapper';
 import ComponentSelector from './vis/ComponentSelector';
 import VisSelectorWrapper from './vis/VisSelectorWrapper';
 import VisWrapper from './vis/VisWrapper';
-import Dummy from './vis/Dummy';
 import Table from './vis/Table';
 import PackedBubbles from './vis/PackedBubbles';
 import PieChart from './vis/PieChart';
 import BarChart from './vis/BarChart';
 import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
+import ParallelCoordinates from './vis/ParallelCoordinates';
 
 const ReactGridLayout = WidthProvider(RGL);
 
@@ -51,7 +51,7 @@ class Explorer extends React.Component{
     this.prefixes = this.wrapper.paramToUrl(this.props.match.params.prefixes).split(',').map(d=>({prefix:d.split('+')[0],uri:d.split('+')[1]}));
     this.triples = this.wrapper.paramToUrl(this.props.match.params.entities).split(',').filter(d=>d!="");
 
-    this.availableComponents = {"Dummy": Dummy, "Table": Table, "PieChart": PieChart, "BarChart":BarChart};
+    this.availableComponents = {"Table": Table, "Pie Chart": PieChart, "Bar Chart":BarChart, "Parallel Coordinates": ParallelCoordinates};
   }
 
   componentDidMount(){
