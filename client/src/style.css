@@ -649,3 +649,17 @@ div#Histogram g#bars text{
   text-anchor: middle;
   font-weight: bold;
 }
+
+/* Parallel coordinates -----------------------------------------------------------------
+*/
+
+div#ParallelCoordinates{
+  margin-left: 2em;
+  margin-right: 2em;
+}
+
+div#ParallelCoordinates path{
+  stroke-width: 1px;
+  fill: none;
+  stroke-linecap:"round"
+}
