@@ -9,7 +9,7 @@ import React from 'react';
  */
  const params = {
     brush_width: 20,
-    legendWidth: 100,
+    legendWidth: 250,
     paddingLeft:60,
     paddingTop: 28,
     paddingRight: 28,
@@ -204,10 +204,6 @@ class ParallelCoordinates extends React.Component{
 
         return(
             <div id="ParallelCoordinates" className="visualization" style={size} ref={node => this.domElement = node}>
-                <p style={{margin:0}}>Add variables to the parallel coordinates : {this.props.attributes.map(e=>(
-                    <span key={e.name} className="option"> {e.name} </span>
-                ))}</p>
-
                 <svg ref={node => this.svg = node} 
                 width={this.props.width - params.legendWidth}
                 height={this.props.height}>
