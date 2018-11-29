@@ -57,7 +57,7 @@ class OptionTags extends React.Component{
                 name: name,
                 type: this.state.type,
                 attribute: this.state.attribute,
-                aggregation: this.state.aggregation,
+                aggregation: this.state.aggregation_term!='none'?this.state.aggregation:'none',
                 aggregation_term: this.state.aggregation!='none'?this.state.aggregation_term:'none',
             });
             this.setState({
@@ -95,7 +95,7 @@ class OptionTags extends React.Component{
                 <div id="options" style={{display: this.state.addingTag===true?'block':'none'}}>
                     <div id="table">
                         <ul>
-                            <li>Attribute</li><hr/>
+                            <li>Variable</li><hr/>
                             {this.props.options.map(option=>(
                                 <li key={option} 
                                     onClick={()=>this.toggleSelection('attribute', option)}
@@ -103,15 +103,15 @@ class OptionTags extends React.Component{
                             ))}
                         </ul>
                         <ul>
-                            <li>Aggregation</li><hr/>
+                            <li>Metric</li><hr/>
                             {this.aggregationOptions.map(option=>(
                                 <li key={option} 
                                     onClick={()=>this.toggleSelection('aggregation', option)}
                                     style={style('aggregation',option)}>{option}</li>
                             ))}
                         </ul>
-                        <ul>
-                            <li>Aggregate by</li><hr/>
+                        <ul style={{display:this.state.aggregation!='none'?'initial':'none'}}>
+                            <li>Group by</li><hr/>
                             <li onClick={()=>this.toggleSelection('aggregation_term', 'none')}
                                     style={style('aggregation_term','none')}>none</li>
                             {this.props.options.map(option=>(

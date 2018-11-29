@@ -79,11 +79,10 @@ class Table extends React.Component{
         return(
             <div id="Table" className="visualization" style={size}>
                 <p>
-                    Showing from <span>{ this.state.begin } </span> to 
-                    <span> { (this.props.attributes[0].data_length < this.state.end)?(this.props.attributes[0].data_length - this.state.begin):this.state.end } </span>
-                    of <span> { this.props.attributes[0].data_length } </span> total entries | 
-                    <span> { (this.state.begin > 0)?(<a onClick={()=>this.prevPage()}> prev page </a>):" prev page " } </span>
-                    <span> { (this.props.attributes[0].data_length > this.state.end)?(<a onClick={()=>this.nextPage()}> next page </a>):" next page " } </span>
+                    <span>{ this.state.begin } - { (this.props.attributes[0].data_length < this.state.end)?(this.props.attributes[0].data_length - this.state.begin):this.state.end } </span>
+                    <span> / { this.props.attributes[0].data_length } |  </span>  
+                    <span> { (this.state.begin > 0)?(<a onClick={()=>this.prevPage()}> prev page </a>):"  prev page  " } </span>
+                    <span> { (this.props.attributes[0].data_length > this.state.end)?(<a onClick={()=>this.nextPage()}> next page </a>):"  next page " } </span>
                 </p>
                 <table>
                     {this.renderHeader()}

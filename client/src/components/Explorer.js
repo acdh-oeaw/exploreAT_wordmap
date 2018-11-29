@@ -158,7 +158,7 @@ class Explorer extends React.Component{
           <div className="info">
               <span>Ontologies referenced : {this.prefixes.map(p=>p.prefix).join(', ')}</span>
               <span>Sparql entry point : {this.api_url}</span>
-              <span onClick={()=>alert(this.state.available_entities.map(e=>`${e}\n`))} style={{cursor:'pointer'}}>Show entities </span>
+              <span onClick={()=>alert(this.state.available_entities.map(e=>`${e}\n`))} style={{cursor:'pointer'}}>Show variables </span>
           </div>
         </div>
         <div className="content">

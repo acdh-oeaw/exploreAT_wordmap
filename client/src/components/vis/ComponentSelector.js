@@ -130,7 +130,7 @@ class ComponentSelector extends React.Component{
             return(
             <div className="menu-panel">
                 <ul>
-                    <li>Attributes chosen <a onClick={()=>this.backToEntities()}>(back to selection)</a> :</li>
+                    <li>Variables chosen <a onClick={()=>this.backToEntities()}>(back to selection)</a> :</li>
                     <li>{this.state.attributes.reduce((a,b)=>b.name+', '+a, "")}</li>
                     <hr/><br/>
                     <li>Type of component to be created :</li>
@@ -143,6 +143,7 @@ class ComponentSelector extends React.Component{
                     </li>
                 </ul>
                 <a onClick={()=>alert(this.state.vis_incompatibilities.map(e=>`${e}\n`))} style={{cursor:'pointer'}}>Show incompatiblities </a>
+                <br/>
                 <a onClick={this.createComponent}>Create component</a>
             </div>
             );
@@ -155,7 +156,7 @@ class ComponentSelector extends React.Component{
                 <li><input type="text" value={this.state.name} onChange={this.handleNameChange} /></li>
             </ul>
             <ul>
-                <li>Attributes to explore on the new component :</li>
+                <li>Variables to explore on the new component :</li>
                 <li>
                     <OptionTags 
                         tags={this.state.attributes}
