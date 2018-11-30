@@ -66,7 +66,7 @@ class ParallelCoordinates extends React.Component{
             this.yAxis[x.key] = d3.axisLeft(x.value);
         });
 
-        this.colorScale = d3.scaleOrdinal( d3.schemeCategory10)
+        this.colorScale = d3.scaleOrdinal( d3.schemeSet3)
             .domain(this.yScales[this.props.attributes[0].name].domain());
         //Binding of class methods
         
@@ -210,7 +210,7 @@ class ParallelCoordinates extends React.Component{
       }
 
     updateColorAttribute(attribute){
-        this.colorScale = d3.scaleOrdinal( d3.schemeCategory10)
+        this.colorScale = d3.scaleOrdinal( d3.schemeSet3)
             .domain(this.yScales[attribute].domain())
 
         d3.select(this.active).selectAll('path')
@@ -239,23 +239,23 @@ class ParallelCoordinates extends React.Component{
                     <g ref={node => this.active = node} className={'active'}/>
                     <g className="legend" transform={`translate(${this.props.width - params.legendWidth },30)`}>
                         <g transform={`translate(0,0)`}>
-                            <text x="5" y="5">
+                            <text x="7" y="5">
                                 {this.state.colorAttribute}
                             </text>
                         </g>
                         {this.colorScale.domain().map((d,i)=>(
-                            (45 + i*15 > this.props.height-params.marginTop - params.paddingBottom)?'':
-                            <g transform={`translate(0,${15 + i*15})`} key={'legend-'+i}>
+                            (45 + i*16 > this.props.height-params.marginTop - params.paddingBottom)?'':
+                            <g transform={`translate(0,${17 + i*16})`} key={'legend-'+i}>
                                 <circle cx="0" cy="0" r="6" fill={this.colorScale(d)}></circle>
-                                <text x="5" y="5">
+                                <text x="7" y="5">
                                     {d}
                                 </text>
                             </g>
                         ))}
-                        {(this.colorScale.domain().length*15 + 45 <
+                        {(this.colorScale.domain().length*16 + 47 <
                           this.props.height-params.marginTop - params.paddingBottom)?'':
                             <g transform={`translate(0,${this.props.height-params.marginTop - params.paddingBottom - 35})`}>
-                                <text x="5" y="15"> . . . </text>
+                                <text x="7" y="15"> . . . </text>
                             </g>
                         }
                     </g>

@@ -7,6 +7,15 @@ import React from 'react';
  *
  * Data is provided as an array of objects
  */
+ const params = {
+    legendWidth: 200,
+    marginTop: 25, // for the selection of 
+    marginRight: 10, // because of the padding of the container
+    paddingLeft:10,
+    paddingTop: 10,
+    paddingRight: 10,
+    paddingBottom: 10,
+ };
 
 class PieChart extends React.Component{
     constructor(props){
@@ -70,12 +79,12 @@ class PieChart extends React.Component{
         }
 
         let rotationAccumulated = 0;
-        const colorScale = d3.scaleOrdinal( d3.schemeSet1);
+        const colorScale = d3.scaleOrdinal( d3.schemeSet3);
 
         const sectors = d3.entries(this.state.data).map((d,i)=>{
             const endAngle = rotationAccumulated + (360/this.state.total)*d.value;
-            let path = describeArc(dimensions.width/2, dimensions.height/2, dimensions.radius, rotationAccumulated, endAngle);
-            path +=` L${dimensions.width/2},${dimensions.height/2}`
+            let path = describeArc(dimensions.x, dimensions.y, dimensions.radius, rotationAccumulated, endAngle);
+            path +=` L${dimensions.x},${dimensions.y}`
             const sector = (<path
                 d={path}
                 fill={colorScale(i)}
@@ -92,47 +101,47 @@ class PieChart extends React.Component{
 
     render(){
         const size = {
-            width: this.props.width+"px",
-            height: (this.props.height)+"px"
+            x: params.paddingLeft + (this.props.width - params.marginRight-params.paddingLeft-params.paddingRight - params.legendWidth)/2,
+            y: params.marginTop-params.paddingTop+(this.props.height - params.marginTop-params.paddingTop-params.paddingBottom)/2,
+            width: (this.props.width - params.marginRight),
+            height: (this.props.height - params.marginTop),
+            radius: Math.min((this.props.height - params.marginTop-params.paddingTop-params.paddingBottom), 
+                    (this.props.width - params.marginRight-params.paddingLeft-params.paddingRight - params.legendWidth))/2
         }
 
-        const chartDimensions = {
-            width: (this.props.width * 0.8),
-            height: (this.props.height - 50),
-            radius: Math.min((this.props.height - 100), this.props.width)/2
-        }
+        console.log(size)
 
         const style = (e)=>this.state.sector_dimension==e?{cursor:"pointer",color:"#18bc9c", marginLeft:"5px"}:
         {cursor:"pointer",color:"black", marginLeft:"5px"};
 
         return(
-            <div id="PieChart" className="visualization" style={size} ref={node => this.domElement = node}>
+            <div id="PieChart" className="visualization" style={{height:this.props.height+'px', width:this.props.width+'px'}} ref={node => this.domElement = node}>
                 <p style={{margin:0}}>Select the attribute used for the sectors : {this.props.attributes.map(e=>(
                     <span key={e.name} onClick={()=>this.selectAttribute(e)} className="option" style={style(e.name)}> {e.name} </span>
                 ))}</p>
-                <svg style={{width:size.width, height:(chartDimensions.height+'px')}}>
+                <svg style={{width:size.width+'px', height:size.height+'px'}}>
                     <g>
                         <circle 
-                            cx={chartDimensions.width/2} 
-                            cy={chartDimensions.height/2} 
-                            r={chartDimensions.radius}
+                            cx={size.x} 
+                            cy={size.y} 
+                            r={size.radius}
                             fill="lightgrey"> 
 
                         </circle>
-                        {this.createSectors(chartDimensions)}
+                        {this.createSectors(size)}
                     </g>
-                    <g transform={`translate(${chartDimensions.width/2 + chartDimensions.radius + 20 },${30})`}>
+                    <g transform={`translate(${this.props.width - params.legendWidth },30)`}>
                         <g transform={`translate(0,0)`}>
-                            <text x="5" y="5">
+                            <text x="7" y="5">
                                 {this.state.legend} ( value )
                             </text>
                         </g>
                         {(()=>{
-                            const colorScale = d3.scaleOrdinal( d3.schemeSet1);
+                            const colorScale = d3.scaleOrdinal( d3.schemeSet3);
                             const legend = d3.entries(this.state.data).map((d,i)=>(
-                                <g transform={`translate(0,${15 + i*15})`} key={d.key}>
+                                <g transform={`translate(0,${17 + i*16})`} key={d.key}>
                                     <circle cx="0" cy="0" r="6" fill={colorScale(i)}></circle>
-                                    <text x="5" y="5">
+                                    <text x="7" y="5">
                                         {d.key.includes('/')?d.key.split('/')[d.key.split('/').length-1]:d.key} ( {d.value} )
                                     </text>
                                 </g>

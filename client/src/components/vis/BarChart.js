@@ -7,6 +7,15 @@ import React from 'react';
  *
  * Data is provided as an array of objects
  */
+  const params = {
+    legendWidth: 200,
+    marginTop: 25, // for the selection of 
+    marginRight: 10, // because of the padding of the container
+    paddingLeft:10,
+    paddingTop: 10,
+    paddingRight: 10,
+    paddingBottom: 10,
+ };
 
 class BarChart extends React.Component{
     constructor(props){
@@ -46,11 +55,11 @@ class BarChart extends React.Component{
 
     createBars(dimensions){
         let rotationAccumulated = 0;
-        const colorScale = d3.scaleOrdinal( d3.schemeSet1);
+        const colorScale = d3.scaleOrdinal( d3.schemeSet3);
         const yScale = d3.scaleLinear()
             .domain([0,d3.values(this.state.data).reduce((a,b)=>a>b?a:b,0)])
-            .range([0,dimensions.height-dimensions.margin]);
-        const bar_width = (dimensions.width-dimensions.margin)/d3.keys(this.state.data).length;
+            .range([params.paddingTop,dimensions.height-params.paddingBottom]);
+        const bar_width = (dimensions.width)/d3.keys(this.state.data).length;
 
         const bars = d3.entries(this.state.data).map((d,i)=>{
             const bar = (<rect fill={colorScale(i)} 
@@ -59,7 +68,7 @@ class BarChart extends React.Component{
                 width={bar_width-2}
                 height={yScale(d.value)}></rect>);
             
-            return(<g key={d.key} transform={`translate(${dimensions.margin + i*bar_width},${dimensions.height-dimensions.margin - yScale(d.value)})`}> 
+            return(<g key={d.key} transform={`translate(${params.paddingLeft + i*bar_width},${dimensions.height - yScale(d.value)})`}> 
                 {bar}
                 <text x={bar_width/2-5} y={25}>{d.value}</text>
                 <title>{d.key} - {d.value}</title>
@@ -71,42 +80,41 @@ class BarChart extends React.Component{
 
     render(){
         const size = {
-            width: this.props.width+"px",
-            height: (this.props.height)+"px"
+            width: (this.props.width - params.marginRight),
+            height: (this.props.height - params.marginTop),
         }
 
         const chartDimensions = {
-            width: (this.props.width * 0.7),
-            height: (this.props.height - 50),
-            margin: 10
+            width: (this.props.width - params.marginRight - params.paddingRight - params.paddingLeft - params.legendWidth),
+            height: (this.props.height - params.marginTop - params.paddingTop - params.paddingBottom),   
         }
 
         const style = (e)=>this.state.sector_dimension==e?{cursor:"pointer",color:"#18bc9c", marginLeft:"5px"}:
         {cursor:"pointer",color:"black", marginLeft:"5px"};
 
         return(
-            <div id="Histogram" className="visualization" style={size} ref={node => this.domElement = node}>
-                <p style={{margin:0}}>Select the attribute used for the bars : {this.props.attributes.map(e=>(
+            <div id="Histogram" className="visualization" style={{height:this.props.height+'px', width:this.props.width+'px'}} ref={node => this.domElement = node}>
+                <p style={{margin:'0 10px'}}>Select the attribute used for the bars : {this.props.attributes.map(e=>(
                     <span key={e.name} onClick={()=>this.selectAttribute(e)} className="option" style={style(e.name)}> {e.name} </span>
                 ))}</p>
-                <svg style={{width:size.width, height:(chartDimensions.height+'px')}}>
+                <svg style={size}>
                     <g id="bars">
                         {this.state.data!=null?this.createBars(chartDimensions):""}
                     </g>
-                    <g transform={`translate(${chartDimensions.width + 20 },${30})`}>
+                    <g transform={`translate(${this.props.width - params.legendWidth },30)`}>
                         <g transform={`translate(0,0)`}>
-                            <text x="5" y="5">
+                            <text x="7" y="5">
                                 {this.state.legend} ( value )
                             </text>
                         </g>
                         {(()=>{
                             let legend = "";
                             if(this.state.data != null){
-                                const colorScale = d3.scaleOrdinal( d3.schemeSet1);
+                                const colorScale = d3.scaleOrdinal( d3.schemeSet3);
                                 legend = d3.entries(this.state.data).map((d,i)=>(
-                                    <g transform={`translate(0,${15 + i*15})`} key={d.key}>
+                                    <g transform={`translate(0,${17 + i*16})`} key={d.key}>
                                         <circle cx="0" cy="0" r="6" fill={colorScale(i)}></circle>
-                                        <text x="5" y="5">
+                                        <text x="7" y="5">
                                             {d.key.includes('/')?d.key.split('/')[d.key.split('/').length-1]:d.key} ( {d.value} )
                                         </text>
                                     </g>
