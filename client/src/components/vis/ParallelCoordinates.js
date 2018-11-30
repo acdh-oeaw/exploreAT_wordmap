@@ -26,7 +26,10 @@ class ParallelCoordinates extends React.Component{
         for(let i=0; i<this.props.attributes[0].data_total; i++){
             let entry = {};
             this.props.attributes.map(attr=>{
-                entry[attr.name] = attr.data[attr.name][i].valueOf();
+                // The uris are shrotten 
+                let value = attr.data[attr.name][i].valueOf();
+                    value = value.includes('/')?value.split('/')[value.split('/').length-1]:value
+                entry[attr.name] = value;
             })
             this.data.push(entry);
         }
@@ -45,8 +48,10 @@ class ParallelCoordinates extends React.Component{
         this.props.attributes.map(x=>{
             const attribute_values = [];
                 x.data[x.name].map(e=>{
-                    if(!attribute_values.includes(e.valueOf()))
-                        attribute_values.push(e.valueOf());
+                    let value = e.valueOf();
+                        value = value.includes('/')?value.split('/')[value.split('/').length-1]:value;
+                    if(!attribute_values.includes(value))
+                        attribute_values.push(value);
                 });
             this.yScales[x.name] = d3.scalePoint()
                 .domain(attribute_values)
@@ -153,8 +158,10 @@ class ParallelCoordinates extends React.Component{
         this.props.attributes.map(x=>{
             const attribute_values = [];
                 x.data[x.name].map(e=>{
-                    if(!attribute_values.includes(e.valueOf()))
-                        attribute_values.push(e.valueOf());
+                    let value = e.valueOf();
+                        value = value.includes('/')?value.split('/')[value.split('/').length-1]:value;
+                    if(!attribute_values.includes(value))
+                        attribute_values.push(value);
                 });
             this.yScales[x.name] = d3.scalePoint()
                 .domain(attribute_values)

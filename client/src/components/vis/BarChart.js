@@ -53,7 +53,6 @@ class BarChart extends React.Component{
                 y={0}
                 width={bar_width-2}
                 height={yScale(d.value)}></rect>);
-            console.log(0,d3.values(this.state.data).reduce((a,b)=>a>b?a:b,0), dimensions.height, d.value, yScale(d.value))
             
             return(<g key={d.key} transform={`translate(${dimensions.margin + i*bar_width},${dimensions.height-dimensions.margin - yScale(d.value)})`}> 
                 {bar}
@@ -97,7 +96,9 @@ class BarChart extends React.Component{
                                 legend = d3.entries(this.state.data).map((d,i)=>(
                                     <g transform={`translate(0,${i*15})`} key={d.key}>
                                         <circle cx="0" cy="0" r="6" fill={colorScale(i)}></circle>
-                                        <text x="5" y="5">{d.key} ( {d.value} )</text>
+                                        <text x="5" y="5">
+                                            {d.key.includes('/')?d.key.split('/')[d.key.split('/').length-1]:d.key} ( {d.value} )
+                                        </text>
                                     </g>
                                 ));
                             }
