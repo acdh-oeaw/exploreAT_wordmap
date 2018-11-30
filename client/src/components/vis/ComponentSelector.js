@@ -100,6 +100,16 @@ class ComponentSelector extends React.Component{
         let useful_visualizations = this.props.availableComponents;
         const vis_incompatibilities = [];
 
+        if(this.state.attributes.length < 2){
+            useful_visualizations = useful_visualizations.filter(vis=>vis!='Parallel Coordinates');
+            vis_incompatibilities.push(`At least two values have to selected to use Parallel Coordinates.`);
+        }
+
+        if(true === this.state.attributes.reduce((a,b)=>a||b.aggregation!='none',false)){
+            useful_visualizations = useful_visualizations.filter(vis=>vis!='Parallel Coordinates');
+            vis_incompatibilities.push(`Metrics cannot be used with Parallel Coordinates.`);
+        }
+
         this.state.attributes.map(a=>{
             if(a.data_length > 120){
                 vis_incompatibilities.push(`${a.name} takes too many different values to be used with a Pie Chart.`);

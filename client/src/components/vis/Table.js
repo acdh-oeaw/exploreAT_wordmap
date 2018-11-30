@@ -34,10 +34,10 @@ class Table extends React.Component{
             const df = [];
             this.props.attributes.map(e=>{
                 if(e.aggregation=='none')
-                    df.push(<td key={e.attribute+i}>{e.data[e.attribute][i]}</td>);
+                    df.push(<td key={e.attribute+i}>{e.data[e.attribute][i].valueOf()}</td>);
                 else{
                     df.push(<td key={e.attribute+i}>{d3.entries(e.data)[i].key}</td>);
-                    df.push(<td key={e.name+i}>{d3.entries(e.data)[i].value}</td>);
+                    df.push(<td key={e.name+i}>{d3.entries(e.data)[i].value.valueOf()}</td>);
                 }
             });
             cells.push(<tr key={i}>{df}</tr>);
@@ -88,6 +88,12 @@ class Table extends React.Component{
                     {this.renderHeader()}
                     {this.renderCells(this.state.begin, this.state.end)}
                 </table>
+                <p>
+                    <span>{ this.state.begin } - { (this.props.attributes[0].data_length < this.state.end)?(this.props.attributes[0].data_length - this.state.begin):this.state.end } </span>
+                    <span> / { this.props.attributes[0].data_length } |  </span>  
+                    <span> { (this.state.begin > 0)?(<a onClick={()=>this.prevPage()}> prev page </a>):"  prev page  " } </span>
+                    <span> { (this.props.attributes[0].data_length > this.state.end)?(<a onClick={()=>this.nextPage()}> next page </a>):"  next page " } </span>
+                </p>
             </div>
         );
     }
