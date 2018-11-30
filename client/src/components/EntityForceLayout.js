@@ -119,7 +119,7 @@ class EntityForceLayout extends React.Component{
 		const linkForce = d3.forceLink().distance(160);
 
 		const simulation = d3.forceSimulation()
-			.alphaDecay(0.01)
+			.alphaDecay(0.025)
 			.force('charge', d3.forceManyBody().strength(-45))
 			.force('center', d3.forceCenter(d3.select('svg').node().getBoundingClientRect().width/2, 100))
 			.force('collide', d3.forceCollide(function(d){
@@ -209,7 +209,7 @@ class EntityForceLayout extends React.Component{
 		function dragstarted(d)
 		{
 			simulation.restart();
-			simulation.alpha(1.0);
+			simulation.alpha(1).alphaDecay(0.025);
 			d.fx = d.x;
 			d.fy = d.y;
 		}
@@ -224,7 +224,6 @@ class EntityForceLayout extends React.Component{
 		{
 			d.fx = null;
 			d.fy = null;
-			simulation.alphaTarget(0.1);
 		}
 	}
 

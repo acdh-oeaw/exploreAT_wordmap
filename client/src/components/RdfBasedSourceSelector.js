@@ -24,7 +24,7 @@ class RdfBasedSourceSelector extends React.Component{
             sparql:"http://localhost:3030/oldcan/query",
             ontology_url:"https://explorations4u.acdh.oeaw.ac.at/ontology/oldcan",
             ontology:null,
-            ontology_from_file : false,
+            ontology_from_file : true,
         };
 
         this.sparql = sparql;
