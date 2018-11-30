@@ -25,6 +25,18 @@ class VisWrapper extends React.Component{
 
     componentWillUpdate(nextProps, nextState){
     }
+    /*
+                        <button style={buttonStyle}
+                            className="button" 
+                            onClick={()=>console.log('null')}>    
+                            edit
+                        </button>
+                        <button style={buttonStyle}
+                            className="button" 
+                            onClick={()=>console.log('null')}>    
+                            export
+                        </button>
+    */
 
     render(){
         const buttonStyle = {
@@ -42,16 +54,7 @@ class VisWrapper extends React.Component{
             <div className="visWrapper" width={this.props.width} height={this.props.height}>
                 <div className="header">
                     <div>
-                        <button style={buttonStyle}
-                            className="button" 
-                            onClick={()=>console.log('null')}>    
-                            edit
-                        </button>
-                        <button style={buttonStyle}
-                            className="button" 
-                            onClick={()=>console.log('null')}>    
-                            export
-                        </button>
+                        
                     </div>
                     <p>{this.props.name}</p>
                     <button style={buttonStyle}
