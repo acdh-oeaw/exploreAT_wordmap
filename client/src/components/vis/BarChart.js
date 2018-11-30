@@ -70,7 +70,7 @@ class BarChart extends React.Component{
             
             return(<g key={d.key} transform={`translate(${params.paddingLeft + i*bar_width},${dimensions.height - yScale(d.value)})`}> 
                 {bar}
-                <text x={bar_width/2-5} y={25}>{d.value}</text>
+                <text x={2+ bar_width/2} y={15} className="barValue">{d.value}</text>
                 <title>{d.key} - {d.value}</title>
             </g>);
         });
@@ -93,7 +93,7 @@ class BarChart extends React.Component{
         {cursor:"pointer",color:"black", marginLeft:"5px"};
 
         return(
-            <div id="Histogram" className="visualization" style={{height:this.props.height+'px', width:this.props.width+'px'}} ref={node => this.domElement = node}>
+            <div id="BarChart" className="visualization" style={{height:this.props.height+'px', width:this.props.width+'px'}} ref={node => this.domElement = node}>
                 <p style={{margin:'0 10px'}}>Select the attribute used for the bars : {this.props.attributes.map(e=>(
                     <span key={e.name} onClick={()=>this.selectAttribute(e)} className="option" style={style(e.name)}> {e.name} </span>
                 ))}</p>
@@ -103,7 +103,7 @@ class BarChart extends React.Component{
                     </g>
                     <g transform={`translate(${this.props.width - params.legendWidth },30)`}>
                         <g transform={`translate(0,0)`}>
-                            <text x="7" y="5">
+                            <text x="7" y="0">
                                 {this.state.legend} ( value )
                             </text>
                         </g>
@@ -112,6 +112,7 @@ class BarChart extends React.Component{
                             if(this.state.data != null){
                                 const colorScale = d3.scaleOrdinal( d3.schemeSet3);
                                 legend = d3.entries(this.state.data).map((d,i)=>(
+                                    (55 + i*16 > this.props.height-params.marginTop - params.paddingBottom)?'':
                                     <g transform={`translate(0,${17 + i*16})`} key={d.key}>
                                         <circle cx="0" cy="0" r="6" fill={colorScale(i)}></circle>
                                         <text x="7" y="5">
@@ -122,6 +123,12 @@ class BarChart extends React.Component{
                             }
                             return(legend);
                         })()}
+                        {(d3.entries(this.state.data).length*16 + 55 <
+                          this.props.height-params.marginTop - params.paddingBottom)?'':
+                            <g transform={`translate(0,${this.props.height-params.marginTop - params.paddingBottom - 45})`}>
+                                <text x="7" y="15"> . . . </text>
+                            </g>
+                        }
                     </g>
                 </svg>
             </div>

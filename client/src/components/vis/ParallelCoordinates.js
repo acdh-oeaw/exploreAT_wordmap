@@ -239,7 +239,7 @@ class ParallelCoordinates extends React.Component{
                     <g ref={node => this.active = node} className={'active'}/>
                     <g className="legend" transform={`translate(${this.props.width - params.legendWidth },30)`}>
                         <g transform={`translate(0,0)`}>
-                            <text x="7" y="5">
+                            <text x="7" y="0">
                                 {this.state.colorAttribute}
                             </text>
                         </g>

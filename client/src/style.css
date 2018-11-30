@@ -642,12 +642,12 @@ div#PackedBubbles .footer {
     }
 }
 
-/* Histogram ---------------------------------------------------------------------------
+/* BarChart ---------------------------------------------------------------------------
 */
 
-div#Histogram g#bars text{
+div#BarChart g#bars text.barValue{
   text-anchor: middle;
-  font-weight: bold;
+  font-size: 0.8em;
 }
 
 /* Parallel coordinates -----------------------------------------------------------------

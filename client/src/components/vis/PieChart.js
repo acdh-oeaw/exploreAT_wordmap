@@ -130,24 +130,34 @@ class PieChart extends React.Component{
                         </circle>
                         {this.createSectors(size)}
                     </g>
-                    <g transform={`translate(${this.props.width - params.legendWidth },30)`}>
+                   <g transform={`translate(${this.props.width - params.legendWidth },30)`}>
                         <g transform={`translate(0,0)`}>
-                            <text x="7" y="5">
+                            <text x="7" y="0">
                                 {this.state.legend} ( value )
                             </text>
                         </g>
                         {(()=>{
-                            const colorScale = d3.scaleOrdinal( d3.schemeSet3);
-                            const legend = d3.entries(this.state.data).map((d,i)=>(
-                                <g transform={`translate(0,${17 + i*16})`} key={d.key}>
-                                    <circle cx="0" cy="0" r="6" fill={colorScale(i)}></circle>
-                                    <text x="7" y="5">
-                                        {d.key.includes('/')?d.key.split('/')[d.key.split('/').length-1]:d.key} ( {d.value} )
-                                    </text>
-                                </g>
-                            ));
+                            let legend = "";
+                            if(this.state.data != null){
+                                const colorScale = d3.scaleOrdinal( d3.schemeSet3);
+                                legend = d3.entries(this.state.data).map((d,i)=>(
+                                    (55 + i*16 > this.props.height-params.marginTop - params.paddingBottom)?'':
+                                    <g transform={`translate(0,${17 + i*16})`} key={d.key}>
+                                        <circle cx="0" cy="0" r="6" fill={colorScale(i)}></circle>
+                                        <text x="7" y="5">
+                                            {d.key.includes('/')?d.key.split('/')[d.key.split('/').length-1]:d.key} ( {d.value} )
+                                        </text>
+                                    </g>
+                                ));
+                            }
                             return(legend);
                         })()}
+                        {(d3.entries(this.state.data).length*16 + 55 <
+                          this.props.height-params.marginTop - params.paddingBottom)?'':
+                            <g transform={`translate(0,${this.props.height-params.marginTop - params.paddingBottom - 45})`}>
+                                <text x="7" y="15"> . . . </text>
+                            </g>
+                        }
                     </g>
                 </svg>
             </div>
