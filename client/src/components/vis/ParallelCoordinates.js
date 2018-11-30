@@ -9,9 +9,11 @@ import React from 'react';
  */
  const params = {
     brush_width: 20,
-    legendWidth: 250,
+    legendWidth: 200,
+    marginTop: 30, // for the selection of 
+    marginRight: 30, // because of the padding of the container
     paddingLeft:60,
-    paddingTop: 28,
+    paddingTop: 8,
     paddingRight: 28,
     paddingBottom: 28,
  };
@@ -20,7 +22,9 @@ class ParallelCoordinates extends React.Component{
     constructor(props){
         super(props);
 
-        this.state = {};
+        this.state = {
+            colorAttribute: this.props.attributes[0].name
+        };
 
         this.data = [];
         for(let i=0; i<this.props.attributes[0].data_total; i++){
@@ -38,11 +42,10 @@ class ParallelCoordinates extends React.Component{
         this.lineGenerator = d3.line();
         
         //Helper functions
-        this.colorScale = d3.scaleOrdinal( d3.schemeSet1);
 
         this.xScale = d3.scalePoint()
           .domain(this.props.attributes.map(x=>x.name))
-          .range([params.paddingLeft, this.props.width-params.paddingRight-params.legendWidth]);
+          .range([params.paddingLeft, this.props.width-params.paddingRight-params.legendWidth-params.marginRight]);
         
         this.yScales = {};
         this.props.attributes.map(x=>{
@@ -55,7 +58,7 @@ class ParallelCoordinates extends React.Component{
                 });
             this.yScales[x.name] = d3.scalePoint()
                 .domain(attribute_values)
-                .range([this.props.height-params.paddingBottom, params.paddingTop+20]);
+                .range([this.props.height-params.marginTop -params.paddingBottom, params.paddingTop + params.marginTop+20]);
             });
 
         this.yAxis = {};
@@ -63,6 +66,8 @@ class ParallelCoordinates extends React.Component{
             this.yAxis[x.key] = d3.axisLeft(x.value);
         });
 
+        this.colorScale = d3.scaleOrdinal( d3.schemeCategory10)
+            .domain(this.yScales[this.props.attributes[0].name].domain());
         //Binding of class methods
         
         this.linePath = this.linePath.bind(this);
@@ -70,6 +75,7 @@ class ParallelCoordinates extends React.Component{
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.updateScales = this.updateScales.bind(this);
         this.repositionScales = this.repositionScales.bind(this);
+        this.updateColorAttribute = this.updateColorAttribute.bind(this);
     }
 
     componentDidMount(){
@@ -110,7 +116,7 @@ class ParallelCoordinates extends React.Component{
           .enter()
             .append('path')
             .attr('d', d=>this.linePath(d))
-            .attr('stroke',(d,i)=>this.colorScale(i));
+            .attr('stroke',(d,i)=>this.colorScale(d[this.state.colorAttribute]));
 
         // Vertical axis for the features
         const featureAxisG = pcSvg.selectAll('g.feature')
@@ -132,7 +138,7 @@ class ParallelCoordinates extends React.Component{
         featureAxisG
           .append("text")
           .attr("transform", "rotate(-20)")
-          .attr('y', params.padding+10)
+          .attr('y', params.paddingTop+ params.marginTop + 10)
           .attr('x', -20)
           .text(d=>d.name);
     }
@@ -146,13 +152,13 @@ class ParallelCoordinates extends React.Component{
 
         active
             .attr('d', d=>this.linePath(d))
-            .attr('stroke',(d,i)=>this.colorScale(i));
+            .attr('stroke',(d,i)=>this.colorScale(d[this.state.colorAttribute]));
     }
 
     updateScales(){
         this.xScale = d3.scalePoint()
           .domain(this.props.attributes.map(x=>x.name))
-          .range([params.paddingLeft, this.props.width-params.paddingRight-params.legendWidth]);
+          .range([params.paddingLeft, this.props.width-params.paddingRight-params.legendWidth - params.marginRight]);
         
         this.yScales = {};
         this.props.attributes.map(x=>{
@@ -165,7 +171,7 @@ class ParallelCoordinates extends React.Component{
                 });
             this.yScales[x.name] = d3.scalePoint()
                 .domain(attribute_values)
-                .range([this.props.height-params.paddingBottom, params.paddingTop+20]);
+                .range([this.props.height-params.marginTop - params.paddingBottom, params.paddingTop + params.marginTop +20]);
             });
 
         this.yAxis = {};
@@ -198,10 +204,19 @@ class ParallelCoordinates extends React.Component{
         featureAxisG
           .append("text")
           .attr("transform", "rotate(-20)")
-          .attr('y', params.paddingTop+10)
+          .attr('y', params.paddingTop+ params.marginTop + 10)
           .attr('x', -20)
           .text(d=>d.name);
       }
+
+    updateColorAttribute(attribute){
+        this.colorScale = d3.scaleOrdinal( d3.schemeCategory10)
+            .domain(this.yScales[attribute].domain())
+
+        d3.select(this.active).selectAll('path')
+            .attr('stroke',(d,i)=>this.colorScale(d[attribute]));
+        this.setState({colorAttribute: attribute})
+    }
 
     render(){
         const size = {
@@ -209,13 +224,41 @@ class ParallelCoordinates extends React.Component{
             height: (this.props.height)+"px"
         }
 
+        const style = (e)=>this.state.colorAttribute==e?{cursor:"pointer",color:"#18bc9c", marginLeft:"5px"}:
+        {cursor:"pointer",color:"black", marginLeft:"5px"};
+
         return(
             <div id="ParallelCoordinates" className="visualization" style={size} ref={node => this.domElement = node}>
+                <p style={{margin:0}}>Select the variable used for coloring : {this.props.attributes.map(e=>(
+                    <span key={e.name} onClick={()=>this.updateColorAttribute(e.name)} className="option" style={style(e.name)}> {e.name} </span>
+                ))}</p>
                 <svg ref={node => this.svg = node} 
-                width={this.props.width - params.legendWidth}
-                height={this.props.height}>
+                width={this.props.width - params.marginRight}
+                height={this.props.height - params.marginTop}>
                     <g ref={node => this.inactive = node} className={'inactive'}/>
                     <g ref={node => this.active = node} className={'active'}/>
+                    <g className="legend" transform={`translate(${this.props.width - params.legendWidth },30)`}>
+                        <g transform={`translate(0,0)`}>
+                            <text x="5" y="5">
+                                {this.state.colorAttribute}
+                            </text>
+                        </g>
+                        {this.colorScale.domain().map((d,i)=>(
+                            (45 + i*15 > this.props.height-params.marginTop - params.paddingBottom)?'':
+                            <g transform={`translate(0,${15 + i*15})`} key={'legend-'+i}>
+                                <circle cx="0" cy="0" r="6" fill={this.colorScale(d)}></circle>
+                                <text x="5" y="5">
+                                    {d}
+                                </text>
+                            </g>
+                        ))}
+                        {(this.colorScale.domain().length*15 + 45 <
+                          this.props.height-params.marginTop - params.paddingBottom)?'':
+                            <g transform={`translate(0,${this.props.height-params.marginTop - params.paddingBottom - 35})`}>
+                                <text x="5" y="15"> . . . </text>
+                            </g>
+                        }
+                    </g>
                 </svg>
             </div>
         );

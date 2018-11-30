@@ -13,9 +13,10 @@ class BarChart extends React.Component{
         super(props);
 
         this.state = {
-            sector_dimension:"",
-            data: null,
-            total: 1
+            legend: this.props.attributes[0][this.props.attributes[0].aggregation_term!='none'?'aggregation_term':'name'],
+            sector_dimension:this.props.attributes[0].name,
+            data: this.props.attributes[0].data,
+            total: this.props.attributes[0].total
         };
 
         this.node = d3.select(this.node);
@@ -36,7 +37,11 @@ class BarChart extends React.Component{
     }
 
     selectAttribute(attribute){
-        this.setState({data:attribute.data, sector_dimension:attribute.name, total:attribute.data_total})
+        this.setState({
+            legend: attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
+            data:attribute.data, 
+            sector_dimension:attribute.name, 
+            total:attribute.data_total})
     }
 
     createBars(dimensions){
@@ -81,7 +86,7 @@ class BarChart extends React.Component{
 
         return(
             <div id="Histogram" className="visualization" style={size} ref={node => this.domElement = node}>
-                <p style={{margin:0}}>Select the attribute used for the sectors : {this.props.attributes.map(e=>(
+                <p style={{margin:0}}>Select the attribute used for the bars : {this.props.attributes.map(e=>(
                     <span key={e.name} onClick={()=>this.selectAttribute(e)} className="option" style={style(e.name)}> {e.name} </span>
                 ))}</p>
                 <svg style={{width:size.width, height:(chartDimensions.height+'px')}}>
@@ -89,12 +94,17 @@ class BarChart extends React.Component{
                         {this.state.data!=null?this.createBars(chartDimensions):""}
                     </g>
                     <g transform={`translate(${chartDimensions.width + 20 },${30})`}>
+                        <g transform={`translate(0,0)`}>
+                            <text x="5" y="5">
+                                {this.state.legend} ( value )
+                            </text>
+                        </g>
                         {(()=>{
                             let legend = "";
                             if(this.state.data != null){
                                 const colorScale = d3.scaleOrdinal( d3.schemeSet1);
                                 legend = d3.entries(this.state.data).map((d,i)=>(
-                                    <g transform={`translate(0,${i*15})`} key={d.key}>
+                                    <g transform={`translate(0,${15 + i*15})`} key={d.key}>
                                         <circle cx="0" cy="0" r="6" fill={colorScale(i)}></circle>
                                         <text x="5" y="5">
                                             {d.key.includes('/')?d.key.split('/')[d.key.split('/').length-1]:d.key} ( {d.value} )

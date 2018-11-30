@@ -13,9 +13,10 @@ class PieChart extends React.Component{
         super(props);
 
         this.state = {
-            sector_dimension:"",
-            data: {'_': 1},
-            total: 1
+            legend: this.props.attributes[0][this.props.attributes[0].aggregation_term!='none'?'aggregation_term':'name'],
+            sector_dimension:this.props.attributes[0].name,
+            data: this.props.attributes[0].data,
+            total: this.props.attributes[0].total
         };
 
         this.node = d3.select(this.node);
@@ -36,7 +37,11 @@ class PieChart extends React.Component{
     }
 
     selectAttribute(attribute){
-        this.setState({data:attribute.data, sector_dimension:attribute.name, total:attribute.data_total})
+        this.setState({
+            legend:attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
+            data:attribute.data, 
+            sector_dimension:attribute.name, 
+            total:attribute.data_total})
     }
 
     createSectors(dimensions){
@@ -117,10 +122,15 @@ class PieChart extends React.Component{
                         {this.createSectors(chartDimensions)}
                     </g>
                     <g transform={`translate(${chartDimensions.width/2 + chartDimensions.radius + 20 },${30})`}>
+                        <g transform={`translate(0,0)`}>
+                            <text x="5" y="5">
+                                {this.state.legend} ( value )
+                            </text>
+                        </g>
                         {(()=>{
                             const colorScale = d3.scaleOrdinal( d3.schemeSet1);
                             const legend = d3.entries(this.state.data).map((d,i)=>(
-                                <g transform={`translate(0,${i*15})`} key={d.key}>
+                                <g transform={`translate(0,${15 + i*15})`} key={d.key}>
                                     <circle cx="0" cy="0" r="6" fill={colorScale(i)}></circle>
                                     <text x="5" y="5">
                                         {d.key.includes('/')?d.key.split('/')[d.key.split('/').length-1]:d.key} ( {d.value} )
