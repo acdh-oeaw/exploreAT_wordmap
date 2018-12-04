@@ -662,3 +662,7 @@ div#ParallelCoordinates path{
   fill: none;
   stroke-linecap:"round"
 }
+
+div#ParallelCoordinates g.inactive path{
+  stroke:lightgrey;
+}

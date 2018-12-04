@@ -9,13 +9,14 @@ import React from 'react';
  */
  const params = {
     brush_width: 20,
-    legendWidth: 200,
+    legendWidth: 170,
     marginTop: 30, // for the selection of 
-    marginRight: 30, // because of the padding of the container
+    marginRight: 80, // because of the padding of the container
     paddingLeft:60,
     paddingTop: 8,
     paddingRight: 28,
     paddingBottom: 28,
+    axisTickLength:14
  };
 
 class ParallelCoordinates extends React.Component{
@@ -27,12 +28,14 @@ class ParallelCoordinates extends React.Component{
         };
 
         this.data = [];
+        this.filters = [];
+
         for(let i=0; i<this.props.attributes[0].data_total; i++){
             let entry = {};
             this.props.attributes.map(attr=>{
                 // The uris are shrotten 
                 let value = attr.data[attr.name][i].valueOf();
-                    value = value.includes('/')?value.split('/')[value.split('/').length-1]:value
+                    value = String(value).includes('/')?value.split('/')[value.split('/').length-1]:value
                 entry[attr.name] = value;
             })
             this.data.push(entry);
@@ -52,25 +55,44 @@ class ParallelCoordinates extends React.Component{
             const attribute_values = [];
                 x.data[x.name].map(e=>{
                     let value = e.valueOf();
-                        value = value.includes('/')?value.split('/')[value.split('/').length-1]:value;
+                        value = String(value).includes('/')?value.split('/')[value.split('/').length-1]:value;
                     if(!attribute_values.includes(value))
                         attribute_values.push(value);
                 });
             this.yScales[x.name] = d3.scalePoint()
                 .domain(attribute_values)
-                .range([this.props.height-params.marginTop -params.paddingBottom, params.paddingTop + params.marginTop+20]);
+                .range([this.props.height-params.marginTop -params.paddingBottom, params.paddingTop + params.marginTop+20])
             });
 
+
         this.yAxis = {};
+        d3.entries(this.yScales).map((x,i)=>{
+            if(i < d3.keys(this.yScales).length/2)
+                this.yAxis[x.key] = d3.axisLeft(x.value).tickFormat(d=>String(d).substring(0,params.axisTickLength));
+            else
+                this.yAxis[x.key] = d3.axisRight(x.value).tickFormat(d=>String(d).substring(0,params.axisTickLength));
+        });
+
+        this.yBrushes = {};
+        let extent = [
+            [-(params.brush_width/2), params.paddingTop + 20 + params.marginTop],
+            [params.brush_width/2, this.props.height-params.paddingBottom-params.marginTop]
+        ];
+
         d3.entries(this.yScales).map(x=>{
-            this.yAxis[x.key] = d3.axisLeft(x.value);
+            this.yBrushes[x.key]= d3.brushY()
+                .extent(extent)
+                .on('brush', ()=>this.brushEventHandler(x.key))
+                .on('end', ()=>this.brushEventHandler(x.key));
         });
 
         this.colorScale = d3.scaleOrdinal( d3.schemeSet3)
             .domain(this.yScales[this.props.attributes[0].name].domain());
         //Binding of class methods
         
+        this.inside = (x,feature)=>this.filters[feature][0]<=x && x <=this.filters[feature][1];
         this.linePath = this.linePath.bind(this);
+        this.selected = this.selected.bind(this);
         this.renderParallelCoordinates = this.renderParallelCoordinates.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.updateScales = this.updateScales.bind(this);
@@ -90,14 +112,48 @@ class ParallelCoordinates extends React.Component{
     }
 
     componentDidUpdate(prevProps, prevState, snapshot){
-      if(this.state.did_mount == true){
-        this.updateScales();
-        if(prevProps.width != this.props.width || prevProps.height != this.props.height){
-            this.repositionScales();
+        if(this.state.did_mount == true){
+            this.updateScales();
+            if(prevProps.width != this.props.width || prevProps.height != this.props.height){
+                this.repositionScales();
+            }
+            this.updateParallelCoordinates();
         }
-        this.updateParallelCoordinates();
-      }
-  }
+    }
+
+    brushEventHandler(feature){
+        if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") 
+            return; // ignore brush-by-zoom
+        if(d3.event.selection != null){
+            this.filters[feature] = d3.event.selection[0]>d3.event.selection[1]?[
+                    d3.event.selection[1],d3.event.selection[0]
+                ]:[
+                    d3.event.selection[0],d3.event.selection[1]
+                ];
+            d3.select('g.feature#'+feature+' g.axis')
+                .selectAll('text')
+                .style('fill', x=>this.inside(this.yScales[feature](x),feature)===true?'black':'lightgrey');
+        }else{
+            if(feature in this.filters)
+                delete(this.filters[feature]);
+            d3.select('g.feature#'+feature+' g.axis')
+                .selectAll('text')
+                .style('fill','black');
+        }
+        this.applyFilters();
+    }
+
+    selected(d){
+        const _filters = d3.entries(this.filters);
+        return _filters.every(f=>{
+            return f.value[0] <= this.yScales[f.key](d[f.key]) && this.yScales[f.key](d[f.key]) <= f.value[1];
+        });
+    }
+
+    applyFilters(){
+        d3.select('g.active').selectAll('path')
+          .style('display', d=>(this.selected(d)?null:'none'));
+    }
 
     linePath(d){
         const _data = d3.entries(d);
@@ -109,6 +165,12 @@ class ParallelCoordinates extends React.Component{
         const pcSvg = d3.select(this.svg)
           .attr('width', this.props.width)
           .attr('height', this.props.height);
+
+        d3.select(this.inactive).selectAll('path')
+            .data(this.data)
+            .enter()
+                .append('path')
+                .attr('d', d=>this.linePath(d));
 
         // active data
         d3.select(this.active).selectAll('path')
@@ -135,6 +197,15 @@ class ParallelCoordinates extends React.Component{
                 d3.select(this).call(yAxis[d.name]);
               });
 
+        const yBrushes = this.yBrushes;
+        featureAxisG
+          .each(function(d){
+            d3.select(this)
+              .append('g')
+              .attr('class','brush')
+              .call(yBrushes[d.name]);
+        });
+
         featureAxisG
           .append("text")
           .attr("transform", "rotate(-20)")
@@ -144,13 +215,22 @@ class ParallelCoordinates extends React.Component{
     }
 
     updateParallelCoordinates(){
+        // inactive data
+        let inactive = d3.select(this.inactive).selectAll('path')
+          .data(this.data)
+        inactive.exit().remove();
+        inactive.enter().append('path');
+
+        d3.select(this.inactive).selectAll('path')
+            .attr('d', d=>this.linePath(d));
+
         // active data
         let active = d3.select(this.active).selectAll('path')
           .data(this.data)
         active.exit().remove();
         active.enter().append('path');
 
-        active
+        d3.select(this.active).selectAll('path')
             .attr('d', d=>this.linePath(d))
             .attr('stroke',(d,i)=>this.colorScale(d[this.state.colorAttribute]));
     }
@@ -165,19 +245,36 @@ class ParallelCoordinates extends React.Component{
             const attribute_values = [];
                 x.data[x.name].map(e=>{
                     let value = e.valueOf();
-                        value = value.includes('/')?value.split('/')[value.split('/').length-1]:value;
+                        value = String(value).includes('/')?value.split('/')[value.split('/').length-1]:value;
                     if(!attribute_values.includes(value))
                         attribute_values.push(value);
                 });
             this.yScales[x.name] = d3.scalePoint()
                 .domain(attribute_values)
-                .range([this.props.height-params.marginTop - params.paddingBottom, params.paddingTop + params.marginTop +20]);
+                .range([this.props.height-params.marginTop - params.paddingBottom, params.paddingTop + params.marginTop +20])
             });
 
         this.yAxis = {};
-        d3.entries(this.yScales).map(x=>{
-            this.yAxis[x.key] = d3.axisLeft(x.value);
+        d3.entries(this.yScales).map((x,i)=>{
+            if(i < d3.keys(this.yScales).length/2)
+                this.yAxis[x.key] = d3.axisLeft(x.value).tickFormat(d=>String(d).substring(0,params.axisTickLength));
+            else
+                this.yAxis[x.key] = d3.axisRight(x.value).tickFormat(d=>String(d).substring(0,params.axisTickLength));
         });    
+
+        this.yBrushes = {};
+        let extent = [
+            [-(params.brush_width/2), params.paddingTop + 20 + params.marginTop],
+            [params.brush_width/2, this.props.height-params.paddingBottom-params.marginTop]
+        ];
+
+
+        d3.entries(this.yScales).map(x=>{
+              this.yBrushes[x.key]= d3.brushY()
+                .extent(extent)
+                .on('brush', ()=>this.brushEventHandler(x.key))
+                .on('end', ()=>this.brushEventHandler(x.key));
+        });
     }
 
     repositionScales(){
@@ -200,6 +297,16 @@ class ParallelCoordinates extends React.Component{
               .each(function(d){
                 d3.select(this).call(yAxis[d.name]);
               });
+
+        const yBrushes = this.yBrushes;
+
+        featureAxisG
+          .each(function(d){
+            d3.select(this)
+              .append('g')
+              .attr('class','brush')
+              .call(yBrushes[d.name]);
+        });
 
         featureAxisG
           .append("text")
