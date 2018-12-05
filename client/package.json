@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack --mode production --env.ENTITIES_FROM_RDF",
-    "dev": "webpack-dev-server --host 0.0.0.0 --mode development --hot --env.ENTITIES_FROM_RDF"
+    "dev": "./node_modules/.bin/webpack-dev-server --config webpack.dev.js --env.ENTITIES_FROM_RDF",
+    "build": "webpack --config webpack.prod.js --progress --env.ENTITIES_FROM_RDF"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
@@ -21,7 +22,9 @@
     "style-loader": "^0.21.0",
     "webpack": "^4.23.1",
     "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.10"
+    "webpack-dev-server": "^3.1.10",
+    "webpack-merge": "^4.1.4"
+
   },
   "dependencies": {
     "fast-xml-parser": "^3.12",
