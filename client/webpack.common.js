@@ -2,11 +2,13 @@ const path = require('path');
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const webpack = require("webpack");
 
 const outputDirectory = 'dist'
 
 
-module.exports = {
+module.exports = (env,args)=>{
+  return {
   entry: './src/index.js',
   output: {
     path: path.join(__dirname, outputDirectory),
@@ -42,19 +44,11 @@ module.exports = {
       }
     ]
   },
-  devServer: {
-    port: 3000,
-    open: true,
-    historyApiFallback: true,
-    proxy: {
-      '/api': 'http://0.0.0.0:8080'
-    }
-  },
-  devtool: "cheap-module-source-map",
   plugins: [
     new CleanWebpackPlugin([outputDirectory]),
     new HtmlWebPackPlugin({
       template: "./public/index.html"
     }),
   ]
+  }
 };
