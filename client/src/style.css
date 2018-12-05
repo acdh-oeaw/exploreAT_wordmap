@@ -1,4 +1,4 @@
-a{ cursor:pointer; } p{ cursor:default; }
+a{ cursor:pointer; color:#18bc9c;} p{ cursor:default; }
 
 /* App ---------------------------------------------------------------------------
 */
@@ -105,9 +105,9 @@ div.content div.header{
 }
 
 div.content div.header h2{
-	font-size: 2.5em;
+	font-size: 2em;
 	display: inline-block;
-	margin: 0 0 0 4em ;
+	margin: 0 0 0 5.3em ;
 }
 
 div.content div.header div.info{
@@ -116,15 +116,10 @@ div.content div.header div.info{
 	border-left: solid 3px #2c3e50;
 }
 
-div.content div.header div.info div:first-of-type{
-	border-bottom: solid 3px #2c3e50;
-}
-
 div.content div.header span{
 	font-size: 1.1em;
+  margin-right: 4em;
 }
-
-div.content div.header div.info div span{margin-right: 4em;}
 
 /* Sources ---------------------------------------------------------------------------
 */
@@ -137,6 +132,19 @@ div#source_selector{
 	justify-content: center;
 }
 
+/* Sources ---------------------------------------------------------------------------
+*/
+
+div#source_selector label#extra-label{
+  display: block;
+  margin-bottom: 17px;
+}
+
+div#source_selector span.toggleSource{
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 /* Entities ---------------------------------------------------------------------------
 */
 div#explorer.entitySelector #link-to-dashboard{
@@ -147,7 +155,7 @@ div#explorer.entitySelector #link-to-dashboard{
   padding-bottom: 6px;
 }
 
-div#explorer.entitySelector input{
+div#explorer.entitySelector .content input{
 	height: 1.1em;
 	border-color: lightgrey;
 	display:inline-block;
@@ -198,19 +206,20 @@ div#explorer div.content div#nodes{
 }
 
 
-line.link {
+path.link {
+    fill:none;
     stroke: black;
     stroke-opacity: .5;
 }
-line.link.active {
+path.link.active {
     stroke-opacity: .9;
     stroke: rgb(102, 180, 58);
 }
-line.link.selected {
+path.link.selected {
     stroke-opacity: .9;
   stroke: rgb(102, 180, 58);
 }
-line.link:hover{
+path.link:hover{
     stroke-opacity: .9;
     cursor: pointer;
 }
@@ -287,6 +296,64 @@ div#explorer div.content text#resetQueryButton:hover{
   stroke:crimson;
 }
 
+div#ComponentSelector input{
+  height:2em;
+  margin: 0;
+}
+
+/* Tag selector component
+*/
+div#OptionTags{
+  width:100%;
+  height: 100%;
+}
+
+div#OptionTags div#tags{
+  display:flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+div#OptionTags div.tag{
+  display: inline-block;
+  min-width: 4em;
+  border: solid 2px #18bc9c;
+  padding: 0 3px 0 3px;
+  margin: 3px;
+  height:1.6em;
+}
+
+div#OptionTags div.tag#add-tag{
+  border: dashed 1px #18bc9c;
+  padding-left:0.5em;
+}
+
+div#OptionTags div#options{
+  font-size: 0.85em;
+  padding:3px;
+  box-shadow: rgba(0, 0, 0, 0.34) 3px 2px 9px 1px;
+  width: 100%;
+  height:100%;
+}
+
+div#OptionTags div#options div#table{
+  width: 100%;
+  height:100%;
+  display: flex;
+  flex-direction: row;
+}
+
+div#OptionTags div#options ul{
+  display: inline-block;
+  height: 100%;
+  width:30%;
+}
+
+div#OptionTags div#options a{
+  padding-bottom: 1px;
+  margin-right: 5px;
+}
+
 /* Loader
 */
 div#loader{
@@ -344,17 +411,23 @@ div#loader p{
 
 /* VisWrapper ---------------------------------------------------------------------------
 */
+.react-grid-item > .react-resizable-handle{
+  right:-5px;
+}
+
 div.visWrapper{
-	border: solid 2px grey;
+	border: solid 2px lightgrey;
+  box-shadow: rgba(0, 0, 0, 0.14) 1px 2px 2px 0px, rgba(0, 0, 0, 0.2) 2px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 5px 9px 0px;
 }
 
 div.visWrapper div.header{
-	border: solid 2px black;
+	background-color: lightgrey;
 	display:flex;
 	flex-direction:row;
 	align-items: center;
 	justify-content: space-between;
 	padding:1px;
+  line-height: 1.1em;
 }
 
 div.visWrapper div.header p{
@@ -365,9 +438,26 @@ div.visWrapper div.header p{
     display: inline-block;
     padding-right: 7px;
     padding-left: 7px;
-    height: 1em;
+    
     margin: 0;
     font-weight: bold;
+}
+
+div.visWrapper hr{
+  color: #18bc9c;
+}
+
+div.visWrapper ul{
+  width:90%;
+  margin:8px;
+  padding:0;
+}
+
+div.visWrapper div.menu-panel{
+  width:100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* Buttons ---------------------------------------------------------------------------
@@ -386,6 +476,11 @@ button.button:hover{
 */
 div#Table{
 	overflow: scroll;
+}
+
+div#Table p{
+  margin: 0 10px 0 5px;
+  padding-top: 5px;
 }
 
 /* Old rdf explorer ------------------------------------------------------------------
@@ -545,4 +640,33 @@ div#PackedBubbles .footer {
       -webkit-flex-direction: column;
       flex-direction: column;
     }
+}
+
+/* BarChart ---------------------------------------------------------------------------
+*/
+
+div#BarChart g#bars text.barValue{
+  text-anchor: middle;
+  font-size: 0.8em;
+}
+
+/* Parallel coordinates -----------------------------------------------------------------
+*/
+
+div#ParallelCoordinates{
+  margin-left: 1em;
+}
+
+div#ParallelCoordinates path{
+  stroke-width: 1px;
+  fill: none;
+  stroke-linecap:"round"
+}
+
+div#ParallelCoordinates g.inactive path{
+  stroke:lightgrey;
+}
+
+div#ParallelCoordinates g.axis text{
+  font-size: 0.8em;
 }

@@ -1,13 +1,13 @@
 import * as d3 from 'd3';
 import React from 'react';
 
-/* Dummy
- * Dummy component for scaffolding vis components
+/* BarChart
+ * BarChart component to show aggregated data
  * Vis components are provided with width, height and data props
  *
  * Data is provided as an array of objects
  */
- const params = {
+  const params = {
     legendWidth: 200,
     marginTop: 25, // for the selection of 
     marginRight: 10, // because of the padding of the container
@@ -17,7 +17,7 @@ import React from 'react';
     paddingBottom: 10,
  };
 
-class PieChart extends React.Component{
+class BarChart extends React.Component{
     constructor(props){
         super(props);
 
@@ -29,7 +29,7 @@ class PieChart extends React.Component{
         };
 
         this.node = d3.select(this.node);
-        this.createSectors = this.createSectors.bind(this);
+        this.createBars = this.createBars.bind(this);
         this.selectAttribute = this.selectAttribute.bind(this);
     }
 
@@ -47,90 +47,61 @@ class PieChart extends React.Component{
 
     selectAttribute(attribute){
         this.setState({
-            legend:attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
+            legend: attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
             data:attribute.data, 
             sector_dimension:attribute.name, 
             total:attribute.data_total})
     }
 
-    createSectors(dimensions){
-        const polarToCartesian = (centerX, centerY, radius, angleInDegrees)=>{
-          var angleInRadians = (angleInDegrees-90) * Math.PI / 180.0;
-
-          return {
-            x: centerX + (radius * Math.cos(angleInRadians)),
-            y: centerY + (radius * Math.sin(angleInRadians))
-          };
-        }
-
-        const describeArc = (x, y, radius, startAngle, endAngle) =>{
-
-            var start = polarToCartesian(x, y, radius, endAngle);
-            var end = polarToCartesian(x, y, radius, startAngle);
-
-            var largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
-
-            var d = [
-                "M", start.x, start.y, 
-                "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y
-            ].join(" ");
-
-            return d;       
-        }
-
+    createBars(dimensions){
         let rotationAccumulated = 0;
         const colorScale = d3.scaleOrdinal( d3.schemeSet3);
+        const yScale = d3.scaleLinear()
+            .domain([0,d3.values(this.state.data).reduce((a,b)=>a>b?a:b,0)])
+            .range([params.paddingTop,dimensions.height-params.paddingBottom]);
+        const bar_width = (dimensions.width)/d3.keys(this.state.data).length;
 
-        const sectors = d3.entries(this.state.data).map((d,i)=>{
-            const endAngle = rotationAccumulated + (360/this.state.total)*d.value;
-            let path = describeArc(dimensions.x, dimensions.y, dimensions.radius, rotationAccumulated, endAngle);
-            path +=` L${dimensions.x},${dimensions.y}`
-            const sector = (<path
-                d={path}
-                fill={colorScale(i)}
-                ></path>);
-            rotationAccumulated = endAngle;
-            return(<g key={d.key}>
-                {sector}
-                <title>{d.key} ( {d.value} , {Math.trunc(d.value*100/this.state.total)}%)</title>
+        const bars = d3.entries(this.state.data).map((d,i)=>{
+            const bar = (<rect fill={colorScale(i)} 
+                x={0}
+                y={0}
+                width={bar_width-2}
+                height={yScale(d.value)}></rect>);
+            
+            return(<g key={d.key} transform={`translate(${params.paddingLeft + i*bar_width},${dimensions.height - yScale(d.value)})`}> 
+                {bar}
+                <text x={2+ bar_width/2} y={15} className="barValue">{d.value}</text>
+                <title>{d.key} - {d.value}</title>
             </g>);
         });
 
-        return sectors;
+        return bars;
     }
 
     render(){
         const size = {
-            x: params.paddingLeft + (this.props.width - params.marginRight-params.paddingLeft-params.paddingRight - params.legendWidth)/2,
-            y: params.marginTop-params.paddingTop+(this.props.height - params.marginTop-params.paddingTop-params.paddingBottom)/2,
             width: (this.props.width - params.marginRight),
             height: (this.props.height - params.marginTop),
-            radius: Math.min((this.props.height - params.marginTop-params.paddingTop-params.paddingBottom), 
-                    (this.props.width - params.marginRight-params.paddingLeft-params.paddingRight - params.legendWidth))/2
         }
 
-        console.log(size)
+        const chartDimensions = {
+            width: (this.props.width - params.marginRight - params.paddingRight - params.paddingLeft - params.legendWidth),
+            height: (this.props.height - params.marginTop - params.paddingTop - params.paddingBottom),   
+        }
 
         const style = (e)=>this.state.sector_dimension==e?{cursor:"pointer",color:"#18bc9c", marginLeft:"5px"}:
         {cursor:"pointer",color:"black", marginLeft:"5px"};
 
         return(
-            <div id="PieChart" className="visualization" style={{height:this.props.height+'px', width:this.props.width+'px'}} ref={node => this.domElement = node}>
-                <p style={{margin:0}}>Select the attribute used for the sectors : {this.props.attributes.map(e=>(
+            <div id="BarChart" className="visualization" style={{height:this.props.height+'px', width:this.props.width+'px'}} ref={node => this.domElement = node}>
+                <p style={{margin:'0 10px'}}>Select the attribute used for the bars : {this.props.attributes.map(e=>(
                     <span key={e.name} onClick={()=>this.selectAttribute(e)} className="option" style={style(e.name)}> {e.name} </span>
                 ))}</p>
-                <svg style={{width:size.width+'px', height:size.height+'px'}}>
-                    <g>
-                        <circle 
-                            cx={size.x} 
-                            cy={size.y} 
-                            r={size.radius}
-                            fill="lightgrey"> 
-
-                        </circle>
-                        {this.createSectors(size)}
+                <svg style={size}>
+                    <g id="bars">
+                        {this.state.data!=null?this.createBars(chartDimensions):""}
                     </g>
-                   <g transform={`translate(${this.props.width - params.legendWidth },30)`}>
+                    <g transform={`translate(${this.props.width - params.legendWidth },30)`}>
                         <g transform={`translate(0,0)`}>
                             <text x="7" y="0">
                                 {this.state.legend} ( value )
@@ -165,4 +136,4 @@ class PieChart extends React.Component{
     }
 }
 
-export default PieChart;
+export default BarChart;

@@ -2,7 +2,6 @@ import React from "react";
 import { BrowserRouter as Router, Route, NavLink } from "react-router-dom";
 import { Switch } from 'react-router';
 import { hot } from 'react-hot-loader';
-import SourceSelector from './SourceSelector';
 import EntitySelector from './EntitySelector';
 import Home from './Home';
 import Explorer from './Explorer';
@@ -26,7 +25,7 @@ const App = (props) => {
             </div>
             <div id="links">
               <NavLink to="/">Home</NavLink>
-              <NavLink to="/sources">Explorer</NavLink>
+              <NavLink to="/entities">Explorer</NavLink>
             </div>
           </div>
         </div>
@@ -34,10 +33,8 @@ const App = (props) => {
         <div className="content">
           <Switch>
             <Route exact path="/" component={Home}/>
-            <Route exact path="/sources" component={SourceSelector}/>
-            <Route exact path="/explorer/ontology/:ontology/prefix/:prefix/sparql/:sparql" component={EntitySelector}/>
-            <Route exact path="/explorer/ontology/:ontology/prefix/:prefix/sparql/:sparql/entities" component={EntitySelector}/>
-            <Route exact path="/explorer/ontology/:ontology/prefix/:prefix/sparql/:sparql/entities/:entities" component={Explorer}/>
+            <Route exact path="/entities/" component={EntitySelector}/>
+            <Route exact path="/explorer/prefixes/:prefixes/sparql/:sparql/entities/:entities" component={Explorer}/>
             <Route component={Home}/>
           </Switch>
         </div>

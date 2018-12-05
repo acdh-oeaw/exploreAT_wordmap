@@ -1,20 +1,21 @@
 import React from "react";
 import * as d3 from 'd3';
-import { sparql } from 'd3-sparql'
+import { sparql } from 'd3-sparql';
 import gridStyleLayout from '../../node_modules/react-grid-layout/css/styles.css';
 import gridStyleResizable from '../../node_modules/react-resizable/css/styles.css';
 import { BrowserRouter as Route, NavLink } from "react-router-dom";
 import RGL, { WidthProvider } from "react-grid-layout";
 import UrlParamWrapper from '../aux/UrlParamWrapper';
 
-import ComponentSelector from './vis/ComponentSelector'
-import VisSelectorWrapper from './vis/VisSelectorWrapper'
-import VisWrapper from './vis/VisWrapper'
-import Dummy from './vis/Dummy'
-import Table from './vis/Table'
-import PackedBubbles from './vis/PackedBubbles'
-import PieChart from './vis/PieChart'
+import ComponentSelector from './vis/ComponentSelector';
+import VisSelectorWrapper from './vis/VisSelectorWrapper';
+import VisWrapper from './vis/VisWrapper';
+import Table from './vis/Table';
+import PackedBubbles from './vis/PackedBubbles';
+import PieChart from './vis/PieChart';
+import BarChart from './vis/BarChart';
 import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
+import ParallelCoordinates from './vis/ParallelCoordinates';
 
 const ReactGridLayout = WidthProvider(RGL);
 
@@ -26,7 +27,7 @@ const ReactGridLayout = WidthProvider(RGL);
  * @param props
  * @return {React.Component} 
  */
-class Explorer extends React.Component{
+class Explorer extends React.Component{ 
   constructor(props){
     super(props);    
     
@@ -47,17 +48,14 @@ class Explorer extends React.Component{
     this.removeComponent = this.removeComponent.bind(this);
     // Url query param based parameters
     this.api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
-    this.ontology = this.wrapper.paramToUrl(this.props.match.params.ontology);
-    this.prefix = this.wrapper.paramToUrl(this.props.match.params.prefix);
+    this.prefixes = this.wrapper.paramToUrl(this.props.match.params.prefixes).split(',').map(d=>({prefix:d.split('+')[0],uri:d.split('+')[1]}));
     this.triples = this.wrapper.paramToUrl(this.props.match.params.entities).split(',').filter(d=>d!="");
 
-    this.availableComponents = {"Dummy": Dummy, "Table": Table, "PieChart": PieChart};
+    this.availableComponents = {"Table": Table, "Pie Chart": PieChart, "Bar Chart":BarChart, "Parallel Coordinates": ParallelCoordinates};
   }
 
   componentDidMount(){
-    let query = this.sparqlQueries.createDataSparqlQuery(this.ontology, this.prefix, this.triples);    
-    //query = this.sparqlQueries.oldQuery();//createDataSparqlQuery(this.entries, this.ontology, this.prefix);
-    console.log(query)
+    let query = this.sparqlQueries.createDataSparqlQuery(this.prefixes, this.triples);    
     sparql(this.api_url, query, (err, data) => {
       if (data && !err) {
         this.setState({
@@ -90,16 +88,16 @@ class Explorer extends React.Component{
    * component, and a new layout for displaying it on the dashboard.
    *
    * @param {string} name Name to handle components internally.
-   * @param {array} entities Array containing a subset of entities to handle in the vis component.
+   * @param {array} attributes Array containing a subset of attributes to handle in the vis component.
    * @param {string} type Name of the vis component. Should match a key in this.availableComponents.
    */
-  addComponent(name, entities, type){
+  addComponent(name, attributes, type){
     if(!d3.keys(this.state.components).includes(name)){
       let newInstance = React.createElement(this.availableComponents[type],{},null)
 
       this.setState(prevState=>{
         prevState.layout[name] = {x: 0, y: 0, w: 2, h: 4, isDraggable:true};
-        prevState.visComponents[name]={entities:entities,instance:newInstance};
+        prevState.visComponents[name]={attributes:attributes,instance:newInstance};
         return prevState;
       });
     }
@@ -125,11 +123,10 @@ class Explorer extends React.Component{
     // Display vis component intances through a wrapper class
     const visComponents = d3.entries(this.state.visComponents).map(c=>(
         <div key={c.key}>
-          <VisWrapper width={this.state.layout[c.key].w * Math.trunc(document.body.clientWidth/6)- 25} 
-                      height={this.state.layout[c.key].h * 90 + (this.state.layout[c.key].h - 1)*10 - 40}
+          <VisWrapper width={this.state.layout[c.key].w * Math.trunc(document.body.clientWidth/6)- 15} 
+                      height={this.state.layout[c.key].h * 90 + (this.state.layout[c.key].h - 1)*10 - 30}
                       name={c.key}
-                      entities={c.value.entities}
-                      data={this.state.data}
+                      attributes={c.value.attributes}
                       removeComponent={this.removeComponent}>
                       {c.value.instance}
           </VisWrapper>
@@ -140,10 +137,11 @@ class Explorer extends React.Component{
     visComponents.push(
       <div key="selector" style={({display: this.state.loaded===true?'block':'none'})}>
         <VisSelectorWrapper width={this.state.layout.selector.w * Math.trunc(document.body.clientWidth/6) - 25} 
-              height={this.state.layout.selector.h * 90 + (this.state.layout.selector.h - 1)*10 - 55}
+              height={this.state.layout.selector.h * 90 + (this.state.layout.selector.h - 1)*10 - 30}
               name={"Component Selector"}
               addComponent={this.addComponent}
               entities={this.state.available_entities}
+              data={this.state.data}
               availableComponents={d3.keys(this.availableComponents)}>
               <ComponentSelector/>
         </VisSelectorWrapper>
@@ -154,17 +152,13 @@ class Explorer extends React.Component{
   }
 
   render(){
-    const pretty_entities = this.state.available_entities.map(a=>this.wrapper.nameOfEntity(a)).join(' , ');
-
     return(<div id="explorer">
         <div className="header">
           <h2>Explorer page</h2>
           <div className="info">
-            <div>
-              <span>Ontology : {this.ontology}</span>
+              <span>Ontologies referenced : {this.prefixes.map(p=>p.prefix).join(', ')}</span>
               <span>Sparql entry point : {this.api_url}</span>
-            </div>
-            <span>Current data available for entities : {pretty_entities}</span>
+              <span onClick={()=>alert(this.state.available_entities.map(e=>`${e}\n`))} style={{cursor:'pointer'}}>Show variables </span>
           </div>
         </div>
         <div className="content">

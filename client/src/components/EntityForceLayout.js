@@ -33,16 +33,14 @@ class EntityForceLayout extends React.Component{
 	}
 
 	componentDidMount(){
+		this.createGraph();
+        this.setState({loaded: true});
 	}
 
 	componentWillUnmount(){
 		this.simulation.stop();
 	}
 	componentDidUpdate(prevProps, prevState, snapshot){
-        if(prevProps.dataAvailable === false && this.props.dataAvailable === true){
-            this.createGraph();
-            this.setState({loaded: true});
-        }
 		if(this.state.loaded === true){
             this.updateHighlights(this.props);
         }
@@ -75,7 +73,7 @@ class EntityForceLayout extends React.Component{
 	}
 
 	updateHighlights(data){
-		const links = d3.select(this.node).selectAll("line.link");
+		const links = d3.select(this.node).selectAll("path.link");
 		links.style('stroke', d=>{
 			const query = this.attributeToQuery(d.relationship, d.source.entity);
 			//console.log(d, query, newState.active_nodes[newState.active_nodes.length-1])
@@ -94,7 +92,6 @@ class EntityForceLayout extends React.Component{
 	}
 
 	createGraph(){
-
 		const rect = this.svg.getBoundingClientRect(),
 	    width = rect.width,
 	    height = rect.height;
@@ -106,33 +103,41 @@ class EntityForceLayout extends React.Component{
 
 		const nodehash = {};
 		this.props.entities.map(e=>{nodehash[e.entity] = e});
-		const edges = this.props.relationships.map(d=>({
-			source : nodehash[d.source],
-			target : nodehash[d.target],
-			relationship : d.relationship,
-			value: d.value
-		}));
+		const edges = [];
+		this.props.relationships.map(d=>{
+			if(nodehash[d.source] && nodehash[d.target])
+				edges.push({
+					source : nodehash[d.source],
+					target : nodehash[d.target],
+					relationship : d.relationship,
+					value: d.value
+				});
+			}
+		);
 
-		const linkForce = d3.forceLink().distance(140);
+
+		const linkForce = d3.forceLink().distance(160);
 
 		const simulation = d3.forceSimulation()
-			.force('charge', d3.forceManyBody().strength(-300))
-			.force('center', d3.forceCenter(d3.select('svg').node().getBoundingClientRect().width/2, 200))
+			.alphaDecay(0.025)
+			.force('charge', d3.forceManyBody().strength(-45))
+			.force('center', d3.forceCenter(d3.select('svg').node().getBoundingClientRect().width/2, 100))
 			.force('collide', d3.forceCollide(function(d){
-			    sizeScale(nodehash[d.entity])*4
+			    sizeScale(nodehash[d.entity])*12
 			}))
 			.force('link', linkForce)
-			.nodes(this.props.entities)
 			.on('tick', forceTick);
 
+		simulation.nodes(this.props.entities);
 		simulation.force("link").links(edges);
+		simulation.current_ticks = 0;
 
 		this.simulation = simulation;
 
-		const edgeEnter = d3.select(this.node).selectAll("line.link")
+		const edgeEnter = d3.select(this.node).selectAll("path.link")
 			.data(edges, d => `${d.source.entity}-${d.target.entity}`)
 			.enter()
-			.append("line") //.attr("marker-end","url(#arrow)")
+			.append("path") //.attr("marker-end","url(#arrow)")
 			.attr("class", "link")
 			.on("click",(d)=>{
 				this.props.selectRelationship(d);
@@ -173,27 +178,38 @@ class EntityForceLayout extends React.Component{
       		.text(d=>`${d.count} diferent entries`);
 
 		function forceTick() {
+			simulation.current_ticks += 1;
 			const rect = d3.select('svg').node().getBoundingClientRect(),
 		    width = rect.width,
 		    height = rect.height;
 
-			d3.selectAll("line.link")
-				.attr("x1", d => Math.max(30, Math.min(width-30, d.source.x)))
-				.attr("x2", d => Math.max(30, Math.min(width-30, d.target.x)))
-				.attr("y1", d => Math.max(30, Math.min(height-30, d.source.y)))
-				.attr("y2", d => Math.max(30, Math.min(height-30, d.target.y)))
+		    d3.select('svg').selectAll("path.link")
+				.attr("d", function(d) {
+			        const 
+			        	source_x = Math.max(30, Math.min(width-30, d.source.x)),
+			        	source_y = Math.max(30, Math.min(height-30, d.source.y)),
+			        	target_x = Math.max(30, Math.min(width-30, d.target.x)),
+			        	target_y = Math.max(30, Math.min(height-30, d.target.y)),
+			        	dx = target_x - source_x,
+			            dy = target_y - source_y,
+			            dr = Math.sqrt(dx * dx + dy * dy);
+			        return "M" + 
+			            source_x + "," + source_y
+			             + "A" + 
+			            dr + "," + dr + " 0 0,1 " + 
+			            target_x + "," + 
+			            target_y;
+			    });
 
-			d3.selectAll("g.node")
-				.attr("transform", d => "translate("+
-					Math.max(sizeScale(d.count), Math.min(width - sizeScale(d.count), d.x))+
-					","+
-					Math.max(sizeScale(d.count), Math.min(height - sizeScale(d.count), d.y))+")");
+			d3.selectAll("g.node").attr("transform", d=>`translate( 
+				${Math.max(sizeScale(d.count), Math.min(width - sizeScale(d.count), d.x))} , 
+				${Math.max(sizeScale(d.count), Math.min(height - sizeScale(d.count), d.y))})`);
 		}
 
 		function dragstarted(d)
 		{
 			simulation.restart();
-			simulation.alpha(1.0);
+			simulation.alpha(1).alphaDecay(0.025);
 			d.fx = d.x;
 			d.fy = d.y;
 		}
@@ -208,7 +224,6 @@ class EntityForceLayout extends React.Component{
 		{
 			d.fx = null;
 			d.fy = null;
-			simulation.alphaTarget(0.1);
 		}
 	}
 
