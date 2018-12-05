@@ -666,3 +666,7 @@ div#ParallelCoordinates path{
 div#ParallelCoordinates g.inactive path{
   stroke:lightgrey;
 }
+
+div#ParallelCoordinates g.axis text{
+  font-size: 0.8em;
+}
