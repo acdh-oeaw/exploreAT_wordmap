@@ -98,6 +98,9 @@ class ParallelCoordinates extends React.Component{
         this.updateScales = this.updateScales.bind(this);
         this.repositionScales = this.repositionScales.bind(this);
         this.updateColorAttribute = this.updateColorAttribute.bind(this);
+        this.highlightEntities = this.highlightEntities.bind(this);
+        this.highlightEntitiesBySelector = this.highlightEntitiesBySelector.bind(this);
+        this.unhighlightEntities = this.unhighlightEntities.bind(this);
     }
 
     componentDidMount(){
@@ -119,6 +122,20 @@ class ParallelCoordinates extends React.Component{
             }
             this.updateParallelCoordinates();
         }
+    }
+
+    highlightEntities(d){
+        d3.entries(d).map(entry=>{
+            d3.selectAll(`.${entry.key}-${entry.value}`).classed('hovered',true)
+        })
+    }
+
+    highlightEntitiesBySelector(d){
+        d3.selectAll(d).classed('hovered',true)
+    }
+
+    unhighlightEntities(d){
+        d3.selectAll(".hovered").classed('hovered',false)
     }
 
     brushEventHandler(feature){
@@ -178,7 +195,13 @@ class ParallelCoordinates extends React.Component{
           .enter()
             .append('path')
             .attr('d', d=>this.linePath(d))
-            .attr('stroke',(d,i)=>this.colorScale(d[this.state.colorAttribute]));
+            .each(function(d){
+                const node = d3.select(this);
+                d3.entries(d).map(entry=>node.classed(`${entry.key}-${entry.value}`, true))
+            })
+            .attr('stroke',(d,i)=>this.colorScale(d[this.state.colorAttribute]))
+            .on("mouseover", this.highlightEntities)
+            .on("mouseout", this.uhighlightEntities);
 
         // Vertical axis for the features
         const featureAxisG = pcSvg.selectAll('g.feature')
@@ -231,8 +254,14 @@ class ParallelCoordinates extends React.Component{
         active.enter().append('path');
 
         d3.select(this.active).selectAll('path')
+            .each(function(d){
+                const node = d3.select(this);
+                d3.entries(d).map(entry=>node.classed(`${entry.key}-${entry.value}`, true))
+            })
             .attr('d', d=>this.linePath(d))
-            .attr('stroke',(d,i)=>this.colorScale(d[this.state.colorAttribute]));
+            .attr('stroke',(d,i)=>this.colorScale(d[this.state.colorAttribute]))
+            .on("mouseover", this.highlightEntities)
+            .on("mouseout", this.unhighlightEntities);
     }
 
     updateScales(){
@@ -326,6 +355,8 @@ class ParallelCoordinates extends React.Component{
     }
 
     render(){
+        const last_field_of_uri = (uri)=>uri.includes('/')?uri.split('/')[uri.split('/').length-1]:uri;
+
         const size = {
             width: this.props.width+"px",
             height: (this.props.height)+"px"
@@ -352,7 +383,11 @@ class ParallelCoordinates extends React.Component{
                         </g>
                         {this.colorScale.domain().map((d,i)=>(
                             (45 + i*16 > this.props.height-params.marginTop - params.paddingBottom)?'':
-                            <g transform={`translate(0,${17 + i*16})`} key={'legend-'+i}>
+                            <g transform={`translate(0,${17 + i*16})`} 
+                                    key={'legend-'+i}
+                                    className={`${this.state.colorAttribute}-${last_field_of_uri(String(d))}`}
+                                    onMouseEnter={()=>this.highlightEntitiesBySelector(`.${this.state.colorAttribute}-${last_field_of_uri(String(d))}`)}
+                                    onMouseOut={()=>this.unhighlightEntities()}>>
                                 <circle cx="0" cy="0" r="6" fill={this.colorScale(d)}></circle>
                                 <text x="7" y="5">
                                     {d}

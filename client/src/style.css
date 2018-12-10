@@ -650,6 +650,10 @@ div#BarChart g#bars text.barValue{
   font-size: 0.8em;
 }
 
+div#BarChart rect.hovered{
+  stroke:black;
+  stroke-width:2;
+}
 /* Parallel coordinates -----------------------------------------------------------------
 */
 
@@ -669,4 +673,27 @@ div#ParallelCoordinates g.inactive path{
 
 div#ParallelCoordinates g.axis text{
   font-size: 0.8em;
+}
+
+div#ParallelCoordinates g.active .hovered{
+  stroke:#4f4f4f;
+  stroke-width: 1px;
+}
+
+/* Pie Chart -----------------------------------------------------------------
+*/
+div#PieChart path.hovered{
+  stroke:black;
+  stroke-width:2;
+}
+
+/* Legends -----------------------------------------------------------------
+*/
+g.legend .hovered text{
+  font-weight: bold;
+}
+
+g.legend .hovered circle{
+  stroke:black;
+  stroke-width:1.5;
 }
