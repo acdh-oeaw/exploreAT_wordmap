@@ -21,12 +21,13 @@ class PieChart extends React.Component{
     constructor(props){
         super(props);
 
+        const attribute = this.props.attributes[0]
         this.state = {
-            legend: this.props.attributes[0][this.props.attributes[0].aggregation_term!='none'?'aggregation_term':'name'],
-            sector_dimension:this.props.attributes[0].name,
-            data: this.props.attributes[0].data,
-            total: this.props.attributes[0].total
-        };
+            legend:attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
+            data:attribute.data, 
+            sector_dimension:attribute.name, 
+            total:attribute.data_total
+        }
 
         this.node = d3.select(this.node);
         this.createSectors = this.createSectors.bind(this);
@@ -36,6 +37,13 @@ class PieChart extends React.Component{
     }
 
     componentDidMount(){
+        const attribute = this.props.attributes[0]
+        this.setState = ({
+            legend:attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
+            data:attribute.data, 
+            sector_dimension:attribute.name, 
+            total:attribute.data_total
+        });
     }
 
     componentWillUnmount(){
@@ -91,8 +99,8 @@ class PieChart extends React.Component{
             const className = `${this.state.legend}-${classValue}`;
 
             const endAngle = rotationAccumulated + (360/this.state.total)*d.value;
-            let path = describeArc(dimensions.x, dimensions.y, dimensions.radius, rotationAccumulated, endAngle);
-            path +=` L${dimensions.x},${dimensions.y}`
+            let path = describeArc(dimensions.x, dimensions.y, dimensions.radius, 0.1+rotationAccumulated, endAngle-0.1);
+            path +=` L${dimensions.x},${dimensions.y}Z`
             const sector = (<path
                 className={className}
                 d={path}
@@ -107,6 +115,7 @@ class PieChart extends React.Component{
             </g>);
         });
 
+        console.log('computed here', sectors)
         return sectors;
     }
 
