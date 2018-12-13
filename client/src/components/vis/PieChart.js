@@ -21,19 +21,29 @@ class PieChart extends React.Component{
     constructor(props){
         super(props);
 
+        const attribute = this.props.attributes[0]
         this.state = {
-            legend: this.props.attributes[0][this.props.attributes[0].aggregation_term!='none'?'aggregation_term':'name'],
-            sector_dimension:this.props.attributes[0].name,
-            data: this.props.attributes[0].data,
-            total: this.props.attributes[0].total
-        };
+            legend:attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
+            data:attribute.data, 
+            sector_dimension:attribute.name, 
+            total:attribute.data_total
+        }
 
         this.node = d3.select(this.node);
         this.createSectors = this.createSectors.bind(this);
         this.selectAttribute = this.selectAttribute.bind(this);
+        this.highlightEntities = this.highlightEntities.bind(this);
+        this.unhighlightEntities = this.unhighlightEntities.bind(this);
     }
 
     componentDidMount(){
+        const attribute = this.props.attributes[0]
+        this.setState({
+            legend:attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
+            data:attribute.data, 
+            sector_dimension:attribute.name, 
+            total:attribute.data_total
+        });
     }
 
     componentWillUnmount(){
@@ -80,14 +90,23 @@ class PieChart extends React.Component{
 
         let rotationAccumulated = 0;
         const colorScale = d3.scaleOrdinal( d3.schemeSet3);
+        const last_field_of_uri = (uri)=>uri.includes('/')?uri.split('/')[uri.split('/').length-1]:uri;
 
         const sectors = d3.entries(this.state.data).map((d,i)=>{
+            // classValue is the stripped identifyer to be used for the class name
+            // shortter names will yield faster search results
+            let classValue = last_field_of_uri(String(d.key.valueOf()));
+            const className = `${this.state.legend}-${classValue}`;
+
             const endAngle = rotationAccumulated + (360/this.state.total)*d.value;
-            let path = describeArc(dimensions.x, dimensions.y, dimensions.radius, rotationAccumulated, endAngle);
-            path +=` L${dimensions.x},${dimensions.y}`
+            let path = describeArc(dimensions.x, dimensions.y, dimensions.radius, 0.1+rotationAccumulated, endAngle-0.1);
+            path +=` L${dimensions.x},${dimensions.y}Z`
             const sector = (<path
+                className={className}
                 d={path}
                 fill={colorScale(i)}
+                onMouseEnter={()=>this.highlightEntities(className)}
+                onMouseOut={()=>this.unhighlightEntities()}
                 ></path>);
             rotationAccumulated = endAngle;
             return(<g key={d.key}>
@@ -99,7 +118,17 @@ class PieChart extends React.Component{
         return sectors;
     }
 
+    highlightEntities(selector){
+        d3.selectAll('.'+selector).classed('hovered',true);
+    }
+
+    unhighlightEntities(d){
+        d3.selectAll(".hovered").classed('hovered',false)
+    }
+
     render(){
+        const last_field_of_uri = (uri)=>uri.includes('/')?uri.split('/')[uri.split('/').length-1]:uri;
+
         const size = {
             x: params.paddingLeft + (this.props.width - params.marginRight-params.paddingLeft-params.paddingRight - params.legendWidth)/2,
             y: params.marginTop-params.paddingTop+(this.props.height - params.marginTop-params.paddingTop-params.paddingBottom)/2,
@@ -108,8 +137,6 @@ class PieChart extends React.Component{
             radius: Math.min((this.props.height - params.marginTop-params.paddingTop-params.paddingBottom), 
                     (this.props.width - params.marginRight-params.paddingLeft-params.paddingRight - params.legendWidth))/2
         }
-
-        console.log(size)
 
         const style = (e)=>this.state.sector_dimension==e?{cursor:"pointer",color:"#18bc9c", marginLeft:"5px"}:
         {cursor:"pointer",color:"black", marginLeft:"5px"};
@@ -130,7 +157,7 @@ class PieChart extends React.Component{
                         </circle>
                         {this.createSectors(size)}
                     </g>
-                   <g transform={`translate(${this.props.width - params.legendWidth },30)`}>
+                   <g className="legend" transform={`translate(${this.props.width - params.legendWidth },30)`}>
                         <g transform={`translate(0,0)`}>
                             <text x="7" y="0">
                                 {this.state.legend} ( value )
@@ -142,7 +169,11 @@ class PieChart extends React.Component{
                                 const colorScale = d3.scaleOrdinal( d3.schemeSet3);
                                 legend = d3.entries(this.state.data).map((d,i)=>(
                                     (55 + i*16 > this.props.height-params.marginTop - params.paddingBottom)?'':
-                                    <g transform={`translate(0,${17 + i*16})`} key={d.key}>
+                                    <g transform={`translate(0,${17 + i*16})`} 
+                                            key={d.key}
+                                            className={`${this.state.legend}-${last_field_of_uri(String(d.key))}`}
+                                            onMouseEnter={()=>this.highlightEntities(`${this.state.legend}-${last_field_of_uri(String(d.key))}`)}
+                                            onMouseOut={()=>this.unhighlightEntities()}>
                                         <circle cx="0" cy="0" r="6" fill={colorScale(i)}></circle>
                                         <text x="7" y="5">
                                             {d.key.includes('/')?d.key.split('/')[d.key.split('/').length-1]:d.key} ( {d.value} )

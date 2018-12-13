@@ -168,6 +168,7 @@ class Explorer extends React.Component{
                 layout={this.generateLayout(this.state.layout)}
                 onLayoutChange={this.onLayoutChange}
                 width={document.body.clientWidth}
+                draggableCancel="input,textarea"
                 rowHeight={90}
                 cols={6}
                 className="layout"

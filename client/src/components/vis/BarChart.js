@@ -31,6 +31,8 @@ class BarChart extends React.Component{
         this.node = d3.select(this.node);
         this.createBars = this.createBars.bind(this);
         this.selectAttribute = this.selectAttribute.bind(this);
+        this.highlightEntities = this.highlightEntities.bind(this);
+        this.unhighlightEntities = this.unhighlightEntities.bind(this);
     }
 
     componentDidMount(){
@@ -53,20 +55,40 @@ class BarChart extends React.Component{
             total:attribute.data_total})
     }
 
+    highlightEntities(selector){
+        d3.selectAll('.'+selector).classed('hovered',true);
+    }
+
+    unhighlightEntities(d){
+        d3.selectAll(".hovered").classed('hovered',false)
+    }
+
     createBars(dimensions){
-        let rotationAccumulated = 0;
+        const last_field_of_uri = (uri)=>uri.includes('/')?uri.split('/')[uri.split('/').length-1]:uri;
         const colorScale = d3.scaleOrdinal( d3.schemeSet3);
         const yScale = d3.scaleLinear()
             .domain([0,d3.values(this.state.data).reduce((a,b)=>a>b?a:b,0)])
             .range([params.paddingTop,dimensions.height-params.paddingBottom]);
+
         const bar_width = (dimensions.width)/d3.keys(this.state.data).length;
+        let rotationAccumulated = 0;
 
         const bars = d3.entries(this.state.data).map((d,i)=>{
-            const bar = (<rect fill={colorScale(i)} 
+            // classValue is the stripped identifyer to be used for the class name
+            // shortter names will yield faster search results
+            let classValue = last_field_of_uri(String(d.key.valueOf()));
+            const className = `${this.state.legend}-${classValue}`;
+
+            const bar = (<rect 
+                fill={colorScale(i)} 
+                className={className}
                 x={0}
                 y={0}
                 width={bar_width-2}
-                height={yScale(d.value)}></rect>);
+                height={yScale(d.value)}
+                onMouseEnter={()=>this.highlightEntities(className)}
+                onMouseOut={()=>this.unhighlightEntities()}
+                ></rect>);
             
             return(<g key={d.key} transform={`translate(${params.paddingLeft + i*bar_width},${dimensions.height - yScale(d.value)})`}> 
                 {bar}
@@ -79,6 +101,8 @@ class BarChart extends React.Component{
     }
 
     render(){
+        const last_field_of_uri = (uri)=>uri.includes('/')?uri.split('/')[uri.split('/').length-1]:uri;
+
         const size = {
             width: (this.props.width - params.marginRight),
             height: (this.props.height - params.marginTop),
@@ -101,7 +125,7 @@ class BarChart extends React.Component{
                     <g id="bars">
                         {this.state.data!=null?this.createBars(chartDimensions):""}
                     </g>
-                    <g transform={`translate(${this.props.width - params.legendWidth },30)`}>
+                    <g className="legend" transform={`translate(${this.props.width - params.legendWidth },30)`}>
                         <g transform={`translate(0,0)`}>
                             <text x="7" y="0">
                                 {this.state.legend} ( value )
@@ -113,10 +137,14 @@ class BarChart extends React.Component{
                                 const colorScale = d3.scaleOrdinal( d3.schemeSet3);
                                 legend = d3.entries(this.state.data).map((d,i)=>(
                                     (55 + i*16 > this.props.height-params.marginTop - params.paddingBottom)?'':
-                                    <g transform={`translate(0,${17 + i*16})`} key={d.key}>
+                                    <g transform={`translate(0,${17 + i*16})`} 
+                                            key={d.key} 
+                                            className={`${this.state.legend}-${last_field_of_uri(String(d.key))}`}
+                                            onMouseEnter={()=>this.highlightEntities(`${this.state.legend}-${last_field_of_uri(String(d.key))}`)}
+                                            onMouseOut={()=>this.unhighlightEntities()}>
                                         <circle cx="0" cy="0" r="6" fill={colorScale(i)}></circle>
                                         <text x="7" y="5">
-                                            {d.key.includes('/')?d.key.split('/')[d.key.split('/').length-1]:d.key} ( {d.value} )
+                                            {last_field_of_uri(d.key)} ( {d.value} )
                                         </text>
                                     </g>
                                 ));
