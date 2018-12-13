@@ -38,7 +38,7 @@ class PieChart extends React.Component{
 
     componentDidMount(){
         const attribute = this.props.attributes[0]
-        this.setState = ({
+        this.setState({
             legend:attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
             data:attribute.data, 
             sector_dimension:attribute.name, 
@@ -115,7 +115,6 @@ class PieChart extends React.Component{
             </g>);
         });
 
-        console.log('computed here', sectors)
         return sectors;
     }
 

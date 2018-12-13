@@ -25,6 +25,7 @@ div#app {
 }
 
 div#app div.content, div#app div#source_selector{
+  height:100%;
   flex: 1 1 auto;
 }
 
