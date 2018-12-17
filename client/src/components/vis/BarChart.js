@@ -21,13 +21,34 @@ class BarChart extends React.Component{
     constructor(props){
         super(props);
 
+        const attribute = this.props.attributes[0];
+        let data = {};
+        let total = 0;
+        if(attribute.aggregation != 'none'){
+            this.props.data.map(x=>{
+                if(data[x[attribute.aggregation_term]]){
+                    data[x[attribute.aggregation_term]] += 1;
+                    total += 1;
+                }
+                else{
+                    data[x[attribute.aggregation_term]] = 1;
+                    total += 1;
+                }
+            })
+        }else{
+            data = this.props.data.map(x=>({Attribute:x}));
+            total = this.props.data.length;
+        }
+
         this.state = {
-            legend: this.props.attributes[0][this.props.attributes[0].aggregation_term!='none'?'aggregation_term':'name'],
-            sector_dimension:this.props.attributes[0].name,
-            data: this.props.attributes[0].data,
-            total: this.props.attributes[0].total
+            legend: attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
+            sector_dimension:attribute.name,
+            data: data,
+            total: total,
+            selected_attribute: attribute
         };
 
+        this.columnNames = this.props.attributes.map(x=>x.name);
         this.node = d3.select(this.node);
         this.createBars = this.createBars.bind(this);
         this.selectAttribute = this.selectAttribute.bind(this);
@@ -45,14 +66,56 @@ class BarChart extends React.Component{
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
+        if((prevProps.data != this.props.data)){
+            let data = {};
+            let total = 0;
+            if(this.state.selected_attribute.aggregation != 'none'){
+                this.props.data.map(x=>{
+                    if(data[x[this.state.selected_attribute.aggregation_term]]){
+                        data[x[this.state.selected_attribute.aggregation_term]] += 1;
+                        total += 1;
+                    }
+                    else{
+                        data[x[this.state.selected_attribute.aggregation_term]] = 1;
+                        total += 1;
+                    }
+                })
+            }else{
+                data = this.props.data.map(x=>({Attribute:x}));
+                total = this.props.data.length;
+            }
+
+            this.setState({
+                data:data, 
+                total:total})
+        }
     }
 
     selectAttribute(attribute){
+        let data = {};
+        let total = 0;
+        if(attribute.aggregation != 'none'){
+            this.props.data.map(x=>{
+                if(data[x[attribute.aggregation_term]]){
+                    data[x[attribute.aggregation_term]] += 1;
+                    total += 1;
+                }
+                else{
+                    data[x[attribute.aggregation_term]] = 1;
+                    total += 1;
+                }
+            })
+        }else{
+            data = this.props.data.map(x=>({Attribute:x}));
+            total = this.props.data.length;
+        }
+
         this.setState({
             legend: attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
-            data:attribute.data, 
+            data:data, 
             sector_dimension:attribute.name, 
-            total:attribute.data_total})
+            selected_attribute: attribute,
+            total:total})
     }
 
     highlightEntities(selector){
