@@ -53,7 +53,7 @@ class Explorer extends React.Component{
     this.prefixes = this.wrapper.paramToUrl(this.props.match.params.prefixes).split(',').map(d=>({prefix:d.split('+')[0],uri:d.split('+')[1]}));
     this.triples = this.wrapper.paramToUrl(this.props.match.params.entities).split(',').filter(d=>d!="");
     this.updateFilteredData = this.updateFilteredData.bind(this);
-
+    this.renderComponents = this.renderComponents.bind(this);
     this.availableComponents = {"Table": Table, "Pie Chart": PieChart, "Bar Chart":BarChart, "Parallel Coordinates": ParallelCoordinates};
   }
 
@@ -119,7 +119,7 @@ class Explorer extends React.Component{
 
       this.setState(prevState=>{
         prevState.layout[name] = {x: 0, y: 0, w: 2, h: 4, isDraggable:true};
-        prevState.visComponents[name]={attributes:attributes,instance:newInstance};
+        prevState.visComponents[name]={attributes:attributes,data:this.state.data,instance:newInstance};
         return prevState;
       });
     }
@@ -149,6 +149,9 @@ class Explorer extends React.Component{
                       height={this.state.layout[c.key].h * 90 + (this.state.layout[c.key].h - 1)*10 - 30}
                       name={c.key}
                       attributes={c.value.attributes}
+                      data={this.state.data}
+                      filters={this.state.filters}
+                      updateFilteredData={this.updateFilteredData}
                       removeComponent={this.removeComponent}>
                       {c.value.instance}
           </VisWrapper>
