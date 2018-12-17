@@ -26,6 +26,7 @@
     "webpack-merge": "^4.1.4"
   },
   "dependencies": {
+    "crossfilter2": "1.4.6",
     "fast-xml-parser": "^3.12",
     "react-grid-layout": "^0.16.6",
     "react-dropdown": "1.6.2",

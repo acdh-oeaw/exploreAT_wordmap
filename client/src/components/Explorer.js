@@ -5,8 +5,9 @@ import gridStyleLayout from '../../node_modules/react-grid-layout/css/styles.css
 import gridStyleResizable from '../../node_modules/react-resizable/css/styles.css';
 import { BrowserRouter as Route, NavLink } from "react-router-dom";
 import RGL, { WidthProvider } from "react-grid-layout";
-import UrlParamWrapper from '../aux/UrlParamWrapper';
+import * as crossfilter from 'crossfilter2';
 
+import UrlParamWrapper from '../aux/UrlParamWrapper';
 import ComponentSelector from './vis/ComponentSelector';
 import VisSelectorWrapper from './vis/VisSelectorWrapper';
 import VisWrapper from './vis/VisWrapper';
@@ -34,6 +35,7 @@ class Explorer extends React.Component{
     this.state = {
       data : null,
       available_entities:[],
+      filterChanged: false,
       loaded:false,
       layout: {
         'selector': {x: 0, y: 0, w: 2, h: 4, isDraggable:true},
@@ -50,6 +52,7 @@ class Explorer extends React.Component{
     this.api_url = this.wrapper.paramToUrl(this.props.match.params.sparql);
     this.prefixes = this.wrapper.paramToUrl(this.props.match.params.prefixes).split(',').map(d=>({prefix:d.split('+')[0],uri:d.split('+')[1]}));
     this.triples = this.wrapper.paramToUrl(this.props.match.params.entities).split(',').filter(d=>d!="");
+    this.updateFilteredData = this.updateFilteredData.bind(this);
 
     this.availableComponents = {"Table": Table, "Pie Chart": PieChart, "Bar Chart":BarChart, "Parallel Coordinates": ParallelCoordinates};
   }
@@ -58,13 +61,32 @@ class Explorer extends React.Component{
     let query = this.sparqlQueries.createDataSparqlQuery(this.prefixes, this.triples);    
     sparql(this.api_url, query, (err, data) => {
       if (data && !err) {
-        this.setState({
-          data:data, 
+        let state = {
+          data: data,
+          crossfilter: crossfilter(data),
           available_entities:d3.keys(data[0]),
+          filters: {},
           loaded: true
-        });
+        }
+        d3.keys(data[0]).map(d=>state.filters[d]=state.crossfilter.dimension(x=>x[d]));
+        console.log(state, this.updateFilteredData);
+        this.setState(state);
       } else if (err) throw err;
     });
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if(this.state.loaded == true && prevState.filterChanged == false && this.state.filterChanged == true ){
+      this.setState({
+        data: this.state.crossfilter.allFiltered(),
+        filterChanged: false
+      })
+    }  
+    console.log(this.state.data)
+  }
+
+  updateFilteredData(){
+    this.setState({filterChanged: true});
   }
 
   /**
@@ -142,6 +164,8 @@ class Explorer extends React.Component{
               addComponent={this.addComponent}
               entities={this.state.available_entities}
               data={this.state.data}
+              filters={this.state.filters}
+              updateFilteredData={this.updateFilteredData}
               availableComponents={d3.keys(this.availableComponents)}>
               <ComponentSelector/>
         </VisSelectorWrapper>

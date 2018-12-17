@@ -7,6 +7,15 @@ import OptionTags from './OptionTags.js';
 /* ComponentSelector
  * Allows the creation of new vis components by calling the addComponent function
  * provided as a prop, using the selected name, type and subset of entities.
+ *
+ * Each of the attributes selected is stored as an object with the following attributes :
+    name: a full descriptive name for the attribute,
+    type: data type for the tag,
+    attribute: attribute selected to be displayed or aggregated,
+    aggregation: the type of aggregation to be used,
+    aggregation_term: the attribute by which to aggregate,
+    data_total: the total count of different values,
+    unique: the total size of the dataset
  */
 
 class ComponentSelector extends React.Component{
@@ -38,43 +47,30 @@ class ComponentSelector extends React.Component{
     };
 
     addAttribute(attribute){
-        if(attribute)
+        if(attribute){
             this.setState((prevState)=>{
                 const index = prevState.attributes.map(a=>a.name).indexOf(attribute.name);
+                // If it is not already included
                 if(index ==-1){
-                        let data = {};
                     if(attribute.aggregation == 'none'){
-                        data[attribute.attribute] = this.props.data.map(d=>d[attribute.attribute]);
-                        attribute.data = data;
-                        attribute.data_length = this.props.data.length;
+                        attribute.unique = this.props.data.length;
                         attribute.data_total = this.props.data.length;
-                    }
-                    else{
-                        let total = 0;
+                    }else{
+                        // Compute the amount of different groups available
                         const attribute_values = {};
                         this.props.data.map(e=>{
-                            if(!attribute_values[e[attribute.attribute]])
-                                attribute_values[e[attribute.attribute]] = e;
+                            if(!attribute_values[e[attribute.aggregation_term]])
+                                attribute_values[e[attribute.aggregation_term]]=1;
                         });
-                        d3.values(attribute_values).map(e=>{
-                            if(data[e[attribute.aggregation_term]]){
-                                total += 1;
-                                data[e[attribute.aggregation_term]] += 1;
-                            }
-                            else{
-                                total += 1;
-                                data[e[attribute.aggregation_term]] = 1;
-                            }
-                        });
-                        attribute.data = data;
-                        attribute.data_length = d3.keys(data).length;
-                        attribute.data_total = total;
+                        attribute.unique = d3.keys(attribute_values).length;
+                        attribute.data_total = this.props.data.length;
 
                     } 
                     prevState.attributes.push(attribute)
                 }
                 return(prevState);
             });
+        }
     }
 
     removeAttribute(attribute){
@@ -111,20 +107,20 @@ class ComponentSelector extends React.Component{
         }
 
         this.state.attributes.map(a=>{
-            if(a.data_length > 120){
+            if(a.unique > 120){
                 vis_incompatibilities.push(`${a.name} takes too many different values to be used with a Pie Chart.`);
                 vis_incompatibilities.push(`${a.name} takes too many different values to be used with an Bar Chart.`);
             }
         })
 
-        if(false === this.state.attributes.reduce((a,b)=>a&&b.data_length<140,true)){
+        if(false === this.state.attributes.reduce((a,b)=>a&&b.unique<140,true)){
             useful_visualizations = useful_visualizations.filter(vis=>vis!='Pie Chart');
             vis_incompatibilities.push(`No attribute has less than 120 different values to be used with a Pie Chart.`);
             useful_visualizations = useful_visualizations.filter(vis=>vis!='Bar Chart');
             vis_incompatibilities.push(`No attribute has less than 120 different values to be used with an Bar Chart.`);
         }
 
-        if(false === this.state.attributes.reduce((a,b)=>a&&(b.data_length == this.state.attributes[0].data_length),true)){
+        if(false === this.state.attributes.reduce((a,b)=>a&&(b.unique == this.state.attributes[0].unique),true)){
             useful_visualizations = useful_visualizations.filter(vis=>vis!='Table');
             vis_incompatibilities.push(`All attributes must have the same amount of entries to be displayed in a table.`);
         }

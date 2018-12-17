@@ -76,7 +76,7 @@ class OptionTags extends React.Component{
                 <div className="tag" key={tag.name}>
                     <span> {tag.type} </span>
                     <span> {tag.name} </span>
-                    <span> {tag.data_length} </span>
+                    <span> {tag.unique} </span>
                     <span><a onClick={()=>this.props.removeTag(tag)}> X </a></span>
                 </div>
             ))
