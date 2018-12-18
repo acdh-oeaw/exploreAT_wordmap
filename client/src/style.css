@@ -330,6 +330,7 @@ div#OptionTags div.tag#add-tag{
 }
 
 div#OptionTags div#options{
+  background-color: white;
   font-size: 0.85em;
   padding:3px;
   box-shadow: rgba(0, 0, 0, 0.34) 3px 2px 9px 1px;

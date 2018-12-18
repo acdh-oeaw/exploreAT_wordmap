@@ -25,7 +25,13 @@ class BarChart extends React.Component{
         let data = {};
         let total = 0;
         if(attribute.aggregation != 'none'){
+            let unique = {}
             this.props.data.map(x=>{
+                if(!unique[x[attribute.attribute]])
+                    unique[x[attribute.attribute]] = x;
+            });
+
+            d3.values(unique).map(x=>{
                 if(data[x[attribute.aggregation_term]]){
                     data[x[attribute.aggregation_term]] += 1;
                     total += 1;
@@ -71,17 +77,25 @@ class BarChart extends React.Component{
       shouldUpdate = nextProps.width == this.props.width?shouldUpdate:true;
       shouldUpdate = nextProps.height == this.props.height?shouldUpdate:true;
       shouldUpdate = nextProps.data == this.props.data?shouldUpdate:true;
+      shouldUpdate = nextState.data == this.state.data?shouldUpdate:true;
       shouldUpdate = nextState.selected_attribute == this.state.selected_attribute?shouldUpdate:true;
 
       return shouldUpdate;
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if((prevProps.data != this.props.data)){
+        if(prevProps.data != this.props.data){
+            console.log('re calculando')
             let data = {};
             let total = 0;
             if(this.state.selected_attribute.aggregation != 'none'){
+                let unique = {}
                 this.props.data.map(x=>{
+                    if(!unique[x[this.state.selected_attribute.attribute]])
+                        unique[x[this.state.selected_attribute.attribute]] = x;
+                });
+
+                d3.values(unique).map(x=>{
                     if(data[x[this.state.selected_attribute.aggregation_term]]){
                         data[x[this.state.selected_attribute.aggregation_term]] += 1;
                         total += 1;
@@ -106,7 +120,13 @@ class BarChart extends React.Component{
         let data = {};
         let total = 0;
         if(attribute.aggregation != 'none'){
+            let unique = {}
             this.props.data.map(x=>{
+                if(!unique[x[attribute.attribute]])
+                    unique[x[attribute.attribute]] = x;
+            });
+
+            d3.values(unique).map(x=>{
                 if(data[x[attribute.aggregation_term]]){
                     data[x[attribute.aggregation_term]] += 1;
                     total += 1;
@@ -175,7 +195,7 @@ class BarChart extends React.Component{
     }
 
     render(){
-        console.info('rerender')
+        console.info('rerender',this.state.data)
         const last_field_of_uri = (uri)=>uri.includes('/')?uri.split('/')[uri.split('/').length-1]:uri;
 
         const size = {
