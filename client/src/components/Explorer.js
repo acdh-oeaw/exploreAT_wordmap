@@ -54,6 +54,7 @@ class Explorer extends React.Component{
     this.triples = this.wrapper.paramToUrl(this.props.match.params.entities).split(',').filter(d=>d!="");
     this.updateFilteredData = this.updateFilteredData.bind(this);
     this.renderComponents = this.renderComponents.bind(this);
+    this.resetAllFilters = this.resetAllFilters.bind(this);
     this.availableComponents = {"Table": Table, "Pie Chart": PieChart, "Bar Chart":BarChart, "Parallel Coordinates": ParallelCoordinates};
   }
 
@@ -86,6 +87,11 @@ class Explorer extends React.Component{
   }
 
   updateFilteredData(){
+    this.setState({filterChanged: true});
+  }
+
+  resetAllFilters(){
+    d3.values(this.state.filters).map(f=>f.filterAll());
     this.setState({filterChanged: true});
   }
 
@@ -186,6 +192,7 @@ class Explorer extends React.Component{
               <span>Ontologies referenced : {this.prefixes.map(p=>p.prefix).join(', ')}</span>
               <span>Sparql entry point : {this.api_url}</span>
               <span onClick={()=>alert(this.state.available_entities.map(e=>`${e}\n`))} style={{cursor:'pointer'}}>Show variables </span>
+              <span onClick={()=>this.resetAllFilters()} style={{cursor:'pointer'}}>Reset all filters </span>
           </div>
         </div>
         <div className="content">
