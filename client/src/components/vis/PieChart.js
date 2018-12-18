@@ -20,14 +20,18 @@ import React from 'react';
 class PieChart extends React.Component{
     constructor(props){
         super(props);
+        this.updatedData = this.updatedData.bind(this);
 
-        const attribute = this.props.attributes[0]
+        const attribute = this.props.attributes[0];
+        const {data, total} = this.updatedData(attribute);
+
         this.state = {
-            legend:attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
-            data:attribute.data, 
-            sector_dimension:attribute.name, 
-            total:attribute.data_total
-        }
+            legend: attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
+            sector_dimension:attribute.name,
+            data: data,
+            total: total,
+            selected_attribute: attribute
+        };
 
         this.node = d3.select(this.node);
         this.createSectors = this.createSectors.bind(this);
@@ -52,15 +56,68 @@ class PieChart extends React.Component{
     componentWillUpdate(nextProps, nextState){
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+      let shouldUpdate = false;
+
+      shouldUpdate = nextProps.width == this.props.width?shouldUpdate:true;
+      shouldUpdate = nextProps.height == this.props.height?shouldUpdate:true;
+      shouldUpdate = nextProps.data == this.props.data?shouldUpdate:true;
+      shouldUpdate = nextState.data == this.state.data?shouldUpdate:true;
+      shouldUpdate = nextState.selected_attribute == this.state.selected_attribute?shouldUpdate:true;
+
+      return shouldUpdate;
+    }
+
     componentDidUpdate(prevProps, prevState, snapshot) {
+        if(prevProps.data != this.props.data){
+            const {data, total} = this.updatedData(this.state.selected_attribute);
+
+            this.setState({
+                data:data, 
+                total:total})
+        }
+    }
+
+    updatedData(attribute){
+        let data = {};
+        let total = 0;
+        if(attribute.aggregation != 'none'){
+            let unique = {}
+            this.props.data.map(x=>{
+                if(!unique[x[attribute.attribute]])
+                    unique[x[attribute.attribute]] = x;
+            });
+
+            d3.values(unique).map(x=>{
+                if(data[x[attribute.aggregation_term]]){
+                    data[x[attribute.aggregation_term]] += 1;
+                    total += 1;
+                }
+                else{
+                    data[x[attribute.aggregation_term]] = 1;
+                    total += 1;
+                }
+            })
+        }else{
+            data = this.props.data.map(x=>({Attribute:x}));
+            total = this.props.data.length;
+        }
+
+        return({
+            data:data, 
+            total:total
+        })
     }
 
     selectAttribute(attribute){
+        const {data, total} = this.updatedData(attribute);
+
         this.setState({
-            legend:attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
-            data:attribute.data, 
+            legend: attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
+            data:data, 
             sector_dimension:attribute.name, 
-            total:attribute.data_total})
+            selected_attribute: attribute,
+            total:total})
     }
 
     createSectors(dimensions){

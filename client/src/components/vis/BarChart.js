@@ -20,31 +20,10 @@ import React from 'react';
 class BarChart extends React.Component{
     constructor(props){
         super(props);
+        this.updatedData = this.updatedData.bind(this);
 
         const attribute = this.props.attributes[0];
-        let data = {};
-        let total = 0;
-        if(attribute.aggregation != 'none'){
-            let unique = {}
-            this.props.data.map(x=>{
-                if(!unique[x[attribute.attribute]])
-                    unique[x[attribute.attribute]] = x;
-            });
-
-            d3.values(unique).map(x=>{
-                if(data[x[attribute.aggregation_term]]){
-                    data[x[attribute.aggregation_term]] += 1;
-                    total += 1;
-                }
-                else{
-                    data[x[attribute.aggregation_term]] = 1;
-                    total += 1;
-                }
-            })
-        }else{
-            data = this.props.data.map(x=>({Attribute:x}));
-            total = this.props.data.length;
-        }
+        const {data, total} = this.updatedData(attribute);
 
         this.state = {
             legend: attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
@@ -54,21 +33,11 @@ class BarChart extends React.Component{
             selected_attribute: attribute
         };
 
-        this.columnNames = this.props.attributes.map(x=>x.name);
         this.node = d3.select(this.node);
         this.createBars = this.createBars.bind(this);
         this.selectAttribute = this.selectAttribute.bind(this);
         this.highlightEntities = this.highlightEntities.bind(this);
         this.unhighlightEntities = this.unhighlightEntities.bind(this);
-    }
-
-    componentDidMount(){
-    }
-
-    componentWillUnmount(){
-    }
-
-    componentWillUpdate(nextProps, nextState){
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -85,30 +54,7 @@ class BarChart extends React.Component{
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if(prevProps.data != this.props.data){
-            console.log('re calculando')
-            let data = {};
-            let total = 0;
-            if(this.state.selected_attribute.aggregation != 'none'){
-                let unique = {}
-                this.props.data.map(x=>{
-                    if(!unique[x[this.state.selected_attribute.attribute]])
-                        unique[x[this.state.selected_attribute.attribute]] = x;
-                });
-
-                d3.values(unique).map(x=>{
-                    if(data[x[this.state.selected_attribute.aggregation_term]]){
-                        data[x[this.state.selected_attribute.aggregation_term]] += 1;
-                        total += 1;
-                    }
-                    else{
-                        data[x[this.state.selected_attribute.aggregation_term]] = 1;
-                        total += 1;
-                    }
-                })
-            }else{
-                data = this.props.data.map(x=>({Attribute:x}));
-                total = this.props.data.length;
-            }
+            const {data, total} = this.updatedData(this.state.selected_attribute);
 
             this.setState({
                 data:data, 
@@ -116,7 +62,7 @@ class BarChart extends React.Component{
         }
     }
 
-    selectAttribute(attribute){
+    updatedData(attribute){
         let data = {};
         let total = 0;
         if(attribute.aggregation != 'none'){
@@ -140,6 +86,15 @@ class BarChart extends React.Component{
             data = this.props.data.map(x=>({Attribute:x}));
             total = this.props.data.length;
         }
+
+        return({
+            data:data, 
+            total:total
+        })
+    }
+
+    selectAttribute(attribute){
+        const {data, total} = this.updatedData(attribute);
 
         this.setState({
             legend: attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
@@ -195,7 +150,6 @@ class BarChart extends React.Component{
     }
 
     render(){
-        console.info('rerender',this.state.data)
         const last_field_of_uri = (uri)=>uri.includes('/')?uri.split('/')[uri.split('/').length-1]:uri;
 
         const size = {
