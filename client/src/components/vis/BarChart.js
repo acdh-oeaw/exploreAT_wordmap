@@ -65,6 +65,17 @@ class BarChart extends React.Component{
     componentWillUpdate(nextProps, nextState){
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+      let shouldUpdate = false;
+
+      shouldUpdate = nextProps.width == this.props.width?shouldUpdate:true;
+      shouldUpdate = nextProps.height == this.props.height?shouldUpdate:true;
+      shouldUpdate = nextProps.data == this.props.data?shouldUpdate:true;
+      shouldUpdate = nextState.selected_attribute == this.state.selected_attribute?shouldUpdate:true;
+
+      return shouldUpdate;
+    }
+
     componentDidUpdate(prevProps, prevState, snapshot) {
         if((prevProps.data != this.props.data)){
             let data = {};
@@ -164,6 +175,7 @@ class BarChart extends React.Component{
     }
 
     render(){
+        console.info('rerender')
         const last_field_of_uri = (uri)=>uri.includes('/')?uri.split('/')[uri.split('/').length-1]:uri;
 
         const size = {
