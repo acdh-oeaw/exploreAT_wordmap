@@ -432,6 +432,8 @@ div.visWrapper div.header{
   line-height: 1.1em;
 }
 
+div.visWrapper div.content{background-color: white;}
+
 div.visWrapper div.header p{
 	margin: 0;
 }
