@@ -60,7 +60,7 @@ class EntitySelector extends React.Component{
 		const getAttributeForElement = (array, element, attribute, accesor)=>(
 			array.reduce((final, actual)=>(
 				accesor(actual)==element?actual[attribute]:final), undefined)
-			);
+		);
 
 		let object = {};
 

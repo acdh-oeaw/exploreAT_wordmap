@@ -55,6 +55,7 @@ class Explorer extends React.Component{
     this.updateFilteredData = this.updateFilteredData.bind(this);
     this.renderComponents = this.renderComponents.bind(this);
     this.resetAllFilters = this.resetAllFilters.bind(this);
+    // Include here the components that will be available for selection
     this.availableComponents = {"Table": Table, "Pie Chart": PieChart, "Bar Chart":BarChart, "Parallel Coordinates": ParallelCoordinates};
   }
 
@@ -63,7 +64,7 @@ class Explorer extends React.Component{
     sparql(this.api_url, query, (err, data) => {
       if (data && !err) {
         let state = {
-          data: data,
+          data,
           crossfilter: crossfilter(data),
           available_entities:d3.keys(data[0]),
           filters: {},
@@ -149,16 +150,16 @@ class Explorer extends React.Component{
     // Display vis component intances through a wrapper class
     const visComponents = d3.entries(this.state.visComponents).map(c=>(
         <div key={c.key}>
-          <VisWrapper width={this.state.layout[c.key].w * Math.trunc(document.body.clientWidth/6)- 15} 
-                      height={this.state.layout[c.key].h * 90 + (this.state.layout[c.key].h - 1)*10 - 30}
-                      name={c.key}
-                      attributes={c.value.attributes}
-                      data={this.state.data}
-                      filters={this.state.filters}
-                      updateFilteredData={this.updateFilteredData}
-                      removeComponent={this.removeComponent}>
-                      {c.value.instance}
-          </VisWrapper>
+          	<VisWrapper width={this.state.layout[c.key].w * Math.trunc(document.body.clientWidth/6)- 15} 
+				height={this.state.layout[c.key].h * 90 + (this.state.layout[c.key].h - 1)*10 - 30}
+				name={c.key}
+				attributes={c.value.attributes}
+				data={this.state.data}
+				filters={this.state.filters}
+				updateFilteredData={this.updateFilteredData}
+				removeComponent={this.removeComponent}>
+				{c.value.instance}
+          	</VisWrapper>
         </div>
     ));
 
@@ -166,15 +167,15 @@ class Explorer extends React.Component{
     visComponents.push(
       <div key="selector" style={({display: this.state.loaded===true?'block':'none'})}>
         <VisSelectorWrapper width={this.state.layout.selector.w * Math.trunc(document.body.clientWidth/6) - 25} 
-              height={this.state.layout.selector.h * 90 + (this.state.layout.selector.h - 1)*10 - 30}
-              name={"Component Selector"}
-              addComponent={this.addComponent}
-              entities={this.state.available_entities}
-              data={this.state.data}
-              filters={this.state.filters}
-              updateFilteredData={this.updateFilteredData}
-              availableComponents={d3.keys(this.availableComponents)}>
-              <ComponentSelector/>
+				height={this.state.layout.selector.h * 90 + (this.state.layout.selector.h - 1)*10 - 30}
+				name={"Component Selector"}
+				addComponent={this.addComponent}
+				entities={this.state.available_entities}
+				data={this.state.data}
+				filters={this.state.filters}
+				updateFilteredData={this.updateFilteredData}
+				availableComponents={d3.keys(this.availableComponents)}>
+			<ComponentSelector/>
         </VisSelectorWrapper>
       </div>
     );
