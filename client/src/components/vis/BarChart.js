@@ -41,15 +41,15 @@ class BarChart extends React.Component{
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-      let shouldUpdate = false;
+        let shouldUpdate = false;
 
-      shouldUpdate = shouldUpdate || (nextProps.width != this.props.width);
-      shouldUpdate = shouldUpdate || (nextProps.height != this.props.height);
-      shouldUpdate = shouldUpdate || (nextProps.data != this.props.data);
-      shouldUpdate = shouldUpdate || (nextState.data != this.state.data);
-      shouldUpdate = shouldUpdate || (nextState.selected_attribute != this.state.selected_attribute);
+        shouldUpdate = shouldUpdate || (nextProps.width != this.props.width);
+        shouldUpdate = shouldUpdate || (nextProps.height != this.props.height);
+        shouldUpdate = shouldUpdate || (nextProps.data != this.props.data);
+        shouldUpdate = shouldUpdate || (nextState.data != this.state.data);
+        shouldUpdate = shouldUpdate || (nextState.selected_attribute != this.state.selected_attribute);
 
-      return shouldUpdate;
+        return shouldUpdate;
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {

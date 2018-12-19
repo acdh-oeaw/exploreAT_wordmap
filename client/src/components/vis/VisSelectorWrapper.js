@@ -8,20 +8,6 @@ import React from 'react';
 class VisSelectorWrapper extends React.Component{
     constructor(props){
         super(props);
-
-        this.state = {
-            
-        };
-
-    }
-
-    componentDidMount(){
-    }
-
-    componentWillUnmount(){
-    }
-
-    componentWillUpdate(nextProps, nextState){
     }
 
     render(){

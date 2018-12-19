@@ -29,19 +29,13 @@ class OptionTags extends React.Component{
 
 
     toggleOptions(){
-        this.setState(prev=>{
-            prev['addingTag']=!prev['addingTag'];
-            return(prev);
-        })
+        this.setState(prev=>({addingTag:!prev['addingTag']}))
     }
 
     toggleSelection(type, attribute){
         if(attribute && attribute.length>0)
             this.setState((prevState)=>{
-                if(prevState[type] == attribute)
-                    prevState[type] = '';
-                else
-                    prevState[type] = attribute;
+                prevState[type] = (prevState[type] == attribute)?'':attribute;
                 return(prevState);
             });
     };
@@ -51,10 +45,10 @@ class OptionTags extends React.Component{
            this.state.aggregation.length>0 && this.state.aggregation_term.length>0){
             let name = this.state.attribute;
             if(this.state.aggregation!='none' && this.state.aggregation_term!='none')
-                name += ' '+this.state.aggregation+' by '+this.state.aggregation_term;
+                name += ` ${this.state.aggregation} by ${this.state.aggregation_term}`;
             
             this.props.addTag({
-                name: name,
+                name,
                 type: this.state.type,
                 attribute: this.state.attribute,
                 aggregation: this.state.aggregation_term!='none'?this.state.aggregation:'none',

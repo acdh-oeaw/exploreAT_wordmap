@@ -83,11 +83,7 @@ class Table extends React.Component{
             cells.push(<tr key={i}>{df}</tr>);
         }
 
-        return(
-            <tbody>
-                {cells}
-            </tbody>
-        );
+        return(<tbody> {cells} </tbody>);
     }
 
     nextPage(){

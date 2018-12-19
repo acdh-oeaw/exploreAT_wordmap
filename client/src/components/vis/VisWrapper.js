@@ -10,21 +10,8 @@ import React from 'react';
 class VisWrapper extends React.Component{
     constructor(props){
         super(props);
-
-        this.state = {
-            
-        };
-
     }
 
-    componentDidMount(){
-    }
-
-    componentWillUnmount(){
-    }
-
-    componentWillUpdate(nextProps, nextState){
-    }
     /*
                         <button style={buttonStyle}
                             className="button" 
@@ -53,19 +40,15 @@ class VisWrapper extends React.Component{
         return(
             <div className="visWrapper" width={this.props.width} height={this.props.height}>
                 <div className="header">
-                    <div>
-                        
-                    </div>
-                    <p>{this.props.name}</p>
+                    <div></div>
+                    <p> {this.props.name} </p>
                     <button style={buttonStyle}
-                        className="button" 
-                        onClick={()=>this.props.removeComponent(this.props.name)}>  
+                            className="button" 
+                            onClick={()=>this.props.removeComponent(this.props.name)}>  
                         close
                     </button>
                 </div>
-                <div className="content">
-                    {childrenWithProps}
-                </div>
+                <div className="content"> {childrenWithProps} </div>
             </div>
         );
     }

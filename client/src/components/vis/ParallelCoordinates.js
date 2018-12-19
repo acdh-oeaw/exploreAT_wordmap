@@ -102,8 +102,10 @@ class ParallelCoordinates extends React.Component{
     }
 
     brushEventHandler(feature){
+        // Ignore brush-by-zoom
         if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") 
-            return; // ignore brush-by-zoom
+            return; 
+        // Handle wether to remove filters or apply a new one
         if(d3.event.selection != null){
             this.filters[feature] = d3.event.selection[0]>d3.event.selection[1]?[
                     d3.event.selection[1],d3.event.selection[0]
