@@ -43,11 +43,11 @@ class BarChart extends React.Component{
     shouldComponentUpdate(nextProps, nextState) {
       let shouldUpdate = false;
 
-      shouldUpdate = nextProps.width == this.props.width?shouldUpdate:true;
-      shouldUpdate = nextProps.height == this.props.height?shouldUpdate:true;
-      shouldUpdate = nextProps.data == this.props.data?shouldUpdate:true;
-      shouldUpdate = nextState.data == this.state.data?shouldUpdate:true;
-      shouldUpdate = nextState.selected_attribute == this.state.selected_attribute?shouldUpdate:true;
+      shouldUpdate = shouldUpdate || (nextProps.width != this.props.width);
+      shouldUpdate = shouldUpdate || (nextProps.height != this.props.height);
+      shouldUpdate = shouldUpdate || (nextProps.data != this.props.data);
+      shouldUpdate = shouldUpdate || (nextState.data != this.state.data);
+      shouldUpdate = shouldUpdate || (nextState.selected_attribute != this.state.selected_attribute);
 
       return shouldUpdate;
     }
@@ -55,10 +55,7 @@ class BarChart extends React.Component{
     componentDidUpdate(prevProps, prevState, snapshot) {
         if(prevProps.data != this.props.data){
             const {data, total} = this.updatedData(this.state.selected_attribute);
-
-            this.setState({
-                data:data, 
-                total:total})
+            this.setState({data,total});
         }
     }
 
@@ -87,21 +84,19 @@ class BarChart extends React.Component{
             total = this.props.data.length;
         }
 
-        return({
-            data:data, 
-            total:total
-        })
+        return({data,total});
     }
 
     selectAttribute(attribute){
         const {data, total} = this.updatedData(attribute);
 
         this.setState({
+            data, 
+            total,
             legend: attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
-            data:data, 
             sector_dimension:attribute.name, 
             selected_attribute: attribute,
-            total:total})
+            })
     }
 
     highlightEntities(selector){
