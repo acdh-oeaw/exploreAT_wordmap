@@ -11,7 +11,7 @@ import SparqlQueryCreator from './SparqlQueryCreator.js';
 import RdfBasedSourceSelector from './RdfBasedSourceSelector.js';
 import SparqlBasedSourceSelector from './SparqlBasedSourceSelector.js';
 
-const ENTITIES_FROM_RDF = true;
+const ENTITIES_FROM_RDF = false;
 const SourceSelector = (ENTITIES_FROM_RDF === true)?
 	RdfBasedSourceSelector:
 	SparqlBasedSourceSelector;	

@@ -137,6 +137,10 @@ class BarChart extends React.Component{
                 height={yScale(d.value)}
                 onMouseEnter={()=>this.highlightEntities(className)}
                 onMouseOut={()=>this.unhighlightEntities()}
+                onClick={()=>{
+                    this.props.filters[this.state.selected_attribute.aggregation_term].filter(d.key);
+                    this.props.updateFilteredData();
+                }}
                 ></rect>);
             
             return(<g key={d.key} transform={`translate(${params.paddingLeft + i*bar_width},${dimensions.height - yScale(d.value)})`}> 
@@ -190,6 +194,10 @@ class BarChart extends React.Component{
                                             key={d.key} 
                                             className={`${this.state.legend}-${last_field_of_uri(String(d.key))}`}
                                             onMouseEnter={()=>this.highlightEntities(`${this.state.legend}-${last_field_of_uri(String(d.key))}`)}
+                                            onClick={()=>{
+                                                this.props.filters[this.state.selected_attribute.aggregation_term].filter(d.key);
+                                                this.props.updateFilteredData();
+                                            }}
                                             onMouseOut={()=>this.unhighlightEntities()}>
                                         <circle cx="0" cy="0" r="6" fill={colorScale(i)}></circle>
                                         <text x="7" y="5">

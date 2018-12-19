@@ -164,6 +164,10 @@ class PieChart extends React.Component{
                 fill={colorScale(i)}
                 onMouseEnter={()=>this.highlightEntities(className)}
                 onMouseOut={()=>this.unhighlightEntities()}
+                onClick={()=>{
+                    this.props.filters[this.state.selected_attribute.aggregation_term].filter(d.key);
+                    this.props.updateFilteredData();
+                }}
                 ></path>);
             rotationAccumulated = endAngle;
             return(<g key={d.key}>
@@ -230,7 +234,11 @@ class PieChart extends React.Component{
                                             key={d.key}
                                             className={`${this.state.legend}-${last_field_of_uri(String(d.key))}`}
                                             onMouseEnter={()=>this.highlightEntities(`${this.state.legend}-${last_field_of_uri(String(d.key))}`)}
-                                            onMouseOut={()=>this.unhighlightEntities()}>
+                                            onMouseOut={()=>this.unhighlightEntities()}
+                                            onClick={()=>{
+                                                this.props.filters[this.state.selected_attribute.aggregation_term].filter(d.key);
+                                                this.props.updateFilteredData();
+                                            }}>
                                         <circle cx="0" cy="0" r="6" fill={colorScale(i)}></circle>
                                         <text x="7" y="5">
                                             {d.key.includes('/')?d.key.split('/')[d.key.split('/').length-1]:d.key} ( {d.value} )

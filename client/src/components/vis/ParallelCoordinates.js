@@ -361,7 +361,7 @@ class ParallelCoordinates extends React.Component{
                                     key={'legend-'+i}
                                     className={`${this.state.colorAttribute}-${last_field_of_uri(String(d))}`}
                                     onMouseEnter={()=>this.highlightEntitiesBySelector(`.${this.state.colorAttribute}-${last_field_of_uri(String(d))}`)}
-                                    onMouseOut={()=>this.unhighlightEntities()}>>
+                                    onMouseOut={()=>this.unhighlightEntities()}>
                                 <circle cx="0" cy="0" r="6" fill={this.colorScale(d)}></circle>
                                 <text x="7" y="5">
                                     {d}

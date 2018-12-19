@@ -38,13 +38,17 @@ div#app div.content, div#app div#source_selector{
 #header{
 	z-index: 2;
 	background-color: #2c3e50;
-	padding: 0.2em 0;
+	padding: 0.1em 0;
+}
+
+div.header{
+  height: 30px;
 }
 
 #header div:nth-child(1){
 	padding-left: 2em;
-	height: 40px;
 	background-color: white;
+  height: 34px;
 	margin:0.2em 0;
 	display: flex;
 	flex-direction: row;
@@ -61,11 +65,10 @@ div#app div.content, div#app div#source_selector{
 #header h3{	margin: 0 1em;}
 
 #header img{
-	margin-top:1.7em;
-	height:4.5em;
+	margin-top:2em;
+	height:4em;
 	background-color: white;
-	border-radius: 100%;
-	border:solid 5px #2c3e50;
+	border:solid 4px #2c3e50;
 }
 
 #header img:hover{
@@ -106,9 +109,9 @@ div.content div.header{
 }
 
 div.content div.header h2{
-	font-size: 2em;
+	font-size: 1.5em;
 	display: inline-block;
-	margin: 0 0 0 5.3em ;
+	margin: 0 0 0 6.6em ;
 }
 
 div.content div.header div.info{
@@ -430,6 +433,7 @@ div.visWrapper div.header{
 	justify-content: space-between;
 	padding:1px;
   line-height: 1.1em;
+  height: initial;
 }
 
 div.visWrapper div.content{background-color: white;}

@@ -70,7 +70,6 @@ class Explorer extends React.Component{
           loaded: true
         }
         d3.keys(data[0]).map(d=>state.filters[d]=state.crossfilter.dimension(x=>x[d]));
-        console.log(state, this.updateFilteredData);
         this.setState(state);
       } else if (err) throw err;
     });
@@ -83,7 +82,6 @@ class Explorer extends React.Component{
         filterChanged: false
       })
     }  
-    console.log(this.state.data)
   }
 
   updateFilteredData(){
