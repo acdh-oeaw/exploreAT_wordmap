@@ -23,8 +23,12 @@ class ParallelCoordinates extends React.Component{
     constructor(props){
         super(props);
 
+        const sorting = {};
+        this.props.attributes.map(x=>sorting[x.name]='up');
         this.state = {
-            colorAttribute: this.props.attributes[0].name
+            colorAttribute: this.props.attributes[0].name,
+            sorting: sorting,
+            sortingChanged: false
         };
 
         this.updateData();
@@ -48,6 +52,7 @@ class ParallelCoordinates extends React.Component{
         this.highlightEntitiesBySelector = this.highlightEntitiesBySelector.bind(this);
         this.unhighlightEntities = this.unhighlightEntities.bind(this);
         this.updateData = this.updateData.bind(this);
+        this.toggleSortingOrder = this.toggleSortingOrder.bind(this);
     }
 
     componentDidMount(){
@@ -66,7 +71,11 @@ class ParallelCoordinates extends React.Component{
             this.updateScales();
             if(prevProps.width != this.props.width || prevProps.height != this.props.height){
                 this.repositionScales();
+            }else if(this.state.sortingChanged === true){
+                this.repositionScales();
+                this.state.sortingChanged = false;
             }
+
             this.updateParallelCoordinates();
         }
     }
@@ -123,6 +132,14 @@ class ParallelCoordinates extends React.Component{
                 .style('fill','black');
         }
         this.applyFilters();
+    }
+
+    toggleSortingOrder(attribute){
+        const sortingUpdated = (prev,attribute)=>{
+            prev[attribute] = prev[attribute]=='up'?'down':'up';
+            return(prev);
+        }; 
+        this.setState(prev=>({sorting: sortingUpdated(prev.sorting, attribute), sortingChanged:true}));
     }
 
     selected(d){
@@ -196,10 +213,12 @@ class ParallelCoordinates extends React.Component{
 
         featureAxisG
           .append("text")
+          .attr("class", "SortBy")
           .attr("transform", "rotate(-20)")
           .attr('y', params.paddingTop+ params.marginTop + 10)
           .attr('x', -20)
-          .text(d=>d.name);
+          .text(d=>d.name+(this.state.sorting[d.name]=="up"?"⯆":"⯅"))
+          .on("click",d=>this.toggleSortingOrder(d.name));
     }
 
     updateParallelCoordinates(){
@@ -250,9 +269,10 @@ class ParallelCoordinates extends React.Component{
 
         // Each attribute has an scale for the y axis
         this.yScales = {};
+        const sortUp = (a,b)=>(a<b), sortDown = (a,b)=>(a>b);
         this.props.attributes.map(attr=>{
             this.yScales[attr.name] = d3.scalePoint()
-                .domain(domain[attr.name])
+                .domain(domain[attr.name].sort(this.state.sorting[attr.name]=='up'?sortUp:sortDown))
                 .range(range)
         });
 
@@ -315,10 +335,12 @@ class ParallelCoordinates extends React.Component{
 
         featureAxisG
           .append("text")
+          .attr("class", "SortBy")
           .attr("transform", "rotate(-20)")
           .attr('y', params.paddingTop+ params.marginTop + 10)
           .attr('x', -20)
-          .text(d=>d.name);
+          .text(d=>d.name+(this.state.sorting[d.name]=="up"?"⯆":"⯅"))
+          .on("click",d=>this.toggleSortingOrder(d.name));
       }
 
     updateColorAttribute(attribute){

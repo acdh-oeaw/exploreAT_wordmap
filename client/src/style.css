@@ -276,7 +276,7 @@ g.entity text.attribute-selected {
 /* Explorer ---------------------------------------------------------------------------
  * https://projects.lukehaas.me/css-loaders/
 */
-div#explorer div.content tspan.sortBy{
+div#explorer div.content .sortBy{
   cursor: pointer;
 }
 
