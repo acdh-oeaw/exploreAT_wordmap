@@ -1,5 +1,7 @@
 import * as d3 from 'd3';
 import React from 'react';
+import { Icon } from 'react-materialize';
+
 
 /* Dummy
  * Dummy component for scaffolding vis components
@@ -25,19 +27,36 @@ class PieChart extends React.Component{
         const attribute = this.props.attributes[0];
         const {data, total} = this.updatedData(attribute);
 
+        this.sortingFunctions = {
+            key: {
+                up: (a,b)=>(a.key < b.key),
+                down: (a,b)=>(a.key > b.key),
+            },
+            value:{
+                up: (a,b)=>(a.value < b.value),
+                down: (a,b)=>(a.value > b.value),
+            }
+        };
+
         this.state = {
             data,
             total,
             legend: attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
             sector_dimension:attribute.name,
-            selected_attribute: attribute
+            selected_attribute: attribute,
+            sortBy: 'key',
+            keySortOrder:'up',
+            valueSortOrder:'up',
+            sortingFunction: this.sortingFunctions['key']['up'],
         };
+
 
         this.node = d3.select(this.node);
         this.createSectors = this.createSectors.bind(this);
         this.selectAttribute = this.selectAttribute.bind(this);
         this.highlightEntities = this.highlightEntities.bind(this);
         this.unhighlightEntities = this.unhighlightEntities.bind(this);
+        this.setSortBy = this.setSortBy.bind(this);
     }
 
     componentDidMount(){
@@ -59,6 +78,8 @@ class PieChart extends React.Component{
     shouldComponentUpdate(nextProps, nextState) {
         let shouldUpdate = false;
 
+        shouldUpdate = shouldUpdate || (nextState.sortBy != this.state.sortBy);
+        shouldUpdate = shouldUpdate || (nextState[`${nextState.sortBy}SortOrder`] != this.state[`${nextState.sortBy}SortOrder`]);
         shouldUpdate = shouldUpdate || (nextProps.width != this.props.width);
         shouldUpdate = shouldUpdate || (nextProps.height != this.props.height);
         shouldUpdate = shouldUpdate || (nextProps.data != this.props.data);
@@ -144,7 +165,7 @@ class PieChart extends React.Component{
         const colorScale = d3.scaleOrdinal( d3.schemeSet3);
         const last_field_of_uri = (uri)=>uri.includes('/')?uri.split('/')[uri.split('/').length-1]:uri;
 
-        const sectors = d3.entries(this.state.data).map((d,i)=>{
+        const sectors = d3.entries(this.state.data).sort(this.state.sortingFunction).map((d,i)=>{
             // classValue is the stripped identifyer to be used for the class name
             // shortter names will yield faster search results
             let classValue = last_field_of_uri(String(d.key.valueOf()));
@@ -182,6 +203,21 @@ class PieChart extends React.Component{
         d3.selectAll(".hovered").classed('hovered',false)
     }
 
+    setSortBy(value){
+        this.setState(prev=>({
+            keySortOrder:((value!='key' && prev.keySortOrder == 'up')
+                || (value=='key' && value==prev.sortBy && prev.keySortOrder == 'down')
+                || (value=='key' && value!=prev.sortBy && prev.keySortOrder=='up')
+                ?'up':'down'),
+            valueSortOrder:((value!='value' && prev.valueSortOrder == 'up')
+                || (value=='value' && value==prev.sortBy && prev.valueSortOrder == 'down')
+                || (value=='value' && value!=prev.sortBy && prev.valueSortOrder=='up')
+                ?'up':'down'),
+            sortBy:value,
+            sortingFunction: this.sortingFunctions[value][(prev.sortBy!=value?prev[`${value}SortOrder`]:(prev[`${value}SortOrder`]=='up'?'down':'up'))]
+        }));
+    }
+
     render(){
         const last_field_of_uri = (uri)=>uri.includes('/')?uri.split('/')[uri.split('/').length-1]:uri;
 
@@ -216,14 +252,22 @@ class PieChart extends React.Component{
                    <g className="legend" transform={`translate(${this.props.width - params.legendWidth },30)`}>
                         <g transform={`translate(0,0)`}>
                             <text x="7" y="0">
-                                {this.state.legend} ( value )
+                                {this.state.legend}
+                                <tspan onClick={()=>this.setSortBy("key")} className={"sortBy"}> 
+                                    {(this.state.keySortOrder == 'up')?"⯆":"⯅"}
+                                </tspan>
+                                ( value 
+                                <tspan onClick={()=>this.setSortBy("value")} className={"sortBy"}> 
+                                    {(this.state.valueSortOrder == 'up')?"⯆":"⯅"}
+                                </tspan>
+                                )
                             </text>
                         </g>
                         {(()=>{
                             let legend = "";
                             if(this.state.data != null){
                                 const colorScale = d3.scaleOrdinal( d3.schemeSet3);
-                                legend = d3.entries(this.state.data).map((d,i)=>(
+                                legend = d3.entries(this.state.data).sort(this.state.sortingFunction).map((d,i)=>(
                                     (55 + i*16 > this.props.height-params.marginTop - params.paddingBottom)?'':
                                     <g transform={`translate(0,${17 + i*16})`} 
                                             key={d.key}

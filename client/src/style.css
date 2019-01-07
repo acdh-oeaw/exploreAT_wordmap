@@ -276,6 +276,10 @@ g.entity text.attribute-selected {
 /* Explorer ---------------------------------------------------------------------------
  * https://projects.lukehaas.me/css-loaders/
 */
+div#explorer div.content tspan.sortBy{
+  cursor: pointer;
+}
+
 div#explorer, div#explorer div.content{
   height: 100%;
 }
