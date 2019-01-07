@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const fetch = require('node-fetch');
 const wrapper = require('../aux/UrlParamWrapper'); 
+const sparqlQueries = require('../aux/SparqlQueryBuilder');
+const sparql = require('d3-sparql');
 
 // Retrieves an external resource to evade cross origin restrictions
 router.route('/resource/:url')
@@ -12,6 +14,34 @@ router.route('/resource/:url')
 		    	res.type('text/xml')
 		    	res.send(a);
 		    }).catch(error=>console.error(error));        
+    });
+
+router.route('/entities/:url')
+    .get(function(req, res){
+        const url = wrapper.paramToUrl(req.params.url)
+        console.log(url)
+        sparql.sparql(url, sparqlQueries.getAvailableEntities(), (err, data) => {
+            console.log('aui')
+            if (data && !err) {
+                res.type('text')
+                console.log(data)
+                res.send(JSON.stringify(data))
+          } else if (err) throw err
+        });         
+    });
+
+router.route('/relationships/:url')
+    .get(function(req, res){
+        const url = wrapper.paramToUrl(req.params.url)
+        console.log(url)
+        sparql.sparql(url, sparqlQueries.getEntityRelationships(), (err, data) => {
+            console.log('aui')
+            if (data && !err) {
+                res.type('text')
+                console.log(data)
+                res.send(JSON.stringify(data))
+          } else if (err) throw err
+        });         
     });
 
 // Dummy route for scaffolding

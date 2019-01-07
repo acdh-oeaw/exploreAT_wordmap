@@ -12,3 +12,4 @@ RUN npm install
 COPY . /srv/app/exploreat_client
 
 CMD ["npm", "dev"]
+EXPOSE 3000
