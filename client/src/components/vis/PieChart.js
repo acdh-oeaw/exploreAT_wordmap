@@ -58,7 +58,7 @@ class PieChart extends React.Component{
         this.unhighlightEntities = this.unhighlightEntities.bind(this);
         this.setSortBy = this.setSortBy.bind(this);
     }
-
+    
     componentDidMount(){
         const attribute = this.props.attributes[0]
         this.setState({
