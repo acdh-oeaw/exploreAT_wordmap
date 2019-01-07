@@ -9,7 +9,10 @@ const outputDirectory = 'dist'
 
 module.exports = (env,args)=>{
   return {
-  entry: './src/index.js',
+  entry: {
+    javascript: './src/index.js',
+    html: './public/index.html'
+  },
   output: {
     path: path.join(__dirname, outputDirectory),
     publicPath: '/'
