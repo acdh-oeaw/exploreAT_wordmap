@@ -60,6 +60,7 @@ class Explorer extends React.Component{
   }
 
   componentDidMount(){
+    this.createColorScales = this.createColorScales.bind(this);
     let query = this.sparqlQueries.createDataSparqlQuery(this.prefixes, this.triples);    
     sparql(this.api_url, query, (err, data) => {
       if (data && !err) {
@@ -71,9 +72,29 @@ class Explorer extends React.Component{
           loaded: true
         }
         d3.keys(data[0]).map(d=>state.filters[d]=state.crossfilter.dimension(x=>x[d]));
+        this.colorScales = this.createColorScales(data);
         this.setState(state);
       } else if (err) throw err;
     });
+  }
+
+  createColorScales(data){
+    const colorScales = {}, domains = {};
+    d3.keys(data[0]).map(x=>{
+      colorScales[x]=d3.scaleOrdinal( d3.schemeSet3);
+      domains[x]={};
+    });
+
+    data.map(d=>{
+      d3.keys(d).map(x=>{
+        if(!domains[x][d[x]])
+          domains[x][d[x]] = 1;
+      });
+    });
+
+    d3.entries(domains).map(entry=>colorScales[entry.key].domain(d3.keys(entry.value)));
+
+    return colorScales;
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -156,6 +177,7 @@ class Explorer extends React.Component{
 				attributes={c.value.attributes}
 				data={this.state.data}
 				filters={this.state.filters}
+        colorScales={this.colorScales}
 				updateFilteredData={this.updateFilteredData}
 				removeComponent={this.removeComponent}>
 				{c.value.instance}

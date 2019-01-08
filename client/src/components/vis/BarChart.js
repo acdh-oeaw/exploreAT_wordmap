@@ -127,7 +127,6 @@ class BarChart extends React.Component{
 
     createBars(dimensions){
         const last_field_of_uri = (uri)=>uri.includes('/')?uri.split('/')[uri.split('/').length-1]:uri;
-        const colorScale = d3.scaleOrdinal( d3.schemeSet3);
         const yScale = d3.scaleLinear()
             .domain([0,d3.values(this.state.data).reduce((a,b)=>a>b?a:b,0)])
             .range([params.paddingTop,dimensions.height-params.paddingBottom]);
@@ -140,9 +139,9 @@ class BarChart extends React.Component{
             // shortter names will yield faster search results
             let classValue = last_field_of_uri(String(d.key.valueOf()));
             const className = `${this.state.legend}-${classValue}`;
-
+            console.log()
             const bar = (<rect 
-                fill={colorScale(i)} 
+                fill={this.props.colorScales[this.state.legend](d.key)} 
                 className={className}
                 x={0}
                 y={0}
@@ -223,7 +222,6 @@ class BarChart extends React.Component{
                         {(()=>{
                             let legend = "";
                             if(this.state.data != null){
-                                const colorScale = d3.scaleOrdinal( d3.schemeSet3);
                                 legend = d3.entries(this.state.data).sort(this.state.sortingFunction).map((d,i)=>(
                                     (55 + i*16 > this.props.height-params.marginTop - params.paddingBottom)?'':
                                     <g transform={`translate(0,${17 + i*16})`} 
@@ -235,7 +233,7 @@ class BarChart extends React.Component{
                                                 this.props.updateFilteredData();
                                             }}
                                             onMouseOut={()=>this.unhighlightEntities()}>
-                                        <circle cx="0" cy="0" r="6" fill={colorScale(i)}></circle>
+                                        <circle cx="0" cy="0" r="6" fill={this.props.colorScales[this.state.legend](d.key)}></circle>
                                         <text x="7" y="5">
                                             {last_field_of_uri(d.key)} ( {d.value} )
                                         </text>

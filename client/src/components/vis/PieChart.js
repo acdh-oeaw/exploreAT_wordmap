@@ -177,7 +177,7 @@ class PieChart extends React.Component{
             const sector = (<path
                 className={className}
                 d={path}
-                fill={colorScale(i)}
+                fill={this.props.colorScales[this.state.legend](d.key)}
                 onMouseEnter={()=>this.highlightEntities(className)}
                 onMouseOut={()=>this.unhighlightEntities()}
                 onClick={()=>{
@@ -278,7 +278,7 @@ class PieChart extends React.Component{
                                                 this.props.filters[this.state.selected_attribute.aggregation_term].filter(d.key);
                                                 this.props.updateFilteredData();
                                             }}>
-                                        <circle cx="0" cy="0" r="6" fill={colorScale(i)}></circle>
+                                        <circle cx="0" cy="0" r="6" fill={this.props.colorScales[this.state.legend](d.key)}></circle>
                                         <text x="7" y="5">
                                             {d.key.includes('/')?d.key.split('/')[d.key.split('/').length-1]:d.key} ( {d.value} )
                                         </text>

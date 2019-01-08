@@ -37,6 +37,7 @@ class ParallelCoordinates extends React.Component{
         
         //Helper functions
         this.lineGenerator = d3.line();
+        this.stripUri = (value)=>String(value).includes('/')?value.split('/')[value.split('/').length-1]:value
 
         //Binding of class methods
         
@@ -103,7 +104,6 @@ class ParallelCoordinates extends React.Component{
             this.props.attributes.map(attr=>{
                 // The uris are shrotten 
                 let value = this.props.data[i][attr.name].valueOf();
-                    value = String(value).includes('/')?value.split('/')[value.split('/').length-1]:value
                 entry[attr.name] = value;
             })
             this.data.push(entry);
@@ -172,6 +172,7 @@ class ParallelCoordinates extends React.Component{
                 .attr('d', d=>this.linePath(d));
 
         // active data
+        const stripUri = this.stripUri;
         d3.select(this.active).selectAll('path')
           .data(this.data)
           .enter()
@@ -179,9 +180,9 @@ class ParallelCoordinates extends React.Component{
             .attr('d', d=>this.linePath(d))
             .each(function(d){
                 const node = d3.select(this);
-                d3.entries(d).map(entry=>node.classed(`${entry.key}-${entry.value}`, true))
+                d3.entries(d).map(entry=>node.classed(`${entry.key}-${stripUri(entry.value)}`, true))
             })
-            .attr('stroke',(d,i)=>this.colorScale(d[this.state.colorAttribute]))
+            .attr('stroke',(d,i)=>this.props.colorScales[this.state.colorAttribute](d[this.state.colorAttribute]))
             .on("mouseover", this.highlightEntities)
             .on("mouseout", this.uhighlightEntities);
 
@@ -237,13 +238,14 @@ class ParallelCoordinates extends React.Component{
         active.exit().remove();
         active.enter().append('path');
 
+        const stripUri = this.stripUri;
         d3.select(this.active).selectAll('path')
             .each(function(d){
                 const node = d3.select(this);
-                d3.entries(d).map(entry=>node.classed(`${entry.key}-${entry.value}`, true))
+                d3.entries(d).map(entry=>node.classed(`${entry.key}-${stripUri(entry.value)}`, true))
             })
             .attr('d', d=>this.linePath(d))
-            .attr('stroke',(d,i)=>this.colorScale(d[this.state.colorAttribute]))
+            .attr('stroke',(d,i)=>this.props.colorScales[this.state.colorAttribute](d[this.state.colorAttribute]))
             .on("mouseover", this.highlightEntities)
             .on("mouseout", this.unhighlightEntities);
     }
@@ -272,16 +274,16 @@ class ParallelCoordinates extends React.Component{
         const sortUp = (a,b)=>(a<b), sortDown = (a,b)=>(a>b);
         this.props.attributes.map(attr=>{
             this.yScales[attr.name] = d3.scalePoint()
-                .domain(domain[attr.name].sort(this.state.sorting[attr.name]=='up'?sortUp:sortDown))
+                .domain(this.props.colorScales[attr.name].domain().sort(this.state.sorting[attr.name]=='up'?sortUp:sortDown))
                 .range(range)
         });
 
         this.yAxis = {};
         d3.entries(this.yScales).map((x,i)=>{
             if(i < d3.keys(this.yScales).length/2)
-                this.yAxis[x.key] = d3.axisLeft(x.value).tickFormat(d=>String(d).substring(0,params.axisTickLength));
+                this.yAxis[x.key] = d3.axisLeft(x.value).tickFormat(d=>this.stripUri(String(d)).substring(0,params.axisTickLength));
             else
-                this.yAxis[x.key] = d3.axisRight(x.value).tickFormat(d=>String(d).substring(0,params.axisTickLength));
+                this.yAxis[x.key] = d3.axisRight(x.value).tickFormat(d=>this.stripUri(String(d)).substring(0,params.axisTickLength));
         });    
 
         this.yBrushes = {};
@@ -297,9 +299,6 @@ class ParallelCoordinates extends React.Component{
                 .on('brush', ()=>this.brushEventHandler(x.key))
                 .on('end', ()=>this.brushEventHandler(x.key));
         });
-
-        this.colorScale = d3.scaleOrdinal( d3.schemeSet3)
-            .domain(this.yScales[this.state.colorAttribute].domain());
     }
 
     repositionScales(){
@@ -344,11 +343,8 @@ class ParallelCoordinates extends React.Component{
       }
 
     updateColorAttribute(attribute){
-        this.colorScale = d3.scaleOrdinal( d3.schemeSet3)
-            .domain(this.yScales[attribute].domain())
-
         d3.select(this.active).selectAll('path')
-            .attr('stroke',(d,i)=>this.colorScale(d[attribute]));
+            .attr('stroke',(d,i)=>this.props.colorScales[this.state.colorAttribute](d[this.state.colorAttribute]))
         this.setState({colorAttribute: attribute})
     }
 
@@ -379,20 +375,20 @@ class ParallelCoordinates extends React.Component{
                                 {this.state.colorAttribute}
                             </text>
                         </g>
-                        {this.colorScale.domain().map((d,i)=>(
+                        {this.props.colorScales[this.state.colorAttribute].domain().map((d,i)=>(
                             (45 + i*16 > this.props.height-params.marginTop - params.paddingBottom)?'':
                             <g transform={`translate(0,${17 + i*16})`} 
                                     key={'legend-'+i}
                                     className={`${this.state.colorAttribute}-${last_field_of_uri(String(d))}`}
                                     onMouseEnter={()=>this.highlightEntitiesBySelector(`.${this.state.colorAttribute}-${last_field_of_uri(String(d))}`)}
                                     onMouseOut={()=>this.unhighlightEntities()}>
-                                <circle cx="0" cy="0" r="6" fill={this.colorScale(d)}></circle>
+                                <circle cx="0" cy="0" r="6" fill={this.props.colorScales[this.state.colorAttribute](d)}></circle>
                                 <text x="7" y="5">
-                                    {d}
+                                    {this.stripUri(d)}
                                 </text>
                             </g>
                         ))}
-                        {(this.colorScale.domain().length*16 + 47 <
+                        {(this.props.colorScales[this.state.colorAttribute].domain().length*16 + 47 <
                           this.props.height-params.marginTop - params.paddingBottom)?'':
                             <g transform={`translate(0,${this.props.height-params.marginTop - params.paddingBottom - 35})`}>
                                 <text x="7" y="15"> . . . </text>
