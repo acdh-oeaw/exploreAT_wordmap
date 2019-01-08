@@ -365,6 +365,8 @@ div#OptionTags div#options a{
   margin-right: 5px;
 }
 
+.slider-control-bottomcenter{display: none;}
+
 /* Loader
 */
 div#loader{

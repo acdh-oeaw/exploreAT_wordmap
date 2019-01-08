@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import React from 'react';
 import Dropdown from 'react-dropdown';
+import Carousel from 'nuka-carousel';
 import 'react-dropdown/style.css'
 import OptionTags from './OptionTags.js';
 
@@ -40,6 +41,25 @@ class ComponentSelector extends React.Component{
         this.backToEntities = this.backToEntities.bind(this);
         this.addAttribute = this.addAttribute.bind(this);
         this.removeAttribute = this.removeAttribute.bind(this);
+
+        this.carouselOptions = {
+            "Table":<img onClick={()=>this.handleTypeChange("Table")} 
+                className="button" alt="Table" title="Table" key="Table"
+                height={this.props.height-200} src="/public/table.svg" 
+            />,
+            "Pie Chart":<img onClick={()=>this.handleTypeChange("Pie Chart")} 
+                className="button" alt="Pie Chart" title="Pie Chart" key="Pie Chart"
+                height={this.props.height-200} src="/public/pie.svg" 
+            />,
+            "Parallel Coordinates":<img onClick={()=>this.handleTypeChange("Parallel Coordinates")} 
+                className="button" alt="Parallel Coordinates" title="Parallel Coordinates" key="Parallel Coordinates"
+                height={this.props.height-200} src="/public/ppcc.svg" 
+            />,
+            "Bar Chart":<img onClick={()=>this.handleTypeChange("Bar Chart")} 
+                className="button" alt="Bar Chart" title="Bar Chart" key="Bar Chart"
+                height={this.props.height-200} src="/public/bar.svg" 
+            />,
+        };
     }
 
     handleNameChange(event){
@@ -82,7 +102,7 @@ class ComponentSelector extends React.Component{
     }
 
     handleTypeChange(type){
-        this.setState({type: type.value});
+        this.setState({type: type});
     };
 
     createComponent(){
@@ -125,7 +145,7 @@ class ComponentSelector extends React.Component{
             vis_incompatibilities.push(`All attributes must have the same amount of entries to be displayed in a table.`);
         }
 
-        this.setState({showComponents:true, useful_visualizations:useful_visualizations, vis_incompatibilities:vis_incompatibilities});
+        this.setState({showComponents:true, type:useful_visualizations[0], useful_visualizations:useful_visualizations, vis_incompatibilities:vis_incompatibilities});
     }
 
     backToEntities(){
@@ -140,13 +160,14 @@ class ComponentSelector extends React.Component{
                     <li>Variables chosen <a onClick={()=>this.backToEntities()}>(back to selection)</a> :</li>
                     <li>{this.state.attributes.reduce((a,b)=>b.name+', '+a, "")}</li>
                     <hr/><br/>
-                    <li>Type of component to be created :</li>
+                    <li>Click on the visualization prefered. Currently selected : {this.state.type}</li>
                     <li>
-                        <Dropdown 
-                            options={this.state.useful_visualizations} 
-                            onChange={this.handleTypeChange} 
-                            value={this.state.useful_visualizations[0]} 
-                            placeholder="Select an type" />
+                        <Carousel dragging={false} 
+                                swiping={false} 
+                                wrapAround={true}
+                                cellAlign={"center"}>
+                                {this.state.useful_visualizations.map(x=>this.carouselOptions[x])}
+                          </Carousel>
                     </li>
                 </ul>
                 <a onClick={()=>alert(this.state.vis_incompatibilities.map(e=>`${e}\n`))} style={{cursor:'pointer'}}>Show incompatiblities </a>
