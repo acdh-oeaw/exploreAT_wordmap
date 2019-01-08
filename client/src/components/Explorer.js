@@ -190,8 +190,9 @@ class Explorer extends React.Component{
           <div className="info">
               <span>Ontologies referenced : {this.prefixes.map(p=>p.prefix).join(', ')}</span>
               <span>Sparql entry point : {this.api_url}</span>
-              <span onClick={()=>alert(this.state.available_entities.map(e=>`${e}\n`))} style={{cursor:'pointer'}}>Show variables </span>
-              <span onClick={()=>this.resetAllFilters()} style={{cursor:'pointer'}}>Reset all filters </span>
+              <span className="button" onClick={()=>alert(this.state.available_entities.map(e=>`${e}\n`))}>Show variables </span>
+              <span className="button" onClick={()=>this.resetAllFilters()}>Reset all filters </span>
+              <NavLink to={"/entities/"}> <span className="button">Go back to entity selection</span> </NavLink>
           </div>
         </div>
         <div className="content">

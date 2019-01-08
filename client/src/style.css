@@ -276,7 +276,9 @@ g.entity text.attribute-selected {
 /* Explorer ---------------------------------------------------------------------------
  * https://projects.lukehaas.me/css-loaders/
 */
-div#explorer div.content .sortBy{
+div#explorer div.header span.button{cursor:pointer; color:black;}
+
+.sortBy{
   cursor: pointer;
 }
 
