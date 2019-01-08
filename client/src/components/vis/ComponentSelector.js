@@ -41,25 +41,6 @@ class ComponentSelector extends React.Component{
         this.backToEntities = this.backToEntities.bind(this);
         this.addAttribute = this.addAttribute.bind(this);
         this.removeAttribute = this.removeAttribute.bind(this);
-
-        this.carouselOptions = {
-            "Table":<img onClick={()=>this.handleTypeChange("Table")} 
-                className="button" alt="Table" title="Table" key="Table"
-                height={this.props.height-200} src="/public/table.svg" 
-            />,
-            "Pie Chart":<img onClick={()=>this.handleTypeChange("Pie Chart")} 
-                className="button" alt="Pie Chart" title="Pie Chart" key="Pie Chart"
-                height={this.props.height-200} src="/public/pie.svg" 
-            />,
-            "Parallel Coordinates":<img onClick={()=>this.handleTypeChange("Parallel Coordinates")} 
-                className="button" alt="Parallel Coordinates" title="Parallel Coordinates" key="Parallel Coordinates"
-                height={this.props.height-200} src="/public/ppcc.svg" 
-            />,
-            "Bar Chart":<img onClick={()=>this.handleTypeChange("Bar Chart")} 
-                className="button" alt="Bar Chart" title="Bar Chart" key="Bar Chart"
-                height={this.props.height-200} src="/public/bar.svg" 
-            />,
-        };
     }
 
     handleNameChange(event){
@@ -153,6 +134,25 @@ class ComponentSelector extends React.Component{
     }
 
     renderMenu(){
+        const carouselOptions = {
+            "Table":<img onClick={()=>this.handleTypeChange("Table")} 
+                className="button" alt="Table" title="Table" key="Table"
+                height={this.props.height-200} src="/public/table.svg" 
+            />,
+            "Pie Chart":<img onClick={()=>this.handleTypeChange("Pie Chart")} 
+                className="button" alt="Pie Chart" title="Pie Chart" key="Pie Chart"
+                height={this.props.height-200} src="/public/pie.svg" 
+            />,
+            "Parallel Coordinates":<img onClick={()=>this.handleTypeChange("Parallel Coordinates")} 
+                className="button" alt="Parallel Coordinates" title="Parallel Coordinates" key="Parallel Coordinates"
+                height={this.props.height-200} src="/public/ppcc.svg" 
+            />,
+            "Bar Chart":<img onClick={()=>this.handleTypeChange("Bar Chart")} 
+                className="button" alt="Bar Chart" title="Bar Chart" key="Bar Chart"
+                height={this.props.height-200} src="/public/bar.svg" 
+            />,
+        };
+
         if(this.state.name != "" && this.state.attributes.length>0 && this.state.showComponents === true){
             return(
             <div className="menu-panel">
@@ -166,7 +166,7 @@ class ComponentSelector extends React.Component{
                                 swiping={false} 
                                 wrapAround={true}
                                 cellAlign={"center"}>
-                                {this.state.useful_visualizations.map(x=>this.carouselOptions[x])}
+                                {this.state.useful_visualizations.map(x=>carouselOptions[x])}
                           </Carousel>
                     </li>
                 </ul>
