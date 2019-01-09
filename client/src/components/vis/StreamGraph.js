@@ -1,12 +1,11 @@
 import * as d3 from 'd3';
 import React from 'react';
 
-/* Dummy
- * Dummy component for scaffolding vis components
- * Vis components are provided with width, height and data props
+/* StreamGraph
+ * StreamGraph visualization for representing the evolution or distribution 
+ * of an aggregation over a variable
  * 
- * Data is provided as an array of objects, each of wich is an entry with 
- * a key and value for each of the attributes. 
+ * It must receive at least one aggregated attribute and another one not aggregated
  *
  * The component updates each time the data is been filtered, or the size of the
  * container changes.
@@ -37,10 +36,12 @@ const params = {
     paddingBottom: 10,
  };
 
-class Dummy extends React.Component{
+class StreamGraph extends React.Component{
     constructor(props){
         super(props);
         this.updatedData = this.updatedData.bind(this);
+
+        console.log()
 
         this.state = {
             sector_dimension:"",
@@ -147,4 +148,4 @@ class Dummy extends React.Component{
     }
 }
 
-export default Dummy;
+export default StreamGraph;

@@ -151,6 +151,14 @@ class ComponentSelector extends React.Component{
                 className="button" alt="Bar Chart" title="Bar Chart" key="Bar Chart"
                 height={this.props.height-200} src="/public/bar.svg" 
             />,
+            "Stream Graph":<img onClick={()=>this.handleTypeChange("Stream Graph")} 
+                className="button" alt="Stream Graph" title="Stream Graph" key="Stream Graph"
+                height={this.props.height-200} src="/public/streamgraph.svg" 
+            />,
+            "Circle Packing":<img onClick={()=>this.handleTypeChange("Circle Packing")} 
+                className="button" alt="Circle Packing" title="Circle Packing" key="Circle Packing"
+                height={this.props.height-200} src="/public/circlepacking.svg" 
+            />,
         };
 
         if(this.state.name != "" && this.state.attributes.length>0 && this.state.showComponents === true){

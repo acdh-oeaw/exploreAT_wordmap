@@ -15,6 +15,8 @@ import Table from './vis/Table';
 import PackedBubbles from './vis/PackedBubbles';
 import PieChart from './vis/PieChart';
 import BarChart from './vis/BarChart';
+import StreamGraph from './vis/StreamGraph';
+import CirclePacking from './vis/CirclePacking';
 import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
 import ParallelCoordinates from './vis/ParallelCoordinates';
 
@@ -56,7 +58,14 @@ class Explorer extends React.Component{
     this.renderComponents = this.renderComponents.bind(this);
     this.resetAllFilters = this.resetAllFilters.bind(this);
     // Include here the components that will be available for selection
-    this.availableComponents = {"Table": Table, "Pie Chart": PieChart, "Bar Chart":BarChart, "Parallel Coordinates": ParallelCoordinates};
+    this.availableComponents = {
+      "Table": Table, 
+      "Pie Chart": PieChart, 
+      "Bar Chart":BarChart, 
+      "Parallel Coordinates": ParallelCoordinates,
+      "Stream Graph": StreamGraph,
+      "Circle Packing":CirclePacking
+    };
   }
 
   componentDidMount(){

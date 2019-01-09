@@ -7,7 +7,7 @@ import React from 'react';
  *
  * Data is provided as an array of objects
  */
-  const params = {
+const params = {
     legendWidth: 200,
     marginTop: 25, // for the selection of 
     marginRight: 10, // because of the padding of the container
@@ -114,7 +114,7 @@ class BarChart extends React.Component{
             legend: attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
             sector_dimension:attribute.name, 
             selected_attribute: attribute,
-            })
+        })
     }
 
     highlightEntities(selector){
