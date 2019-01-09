@@ -41,21 +41,17 @@ class StreamGraph extends React.Component{
         super(props);
         this.updateData = this.updateData.bind(this);
 
-        console.log(props.data, props.attributes);
         this.availableCuantitativeDimensions = 
             props.attributes.filter(x=>x.type="num"||x.aggregation!="none");
         this.availableXAxisDimensions = 
             props.attributes.filter(x=>x.type="String"&&x.aggregation=="none");
 
-        console.log(this.updateData(props.data,
-            this.availableCuantitativeDimensions[0],
-            this.availableXAxisDimensions[0]));
-
-        this.state = {
-            cuantitativeDimension:"",
-            xAxisDimension:"",
-            data: null,
-            total: 1,
+        state = {
+            cuantitativeDimension: this.availableCuantitativeDimensions[0],
+            xAxisDimension: this.availableXAxisDimensions[0],
+            data: this.updateData(props.data,
+                this.availableCuantitativeDimensions[0],
+                this.availableXAxisDimensions[0]),
         };
 
         this.node = d3.select(this.node);
@@ -97,45 +93,68 @@ class StreamGraph extends React.Component{
 
     // UpdateData makes the aggregation
     updateData(data, cuantTerm, aggrTerm){
-        /*
-        let uniqueCuantTerm = new Map();
-        data.map(x=>unique.set(x[cuantTerm.attribute], 1));
-        
-        const temp = new Map();
-        for(let [attr,v] of uniqueCuantTerm)
-            temp.set(attr, {});
-        */
-        const results_map = {};
-        data.map(x=>{
+        let uniqueCuantTermKeys = new Map();
+        const results_map = {}, aggregated = new Map();
+        for(let x of data){
             const label = x[cuantTerm.aggregation_term], 
                 aggrTerm_value = x[aggrTerm.attribute];
+            let value = 1;
 
+            // building an array with the calculation done over the aggregation term 
+            // aggregated by the attributed used in the x axis 
             if(results_map[label]){
                 if(results_map[label][aggrTerm_value])
-                    results_map[label][aggrTerm_value] += 1;    
-                else
-                    results_map[label][aggrTerm_value] = 1;    
+                    value = results_map[label][aggrTerm_value] + 1;
             }else{
                 results_map[label] = {};
-                results_map[label][aggrTerm_value] = 1;
             }
-        });
+            results_map[label][aggrTerm_value] = value;
 
-        const results = [];
-        d3.entries(results_map).map(entry=>{
-            d3.entries(entry.value).map(value=>{
-                const result = {};
-                result[cuantTerm.aggregation_term] = entry.key;
-                result[aggrTerm.attribute] = value.key;
-                result.value = value.value;
-                results.push(result);
-            });
-        });
-        /*
-        data.map(x=>{
-            if(temp.has(x[cuantTerm.aggregation]))
-        });*/
-        return results;
+            // building a Map with each of different values of the aggregated data so that 
+            // there's extra computation by calculating twice the the times the value, but the data 
+            // is looped once
+            let entry = {}
+            entry[cuantTerm.aggregation_term] = label;
+            entry[aggrTerm.attribute] = aggrTerm_value;
+            entry.value = value;
+
+            aggregated.set(aggrTerm_value, aggregated.has(aggrTerm_value)?
+                aggregated.get(aggrTerm_value).set(label, entry):
+                (new Map()).set(label,entry));
+
+            uniqueCuantTermKeys.set(label,1);
+        }
+        results_map = null;
+        
+        // give each label a default value of 0 if there is no entry for it for a certain aggregation term
+        for(let label of uniqueCuantTermKeys.keys()){
+            let entry = {}
+            entry[cuantTerm.aggregation_term] = label;
+            entry.value = 0;
+
+            for(let key of aggregated.keys()){
+                entry[aggrTerm.attribute] = key;
+                if(!aggregated.get(key).has(label))
+                    aggregated.get(key).set(label, entry);
+            }
+        }
+
+        // calculate and assign the offsets for each of the entries
+        const offsets = d3.stack()
+                .keys(Array.from(uniqueCuantTermKeys.keys()))
+                .value((d, key) => d.get(key).value)
+                .offset(d3.stackOffsetSilhouette)(
+            Array.from(aggregated.values())
+        );
+
+        for (const layer of offsets) {
+            for (const d of layer) {
+                d.data.get(layer.key).values = [d[0], d[1]];
+            }
+        }
+
+        // it is returned a flatten data structure
+        return(Array.concat(...Array.from(aggregated.values()).map(map=>Array.from(map.values()))));
     }
 
     selectAttribute(attribute){
@@ -191,6 +210,11 @@ class StreamGraph extends React.Component{
                 <p style={{margin:0}}>Select the attribute used for the sectors : {this.props.attributes.map(e=>(
                     <span key={e.name} onClick={()=>this.selectAttribute(e)} className="option"> {e.name} </span>
                 ))}</p>
+                <svg ref={node => this.svg = node} 
+                width={this.props.width - params.marginRight}
+                height={this.props.height - params.marginTop}>
+                    <g ref={node => this.g_element = node}/>
+                </svg>
             </div>
         );
     }
