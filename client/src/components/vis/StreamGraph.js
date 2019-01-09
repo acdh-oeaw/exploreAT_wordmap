@@ -39,18 +39,23 @@ const params = {
 class StreamGraph extends React.Component{
     constructor(props){
         super(props);
-        this.updatedData = this.updatedData.bind(this);
+        this.updateData = this.updateData.bind(this);
 
-        console.log()
+        console.log(props.data, props.attributes);
+        this.availableCuantitativeDimensions = 
+            props.attributes.filter(x=>x.type="num"||x.aggregation!="none");
+        this.availableXAxisDimensions = 
+            props.attributes.filter(x=>x.type="String"&&x.aggregation=="none");
+
+        console.log(this.updateData(props.data,
+            this.availableCuantitativeDimensions[0],
+            this.availableXAxisDimensions[0]));
 
         this.state = {
-            sector_dimension:"",
+            cuantitativeDimension:"",
+            xAxisDimension:"",
             data: null,
             total: 1,
-            sortBy: 'key',
-            keySortOrder:'up',
-            valueSortOrder:'up',
-            sortingFunction: this.sortingFunctions['key']['up'],
         };
 
         this.node = d3.select(this.node);
@@ -88,6 +93,49 @@ class StreamGraph extends React.Component{
         }
         if(prevProps.width != this.props.width){}
         if(prevProps.height != this.props.height){}
+    }
+
+    // UpdateData makes the aggregation
+    updateData(data, cuantTerm, aggrTerm){
+        /*
+        let uniqueCuantTerm = new Map();
+        data.map(x=>unique.set(x[cuantTerm.attribute], 1));
+        
+        const temp = new Map();
+        for(let [attr,v] of uniqueCuantTerm)
+            temp.set(attr, {});
+        */
+        const results_map = {};
+        data.map(x=>{
+            const label = x[cuantTerm.aggregation_term], 
+                aggrTerm_value = x[aggrTerm.attribute];
+
+            if(results_map[label]){
+                if(results_map[label][aggrTerm_value])
+                    results_map[label][aggrTerm_value] += 1;    
+                else
+                    results_map[label][aggrTerm_value] = 1;    
+            }else{
+                results_map[label] = {};
+                results_map[label][aggrTerm_value] = 1;
+            }
+        });
+
+        const results = [];
+        d3.entries(results_map).map(entry=>{
+            d3.entries(entry.value).map(value=>{
+                const result = {};
+                result[cuantTerm.aggregation_term] = entry.key;
+                result[aggrTerm.attribute] = value.key;
+                result.value = value.value;
+                results.push(result);
+            });
+        });
+        /*
+        data.map(x=>{
+            if(temp.has(x[cuantTerm.aggregation]))
+        });*/
+        return results;
     }
 
     selectAttribute(attribute){
@@ -141,7 +189,7 @@ class StreamGraph extends React.Component{
             <div id="Dummy" className="visualization" style={size} ref={node => this.domElement = node}>
                 <p style={{margin:0}}>Dummy component</p>
                 <p style={{margin:0}}>Select the attribute used for the sectors : {this.props.attributes.map(e=>(
-                    <span key={e.name} onClick={()=>this.selectAttribute(e)} className="option" style={style(e.name)}> {e.name} </span>
+                    <span key={e.name} onClick={()=>this.selectAttribute(e)} className="option"> {e.name} </span>
                 ))}</p>
             </div>
         );
