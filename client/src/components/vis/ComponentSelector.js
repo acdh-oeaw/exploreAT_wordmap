@@ -183,9 +183,11 @@ class ComponentSelector extends React.Component{
                     <hr/><br/>
                     <li>Click on the visualization prefered. Currently selected : {this.state.type}</li>
                     <li>
-                        <button onClick={()=>this.handlePrevType(this.state.typeIndex-1)}>Previous</button>
-                        <button onClick={()=>this.handleNextType(this.state.typeIndex+1)}>Next</button>
+                        <div id="miniatureCarousel">
+                        <button onClick={()=>this.handlePrevType(this.state.typeIndex-1)}>{"< Previous"}</button>
                         {carouselOptions[this.props.availableComponents[this.state.typeIndex]]}
+                        <button onClick={()=>this.handleNextType(this.state.typeIndex+1)}>{"Next >"}</button>
+                        </div>
                     </li>
                 </ul>
                 <a onClick={()=>alert(this.state.vis_incompatibilities.map(e=>`${e}\n`))} style={{cursor:'pointer'}}>Show incompatiblities </a>

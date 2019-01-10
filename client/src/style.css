@@ -721,3 +721,34 @@ g#streamGraph .hovered{
   stroke-width:1.5;
 }
 
+
+/* miniature carousel ---------------------------------------------------------------------------
+*/
+
+div#miniatureCarousel{
+    width:100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-top:15px;
+}
+
+div#miniatureCarousel img, div#miniatureCarousel button{
+    display: inline-block;
+}
+
+div#miniatureCarousel img{
+    display: inline-block;
+    box-shadow: rgba(0, 0, 0, 0.14) 1px 2px 2px 0px, rgba(0, 0, 0, 0.2) 2px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 5px 9px 0px;
+}
+
+div#miniatureCarousel button{
+    border: none;
+    color: #18bc9c;
+    background-color:white;
+}
+
+div#miniatureCarousel button:focus{
+    background-color:white;
+}
