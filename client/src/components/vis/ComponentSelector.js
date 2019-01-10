@@ -27,6 +27,7 @@ class ComponentSelector extends React.Component{
             name: "",
             attributes: [],
             type: "",
+            typeIndex: 0,
             showComponents: false,
             data : [],
             useful_visualizations: [],
@@ -34,7 +35,8 @@ class ComponentSelector extends React.Component{
         };
 
         this.handleNameChange = this.handleNameChange.bind(this);
-        this.handleTypeChange = this.handleTypeChange.bind(this);
+        this.handlePrevType = this.handlePrevType.bind(this);
+        this.handleNextType = this.handleNextType.bind(this);
         this.createComponent = this.createComponent.bind(this);
         this.renderMenu = this.renderMenu.bind(this);
         this.showComponents = this.showComponents.bind(this);
@@ -82,9 +84,27 @@ class ComponentSelector extends React.Component{
             });
     }
 
-    handleTypeChange(type){
-        this.setState({type: type});
-    };
+    handlePrevType(newIndex){
+        let index = newIndex>=0?newIndex:this.props.availableComponents.length-1;
+        index = index<this.props.availableComponents.length?index:0;
+        while(!this.state.useful_visualizations.includes(this.props.availableComponents[index])){
+            index = index - 1;
+            index = index>=0?index:this.props.availableComponents.length-1;
+        }
+
+        this.setState({typeIndex: index, type: this.props.availableComponents[index]});
+    }
+
+    handleNextType(newIndex){
+        let index = newIndex>0?newIndex:this.props.availableComponents.length-1;
+        index = index<this.props.availableComponents.length?index:0;
+        while(!this.state.useful_visualizations.includes(this.props.availableComponents[index])){
+            index += 1;
+            index = index<this.props.availableComponents.length?index:0;
+        }
+        
+        this.setState({typeIndex: index, type: this.props.availableComponents[index]});
+    }
 
     createComponent(){
         if(this.state.name != "" && this.state.attributes.length>0 && this.state.type != ""){
@@ -135,27 +155,27 @@ class ComponentSelector extends React.Component{
 
     renderMenu(){
         const carouselOptions = {
-            "Table":<img onClick={()=>this.handleTypeChange("Table")} 
+            "Table":<img 
                 className="button" alt="Table" title="Table" key="Table"
                 height={this.props.height-200} src="/public/table.svg" 
             />,
-            "Pie Chart":<img onClick={()=>this.handleTypeChange("Pie Chart")} 
+            "Pie Chart":<img 
                 className="button" alt="Pie Chart" title="Pie Chart" key="Pie Chart"
                 height={this.props.height-200} src="/public/pie.svg" 
             />,
-            "Parallel Coordinates":<img onClick={()=>this.handleTypeChange("Parallel Coordinates")} 
+            "Parallel Coordinates":<img 
                 className="button" alt="Parallel Coordinates" title="Parallel Coordinates" key="Parallel Coordinates"
                 height={this.props.height-200} src="/public/ppcc.svg" 
             />,
-            "Bar Chart":<img onClick={()=>this.handleTypeChange("Bar Chart")} 
+            "Bar Chart":<img 
                 className="button" alt="Bar Chart" title="Bar Chart" key="Bar Chart"
                 height={this.props.height-200} src="/public/bar.svg" 
             />,
-            "Stream Graph":<img onClick={()=>this.handleTypeChange("Stream Graph")} 
+            "Stream Graph":<img 
                 className="button" alt="Stream Graph" title="Stream Graph" key="Stream Graph"
                 height={this.props.height-200} src="/public/streamgraph.svg" 
             />,
-            "Circle Packing":<img onClick={()=>this.handleTypeChange("Circle Packing")} 
+            "Circle Packing":<img 
                 className="button" alt="Circle Packing" title="Circle Packing" key="Circle Packing"
                 height={this.props.height-200} src="/public/circlepacking.svg" 
             />,
@@ -170,12 +190,12 @@ class ComponentSelector extends React.Component{
                     <hr/><br/>
                     <li>Click on the visualization prefered. Currently selected : {this.state.type}</li>
                     <li>
-                        <Carousel dragging={false} 
-                                swiping={false} 
-                                wrapAround={true}
-                                cellAlign={"center"}>
-                                {this.state.useful_visualizations.map(x=>carouselOptions[x])}
-                          </Carousel>
+
+                                    <button onClick={()=>this.handlePrevType(this.state.typeIndex-1)}>Previous</button>
+                                
+                                    <button onClick={()=>this.handleNextType(this.state.typeIndex+1)}>Next</button>
+                                
+                                {carouselOptions[this.props.availableComponents[this.state.typeIndex]]}
                     </li>
                 </ul>
                 <a onClick={()=>alert(this.state.vis_incompatibilities.map(e=>`${e}\n`))} style={{cursor:'pointer'}}>Show incompatiblities </a>
