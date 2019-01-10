@@ -46,7 +46,7 @@ class StreamGraph extends React.Component{
         this.availableXAxisDimensions = 
             props.attributes.filter(x=>x.type="String"&&x.aggregation=="none");
 
-        state = {
+        const state = {
             cuantitativeDimension: this.availableCuantitativeDimensions[0],
             xAxisDimension: this.availableXAxisDimensions[0],
             data: this.updateData(props.data,
@@ -54,15 +54,19 @@ class StreamGraph extends React.Component{
                 this.availableXAxisDimensions[0]),
         };
 
+        this.state = state;
+
         this.node = d3.select(this.node);
         this.selectAttribute = this.selectAttribute.bind(this);
         this.highlightEntities = this.highlightEntities.bind(this);
         this.unhighlightEntities = this.unhighlightEntities.bind(this);
         this.filterBySomeAttribute = this.filterBySomeAttribute.bind(this);
         this.setSortBy = this.setSortBy.bind(this);
+        this.renderStreamGraph = this.renderStreamGraph.bind(this);
     }
 
     componentDidMount(){
+        this.renderStreamGraph();
     }
 
     componentWillUnmount(){
@@ -84,8 +88,11 @@ class StreamGraph extends React.Component{
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if(prevProps.data != this.props.data){
-            const {data, total} = this.updatedData(this.state.selected_attribute);
-            this.setState({data,total});
+            const data = this.updateData(this.props.data,
+                this.state.cuantitativeDimension,
+                this.state.xAxisDimension);
+                
+            this.setState({data});
         }
         if(prevProps.width != this.props.width){}
         if(prevProps.height != this.props.height){}
@@ -94,7 +101,7 @@ class StreamGraph extends React.Component{
     // UpdateData makes the aggregation
     updateData(data, cuantTerm, aggrTerm){
         let uniqueCuantTermKeys = new Map();
-        const results_map = {}, aggregated = new Map();
+        let results_map = {}, aggregated = new Map();
         for(let x of data){
             const label = x[cuantTerm.aggregation_term], 
                 aggrTerm_value = x[aggrTerm.attribute];
@@ -128,14 +135,14 @@ class StreamGraph extends React.Component{
         
         // give each label a default value of 0 if there is no entry for it for a certain aggregation term
         for(let label of uniqueCuantTermKeys.keys()){
-            let entry = {}
-            entry[cuantTerm.aggregation_term] = label;
-            entry.value = 0;
-
             for(let key of aggregated.keys()){
+                let entry = {}
+                entry[cuantTerm.aggregation_term] = label;
+                entry.value = 0;
                 entry[aggrTerm.attribute] = key;
-                if(!aggregated.get(key).has(label))
+                if(!aggregated.get(key).has(label)){
                     aggregated.get(key).set(label, entry);
+                }
             }
         }
 
@@ -154,7 +161,71 @@ class StreamGraph extends React.Component{
         }
 
         // it is returned a flatten data structure
-        return(Array.concat(...Array.from(aggregated.values()).map(map=>Array.from(map.values()))));
+        const result = new Map();
+        for(let label of uniqueCuantTermKeys.keys())
+            result.set(label, []);
+
+        for(let entries of Array.from(aggregated.values()).map(map=>Array.from(map.values()))){
+            entries.map(d=>{
+                result.get(d[cuantTerm.aggregation_term]).push(d)});
+        }        
+
+        return(Array.from(result.keys()).map(x=>[x,result.get(x)]));
+    }
+
+    renderStreamGraph(){
+        /*
+         *
+            const params = {
+                legendWidth: 200,
+                marginTop: 25, // for the selection of 
+                marginRight: 10, // because of the padding of the container
+                paddingLeft:10,
+                paddingTop: 10,
+                paddingRight: 10,
+                paddingBottom: 10,
+             };
+         * */
+        const height = this.props.height-60,
+            width = this.props.width-60;
+
+        const x = d3.scalePoint()
+            .domain(this.state.data[0][1].map(d=>d[this.state.xAxisDimension.attribute]))
+            .range([0, width - params.marginRight]);
+
+        const y = d3.scaleLinear()
+            .domain(
+                [d3.min(Array.concat(...this.state.data.map(x=>x[1])).map(d => d.values[0])), 
+                d3.max(Array.concat(...this.state.data.map(x=>x[1])).map(d => d.values[1]))])
+            .range([height, params.marginTop]);
+
+        const xAxis = g => g
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x).ticks(width / 80).tickSizeOuter(0))
+            .call(g => g.select(".domain").remove());
+
+        console.log(x,y,this.state.data)
+
+        const area = d3.area()
+            .curve(d3.curveStep)
+            .x(d => x(d[this.state.xAxisDimension.attribute]))
+            .y0(d => y(d.values[0]))
+            .y1(d => y(d.values[1]));
+
+       const svg = d3.select(this.svg);
+        svg.append("g")
+            .selectAll("path")
+            .data(this.state.data)
+            .enter().append("path")
+              .attr("fill", ([name]) => this.props.colorScales[this.state.cuantitativeDimension.aggregation_term](name))
+              .attr("d", ([, values]) => area(values))
+            .append("title")
+              .text(([name]) => name);
+
+          svg.append("g")
+              .call(xAxis);
+          
+          return svg.node();
     }
 
     selectAttribute(attribute){
