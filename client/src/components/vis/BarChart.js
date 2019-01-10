@@ -54,6 +54,7 @@ class BarChart extends React.Component{
         this.highlightEntities = this.highlightEntities.bind(this);
         this.unhighlightEntities = this.unhighlightEntities.bind(this);
         this.setSortBy = this.setSortBy.bind(this);
+        this.sanitizeClassName = (name)=>(name.replace(/"/g,'').replace(/\./g,'').replace(/ /g, ''));
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -138,7 +139,7 @@ class BarChart extends React.Component{
             // classValue is the stripped identifyer to be used for the class name
             // shortter names will yield faster search results
             let classValue = last_field_of_uri(String(d.key.valueOf()));
-            const className = `${this.state.legend}-${classValue}`;
+            const className = `${this.state.legend}-${this.sanitizeClassName(classValue)}`;
             console.log()
             const bar = (<rect 
                 fill={this.props.colorScales[this.state.legend](d.key)} 

@@ -30,7 +30,7 @@ const params = {
     legendWidth: 200,
     marginTop: 25, // for the selection of 
     marginRight: 10, // because of the padding of the container
-    paddingLeft:10,
+    paddingLeft:20,
     paddingTop: 10,
     paddingRight: 10,
     paddingBottom: 10,
@@ -63,6 +63,8 @@ class StreamGraph extends React.Component{
         this.filterBySomeAttribute = this.filterBySomeAttribute.bind(this);
         this.setSortBy = this.setSortBy.bind(this);
         this.renderStreamGraph = this.renderStreamGraph.bind(this);
+        this.stripUri = (value)=>String(value).includes('/')?value.split('/')[value.split('/').length-1]:value;
+        this.sanitizeClassName = (name)=>(name.replace(/"/g,'').replace(/\./g,'').replace(/ /g, ''));
     }
 
     componentDidMount(){
@@ -94,8 +96,12 @@ class StreamGraph extends React.Component{
                 
             this.setState({data});
         }
-        if(prevProps.width != this.props.width){}
-        if(prevProps.height != this.props.height){}
+        if(prevProps.width != this.props.width){
+            this.renderStreamGraph();
+        }
+        if(prevProps.height != this.props.height){
+            this.renderStreamGraph();
+        }
     }
 
     // UpdateData makes the aggregation
@@ -174,37 +180,26 @@ class StreamGraph extends React.Component{
     }
 
     renderStreamGraph(){
-        /*
-         *
-            const params = {
-                legendWidth: 200,
-                marginTop: 25, // for the selection of 
-                marginRight: 10, // because of the padding of the container
-                paddingLeft:10,
-                paddingTop: 10,
-                paddingRight: 10,
-                paddingBottom: 10,
-             };
-         * */
-        const height = this.props.height-60,
+        const stripUri = this.stripUri,
+            sanitizeClassName = this.sanitizeClassName,
+            height = this.props.height-60,
             width = this.props.width-60;
 
         const x = d3.scalePoint()
             .domain(this.state.data[0][1].map(d=>d[this.state.xAxisDimension.attribute]))
-            .range([0, width - params.marginRight]);
+            .range([params.paddingLeft, width - params.marginRight-params.paddingRight]);
 
         const y = d3.scaleLinear()
             .domain(
                 [d3.min(Array.concat(...this.state.data.map(x=>x[1])).map(d => d.values[0])), 
                 d3.max(Array.concat(...this.state.data.map(x=>x[1])).map(d => d.values[1]))])
-            .range([height, params.marginTop]);
+            .range([height-params.paddingBottom, params.marginTop+params.paddingTop]);
 
         const xAxis = g => g
             .attr("transform", `translate(0,${height})`)
             .call(d3.axisBottom(x).ticks(width / 80).tickSizeOuter(0))
             .call(g => g.select(".domain").remove());
 
-        console.log(x,y,this.state.data)
 
         const area = d3.area()
             .curve(d3.curveStep)
@@ -212,20 +207,25 @@ class StreamGraph extends React.Component{
             .y0(d => y(d.values[0]))
             .y1(d => y(d.values[1]));
 
-       const svg = d3.select(this.svg);
+        const svg = d3.select(this.svg);
+        const prev = svg.selectAll('g');
+        if(prev)
+            prev.remove();
         svg.append("g")
+            .attr('id','streamGraph')
             .selectAll("path")
             .data(this.state.data)
             .enter().append("path")
-              .attr("fill", ([name]) => this.props.colorScales[this.state.cuantitativeDimension.aggregation_term](name))
-              .attr("d", ([, values]) => area(values))
+            .attr("fill", ([name]) => this.props.colorScales[this.state.cuantitativeDimension.aggregation_term](name))
+            .attr("d", ([, values]) => area(values))
+            .attr('class', d=>`${this.state.cuantitativeDimension.aggregation_term}-${this.sanitizeClassName(this.stripUri(d[0]))}`)
+            .on("mouseover", this.highlightEntities)
+            .on("mouseout", this.unhighlightEntities)
             .append("title")
-              .text(([name]) => name);
+              .text(([name, value]) => `${name}`);
 
           svg.append("g")
               .call(xAxis);
-          
-          return svg.node();
     }
 
     selectAttribute(attribute){
@@ -246,9 +246,10 @@ class StreamGraph extends React.Component{
         this.props.updateFilteredData()
     }
 
-    highlightEntities(selector){
-        d3.selectAll('.'+selector).classed('hovered',true);
+    highlightEntities(d){
+        d3.selectAll(`.${this.state.cuantitativeDimension.aggregation_term}-${this.sanitizeClassName(this.stripUri(d[0]))}`).classed('hovered',true);
     }
+
 
     unhighlightEntities(d){
         d3.selectAll(".hovered").classed('hovered',false)
@@ -284,7 +285,6 @@ class StreamGraph extends React.Component{
                 <svg ref={node => this.svg = node} 
                 width={this.props.width - params.marginRight}
                 height={this.props.height - params.marginTop}>
-                    <g ref={node => this.g_element = node}/>
                 </svg>
             </div>
         );
