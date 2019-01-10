@@ -713,3 +713,11 @@ g.legend .hovered circle{
   stroke:black;
   stroke-width:1.5;
 }
+
+/* StreamGraph ---------------------------------------------------------------------------
+*/
+g#streamGraph .hovered{
+  stroke:black;
+  stroke-width:1.5;
+}
+
