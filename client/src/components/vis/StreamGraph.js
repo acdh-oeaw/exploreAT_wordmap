@@ -277,8 +277,7 @@ class StreamGraph extends React.Component{
         }
         
         return(
-            <div id="Dummy" className="visualization" style={size} ref={node => this.domElement = node}>
-                <p style={{margin:0}}>Dummy component</p>
+            <div id="StreamGraph" className="visualization" style={size} ref={node => this.domElement = node}>
                 <p style={{margin:0}}>Select the attribute used for the sectors : {this.props.attributes.map(e=>(
                     <span key={e.name} onClick={()=>this.selectAttribute(e)} className="option"> {e.name} </span>
                 ))}</p>

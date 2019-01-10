@@ -182,8 +182,7 @@ class ParallelCoordinates extends React.Component{
             .attr('d', d=>this.linePath(d))
             .each(function(d){
                 const node = d3.select(this);
-                
-                d3.entries(d).filter(x=>x!='value').map(entry=>node.classed(`${entry.key}-${sanitizeClassName(stripUri(entry.value))}`, true))
+                d3.entries(d).filter(x=>x!='value').map(entry=>node.classed(`${entry.key}-${sanitizeClassName(stripUri(String(entry.value)))}`, true))
             })
             .attr('stroke',(d,i)=>this.props.colorScales[this.state.colorAttribute](d[this.state.colorAttribute]))
             .on("mouseover", this.highlightEntities)
@@ -246,7 +245,7 @@ class ParallelCoordinates extends React.Component{
         d3.select(this.active).selectAll('path')
             .each(function(d){
                 const node = d3.select(this);
-                d3.entries(d).map(entry=>node.classed(`${entry.key}-${sanitizeClassName(stripUri(entry.value))}`, true))
+                d3.entries(d).map(entry=>node.classed(`${entry.key}-${sanitizeClassName(stripUri(String(entry.value)))}`, true))
             })
             .attr('d', d=>this.linePath(d))
             .attr('stroke',(d,i)=>this.props.colorScales[this.state.colorAttribute](d[this.state.colorAttribute]))
