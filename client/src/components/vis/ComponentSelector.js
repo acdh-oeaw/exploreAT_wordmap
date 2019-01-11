@@ -181,7 +181,7 @@ class ComponentSelector extends React.Component{
                     <li>Variables chosen <a onClick={()=>this.backToEntities()}>(back to selection)</a> :</li>
                     <li>{this.state.attributes.reduce((a,b)=>b.name+', '+a, "")}</li>
                     <hr/><br/>
-                    <li>Click on the visualization prefered. Currently selected : {this.state.type}</li>
+                    <li>Current selected visualization : {this.state.type}</li>
                     <li>
                         <div id="miniatureCarousel">
                         <button onClick={()=>this.handlePrevType(this.state.typeIndex-1)}>{"< Previous"}</button>

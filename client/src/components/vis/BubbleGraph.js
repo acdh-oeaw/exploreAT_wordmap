@@ -170,8 +170,8 @@ class BubbleGraph extends React.Component{
 
         const y = d3.scaleLinear()
             .domain(
-                [d3.min(Array.concat(...this.state.data.map(x=>x[1])).map(d => d.values[0])), 
-                d3.max(Array.concat(...this.state.data.map(x=>x[1])).map(d => d.values[1]))])
+                [d3.min(Array.prototype.concat(...this.state.data.map(x=>x[1])).map(d => d.values[0])), 
+                d3.max(Array.prototype.concat(...this.state.data.map(x=>x[1])).map(d => d.values[1]))])
             .range([height-params.paddingBottom, params.marginTop+params.paddingTop]);
 
         const xAxis = g => g
