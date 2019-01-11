@@ -36,32 +36,35 @@ const params = {
     paddingBottom: 10,
  };
 
-class StreamGraph extends React.Component{
+class CirclePacking extends React.Component{
     constructor(props){
         super(props);
-        this.updatedData = this.updatedData.bind(this);
+        // Auxiliary functions to manage strings
+        this.stripUri = (value)=>String(value).includes('/')?value.split('/')[value.split('/').length-1]:value;
+        this.sanitizeClassName = (name)=>(name.replace(/"/g,'').replace(/\./g,'').replace(/ /g, ''));
+        this.updateData = this.updateData.bind(this);
 
-        console.log()
-
-        this.state = {
-            sector_dimension:"",
-            data: null,
-            total: 1,
-            sortBy: 'key',
-            keySortOrder:'up',
-            valueSortOrder:'up',
-            sortingFunction: this.sortingFunctions['key']['up'],
+        const state = {
+            hierarchy: this.props.attributes,
+            data: this.updateData(props.data,
+                this.props.attributes),
+            hierarchyChanged: false
         };
 
+        this.state = state;
+
         this.node = d3.select(this.node);
-        this.selectAttribute = this.selectAttribute.bind(this);
+        this.moveAttribute = this.moveAttribute.bind(this);
         this.highlightEntities = this.highlightEntities.bind(this);
         this.unhighlightEntities = this.unhighlightEntities.bind(this);
         this.filterBySomeAttribute = this.filterBySomeAttribute.bind(this);
         this.setSortBy = this.setSortBy.bind(this);
+        this.renderCirclePacking = this.renderCirclePacking.bind(this);
+
     }
 
     componentDidMount(){
+        this.renderCirclePacking();
     }
 
     componentWillUnmount(){
@@ -76,30 +79,44 @@ class StreamGraph extends React.Component{
         shouldUpdate = shouldUpdate || (nextProps.height != this.props.height);
         shouldUpdate = shouldUpdate || (nextProps.data != this.props.data);
         shouldUpdate = shouldUpdate || (nextState.data != this.state.data);
-        shouldUpdate = shouldUpdate || (nextState.selected_attribute != this.state.selected_attribute);
+        shouldUpdate = shouldUpdate || (nextState.hierarchyChanged === true);
 
         return shouldUpdate;
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if(prevProps.data != this.props.data){
-            const {data, total} = this.updatedData(this.state.selected_attribute);
-            this.setState({data,total});
+        if(prevProps.data != this.props.data || this.state.hierarchyChanged===true){
+            const data = this.updateData(this.props.data,
+                this.state.hierarchy);
+            this.setState({data, hierarchyChanged:false}, this.renderCirclePacking);
         }
         if(prevProps.width != this.props.width){}
         if(prevProps.height != this.props.height){}
     }
 
-    selectAttribute(attribute){
-        const {data, total} = this.updatedData(attribute);
+    updateData(data, hierarchy){
+        const results = [];
+        
+        for(let d of data)
+            results
+                .push(hierarchy
+                    .map(x=>d[x.attribute])
+                    .reduce((a,b)=>a+'.'+this.sanitizeClassName(this.stripUri(String(b))),""));
 
-        this.setState({
-            data, 
-            total,
-            legend: attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
-            sector_dimension:attribute.name, 
-            selected_attribute: attribute,
-        })
+        return results;
+    }
+
+    renderCirclePacking(){
+        console.log(this.state.data);
+    }
+
+    moveAttribute(prevIndex,newIndex){
+        this.setState(prev=>{
+            const t = prev.hierarchy.splice(prevIndex,1)[0];
+            prev.hierarchy.splice(newIndex,0,t);
+            prev.hierarchyChanged=true;
+            return(prev);
+        });
     }
 
     // Example of to use filtering
@@ -139,13 +156,25 @@ class StreamGraph extends React.Component{
         
         return(
             <div id="Dummy" className="visualization" style={size} ref={node => this.domElement = node}>
-                <p style={{margin:0}}>Dummy component</p>
-                <p style={{margin:0}}>Select the attribute used for the sectors : {this.props.attributes.map(e=>(
-                    <span key={e.name} onClick={()=>this.selectAttribute(e)} className="option" style={style(e.name)}> {e.name} </span>
-                ))}</p>
+                {this.state.hierarchy.map((x,i)=>(
+                    <div key={x.attribute}>
+                        <span >
+                        {x.attribute} 
+                        {i>0
+                            ?<span className="button" onClick={()=>this.moveAttribute(i,i-1)}> up </span>
+                            :""}
+                        {i<this.state.hierarchy.length-1
+                            ?<span className="button" onClick={()=>this.moveAttribute(i,i+1)}> down </span>
+                            :""}
+                        </span>
+                        <br/>
+                    </div>
+                ))
+                    
+                }
             </div>
         );
     }
 }
 
-export default StreamGraph;
+export default CirclePacking;
