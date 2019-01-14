@@ -42,9 +42,9 @@ class StreamGraph extends React.Component{
         this.updateData = this.updateData.bind(this);
 
         this.availableCuantitativeDimensions = 
-            props.attributes.filter(x=>x.type="num"||x.aggregation!="none");
+            props.attributes.filter(x=>x.type=="num"||x.aggregation!="none");
         this.availableXAxisDimensions = 
-            props.attributes.filter(x=>x.type="String"&&x.aggregation=="none");
+            props.attributes.filter(x=>x.type=="string"&&x.aggregation=="none");
 
         const state = {
             cuantitativeDimension: this.availableCuantitativeDimensions[0],
@@ -57,7 +57,8 @@ class StreamGraph extends React.Component{
         this.state = state;
 
         this.node = d3.select(this.node);
-        this.selectAttribute = this.selectAttribute.bind(this);
+        this.selectCuantitativeAttribute = this.selectCuantitativeAttribute.bind(this);
+        this.selectClusterAttribute = this.selectClusterAttribute.bind(this);
         this.highlightEntities = this.highlightEntities.bind(this);
         this.unhighlightEntities = this.unhighlightEntities.bind(this);
         this.filterBySomeAttribute = this.filterBySomeAttribute.bind(this);
@@ -83,7 +84,8 @@ class StreamGraph extends React.Component{
         shouldUpdate = shouldUpdate || (nextProps.height != this.props.height);
         shouldUpdate = shouldUpdate || (nextProps.data != this.props.data);
         shouldUpdate = shouldUpdate || (nextState.data != this.state.data);
-        shouldUpdate = shouldUpdate || (nextState.selected_attribute != this.state.selected_attribute);
+        shouldUpdate = shouldUpdate || (nextState.cuantitativeDimension != this.state.cuantitativeDimension);
+        shouldUpdate = shouldUpdate || (nextState.xAxisDimension != this.state.xAxisDimension);
 
         return shouldUpdate;
     }
@@ -218,7 +220,7 @@ class StreamGraph extends React.Component{
             .enter().append("path")
             .attr("fill", ([name]) => this.props.colorScales[this.state.cuantitativeDimension.aggregation_term](name))
             .attr("d", ([, values]) => area(values))
-            .attr('class', d=>`${this.state.cuantitativeDimension.aggregation_term}-${this.sanitizeClassName(this.stripUri(d[0]))}`)
+            .attr('class', d=>`${this.state.cuantitativeDimension.aggregation_term}-${this.sanitizeClassName(this.stripUri(String(d[0])))}`)
             .on("mouseover", this.highlightEntities)
             .on("mouseout", this.unhighlightEntities)
             .append("title")
@@ -228,16 +230,24 @@ class StreamGraph extends React.Component{
               .call(xAxis);
     }
 
-    selectAttribute(attribute){
-        const {data, total} = this.updatedData(attribute);
+    selectCuantitativeAttribute(attribute){
+        this.setState(prev=>({
+            cuantitativeDimension: attribute,
+            xAxisDimension: prev.xAxisDimension,
+            data: this.updateData(this.props.data,
+                attribute,
+                prev.xAxisDimension),
+        }),this.renderStreamGraph);
+    }
 
-        this.setState({
-            data, 
-            total,
-            legend: attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
-            sector_dimension:attribute.name, 
-            selected_attribute: attribute,
-        })
+    selectClusterAttribute(attribute){
+        this.setState(prev=>({
+            cuantitativeDimension: prev.cuantitativeDimension,
+            xAxisDimension: attribute,
+            data: this.updateData(this.props.data,
+                prev.cuantitativeDimension,
+                attribute),
+        }),this.renderStreamGraph);
     }
 
     // Example of to use filtering
@@ -247,7 +257,7 @@ class StreamGraph extends React.Component{
     }
 
     highlightEntities(d){
-        d3.selectAll(`.${this.state.cuantitativeDimension.aggregation_term}-${this.sanitizeClassName(this.stripUri(d[0]))}`).classed('hovered',true);
+        d3.selectAll(`.${this.state.cuantitativeDimension.aggregation_term}-${this.sanitizeClassName(this.stripUri(String(d[0])))}`).classed('hovered',true);
     }
 
 
@@ -275,12 +285,21 @@ class StreamGraph extends React.Component{
             width: this.props.width+"px",
             height: (this.props.height)+"px"
         }
+        const styleAttr1 = (e)=>this.state.cuantitativeDimension.name==e?{cursor:"pointer",color:"#18bc9c", marginLeft:"5px"}:
+            {cursor:"pointer",color:"black", marginLeft:"5px"};
+
+        const styleAttr2 = (e)=>this.state.xAxisDimension.name==e?{cursor:"pointer",color:"#18bc9c", marginLeft:"5px"}:
+            {cursor:"pointer",color:"black", marginLeft:"5px"};
         
         return(
             <div id="StreamGraph" className="visualization" style={size} ref={node => this.domElement = node}>
-                <p style={{margin:0}}>Select the attribute used for the sectors : {this.props.attributes.map(e=>(
-                    <span key={e.name} onClick={()=>this.selectAttribute(e)} className="option"> {e.name} </span>
+                <p style={{margin:0}}>Select the size attribute : {this.availableCuantitativeDimensions.map(e=>(
+                    <span key={e.name} onClick={()=>this.selectCuantitativeAttribute(e)} style={styleAttr1(e.name)} className="option"> {e.name} </span>
                 ))}</p>
+                <p style={{margin:0}}>Select the cluster attribute : {this.availableXAxisDimensions.map(e=>(
+                    <span key={e.name} onClick={()=>this.selectClusterAttribute(e)} style={styleAttr2(e.name)} className="option"> {e.name} </span>
+                ))}</p>
+
                 <svg ref={node => this.svg = node} 
                 width={this.props.width - params.marginRight}
                 height={this.props.height - params.marginTop}>
