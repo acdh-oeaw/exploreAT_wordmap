@@ -752,3 +752,15 @@ div#miniatureCarousel button{
 div#miniatureCarousel button:focus{
     background-color:white;
 }
+
+/* Circle packing ---------------------------------------------------------------------------
+*/
+div#CirclePacking{
+  display:flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+div#CirclePacking circle.hovered{
+  stroke:black;
+}
