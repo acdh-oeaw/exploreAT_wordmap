@@ -2,7 +2,28 @@ import * as d3 from 'd3';
 import React from 'react';
 
 /* BubbleGraph
+ * BubbleGraph visualization for representing the evolution or distribution 
+ * of an aggregation over a variable
  * 
+ * It must receive at least one aggregated attribute and another one not aggregated
+ *
+ * The component updates each time the data is been filtered, or the size of the
+ * container changes.
+ *
+ * The following props are been passed to the component:
+ - data: the array of objects for each of the entries
+ - filters: a js object with the keys been the names of the dimensions and the key the filters
+ - updateFilteredData: a method to be called each time a filter is been changed in this component,
+ -      which will trigger an update that will enable the components to be aware of the filters.
+ */
+
+ /* How highlighting can be done
+  * 
+  * className={`${this.state.legend}-${last_field_of_uri(String(d.key))}`}
+  * An example on how it would en up a class : "Questionnaire-57"
+  *
+  * onMouseEnter={()=>this.highlightEntities(`${this.state.legend}-${last_field_of_uri(String(d.key))}`)}
+  * onMouseOut={()=>this.unhighlightEntities()}
 
  */
 const params = {
@@ -21,9 +42,9 @@ class BubbleGraph extends React.Component{
         this.updateData = this.updateData.bind(this);
 
         this.availableCuantitativeDimensions = 
-            props.attributes.filter(x=>x.type="num"||x.aggregation!="none");
+            props.attributes.filter(x=>x.type=="num"||x.aggregation!="none");
         this.availableXAxisDimensions = 
-            props.attributes.filter(x=>x.type="String"&&x.aggregation=="none");
+            props.attributes.filter(x=>x.type=="string"&&x.aggregation=="none");
 
         const state = {
             cuantitativeDimension: this.availableCuantitativeDimensions[0],
@@ -31,12 +52,18 @@ class BubbleGraph extends React.Component{
             data: this.updateData(props.data,
                 this.availableCuantitativeDimensions[0],
                 this.availableXAxisDimensions[0]),
+            forceX: d3.forceX(),
+            forceY: d3.forceY(),
+            simulation: d3.forceSimulation(),
+            searchTerm: '',
+            shouldUpdateForce: true
         };
 
         this.state = state;
 
         this.node = d3.select(this.node);
-        this.selectAttribute = this.selectAttribute.bind(this);
+        this.selectCuantitativeAttribute = this.selectCuantitativeAttribute.bind(this);
+        this.selectClusterAttribute = this.selectClusterAttribute.bind(this);
         this.highlightEntities = this.highlightEntities.bind(this);
         this.unhighlightEntities = this.unhighlightEntities.bind(this);
         this.filterBySomeAttribute = this.filterBySomeAttribute.bind(this);
@@ -62,7 +89,8 @@ class BubbleGraph extends React.Component{
         shouldUpdate = shouldUpdate || (nextProps.height != this.props.height);
         shouldUpdate = shouldUpdate || (nextProps.data != this.props.data);
         shouldUpdate = shouldUpdate || (nextState.data != this.state.data);
-        shouldUpdate = shouldUpdate || (nextState.selected_attribute != this.state.selected_attribute);
+        shouldUpdate = shouldUpdate || (nextState.cuantitativeDimension != this.state.cuantitativeDimension);
+        shouldUpdate = shouldUpdate || (nextState.xAxisDimension != this.state.xAxisDimension);
 
         return shouldUpdate;
     }
@@ -85,7 +113,6 @@ class BubbleGraph extends React.Component{
 
     // UpdateData makes the aggregation
     updateData(data, cuantTerm, aggrTerm){
-        let uniqueCuantTermKeys = new Map();
         let results_map = {}, aggregated = new Map();
         for(let x of data){
             const label = x[cuantTerm.aggregation_term], 
@@ -114,48 +141,9 @@ class BubbleGraph extends React.Component{
                 aggregated.get(aggrTerm_value).set(label, entry):
                 (new Map()).set(label,entry));
 
-            uniqueCuantTermKeys.set(label,1);
         }
-        results_map = null;
         
-        // give each label a default value of 0 if there is no entry for it for a certain aggregation term
-        for(let label of uniqueCuantTermKeys.keys()){
-            for(let key of aggregated.keys()){
-                let entry = {}
-                entry[cuantTerm.aggregation_term] = label;
-                entry.value = 0;
-                entry[aggrTerm.attribute] = key;
-                if(!aggregated.get(key).has(label)){
-                    aggregated.get(key).set(label, entry);
-                }
-            }
-        }
-
-        // calculate and assign the offsets for each of the entries
-        const offsets = d3.stack()
-                .keys(Array.from(uniqueCuantTermKeys.keys()))
-                .value((d, key) => d.get(key).value)
-                .offset(d3.stackOffsetSilhouette)(
-            Array.from(aggregated.values())
-        );
-
-        for (const layer of offsets) {
-            for (const d of layer) {
-                d.data.get(layer.key).values = [d[0], d[1]];
-            }
-        }
-
-        // it is returned a flatten data structure
-        const result = new Map();
-        for(let label of uniqueCuantTermKeys.keys())
-            result.set(label, []);
-
-        for(let entries of Array.from(aggregated.values()).map(map=>Array.from(map.values()))){
-            entries.map(d=>{
-                result.get(d[cuantTerm.aggregation_term]).push(d)});
-        }        
-
-        return(Array.from(result.keys()).map(x=>[x,result.get(x)]));
+        return(Array.prototype.concat(...Array.from(aggregated.values()).map(x=>Array.from(x.values()))));
     }
 
     renderBubbleGraph(){
@@ -165,58 +153,78 @@ class BubbleGraph extends React.Component{
             width = this.props.width-60;
 
         const x = d3.scalePoint()
-            .domain(this.state.data[0][1].map(d=>d[this.state.xAxisDimension.attribute]))
+            .domain(this.state.data.map(d=>d[this.state.xAxisDimension.attribute]))
             .range([params.paddingLeft, width - params.marginRight-params.paddingRight]);
 
-        const y = d3.scaleLinear()
+        const radius = d3.scaleLinear()
             .domain(
-                [d3.min(Array.prototype.concat(...this.state.data.map(x=>x[1])).map(d => d.values[0])), 
-                d3.max(Array.prototype.concat(...this.state.data.map(x=>x[1])).map(d => d.values[1]))])
-            .range([height-params.paddingBottom, params.marginTop+params.paddingTop]);
+                [d3.min(this.state.data.map(d => d.value)), 
+                d3.max(this.state.data.map(d => d.value))])
+            .range([10,30]);
+
+        console.log(radius, this.state.data)
 
         const xAxis = g => g
             .attr("transform", `translate(0,${height})`)
             .call(d3.axisBottom(x).ticks(width / 80).tickSizeOuter(0))
             .call(g => g.select(".domain").remove());
 
-
-        const area = d3.area()
-            .curve(d3.curveStep)
-            .x(d => x(d[this.state.xAxisDimension.attribute]))
-            .y0(d => y(d.values[0]))
-            .y1(d => y(d.values[1]));
-
         const svg = d3.select(this.svg);
         const prev = svg.selectAll('g');
         if(prev)
             prev.remove();
-        svg.append("g")
-            .attr('id','streamGraph')
-            .selectAll("path")
+
+        const node = svg.append("g")
+            .attr('id','BubbleGraph');
+
+        const circles = node.append('g')
+            // .attr('transform', `translate(${xOffset}, 0)`)
+            .attr('class', 'circles')
+            .selectAll('circle')
             .data(this.state.data)
-            .enter().append("path")
-            .attr("fill", ([name]) => this.props.colorScales[this.state.cuantitativeDimension.aggregation_term](name))
-            .attr("d", ([, values]) => area(values))
-            .attr('class', d=>`${this.state.cuantitativeDimension.aggregation_term}-${this.sanitizeClassName(this.stripUri(d[0]))}`)
-            .on("mouseover", this.highlightEntities)
-            .on("mouseout", this.unhighlightEntities)
-            .append("title")
-              .text(([name, value]) => `${name}`);
+            .enter().append("circle")
+            .attr("r", d=>radius(d.value))
+            .attr("fill", d => this.props.colorScales[this.state.cuantitativeDimension.aggregation_term](d[this.state.cuantitativeDimension.aggregation_term]))
 
           svg.append("g")
               .call(xAxis);
+
+        this.state.forceX.x((d) => x(d[this.state.xAxisDimension.attribute]))
+        this.state.forceY.y((d) => this.props.height / 2)
+
+        this.state.simulation
+            .velocityDecay(0.3)
+            .force('x', this.state.forceX)
+            .force('y', this.state.forceY)
+            .force('collide', d3.forceCollide(15))
+
+        this.state.simulation.nodes(this.state.data)
+            .on('tick', function() {
+                circles
+                    .attr('transform', d => {
+                        return `translate(${d.x}, ${d.y})`
+                    })
+        })
     }
 
-    selectAttribute(attribute){
-        const {data, total} = this.updatedData(attribute);
+    selectCuantitativeAttribute(attribute){
+        this.setState(prev=>({
+            cuantitativeDimension: attribute,
+            xAxisDimension: prev.xAxisDimension,
+            data: this.updateData(this.props.data,
+                attribute,
+                prev.xAxisDimension),
+        }),this.renderBubbleGraph);
+    }
 
-        this.setState({
-            data, 
-            total,
-            legend: attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
-            sector_dimension:attribute.name, 
-            selected_attribute: attribute,
-        })
+    selectClusterAttribute(attribute){
+        this.setState(prev=>({
+            cuantitativeDimension: prev.cuantitativeDimension,
+            xAxisDimension: attribute,
+            data: this.updateData(this.props.data,
+                prev.cuantitativeDimension,
+                attribute),
+        }),this.renderBubbleGraph);
     }
 
     // Example of to use filtering
@@ -226,7 +234,7 @@ class BubbleGraph extends React.Component{
     }
 
     highlightEntities(d){
-        d3.selectAll(`.${this.state.cuantitativeDimension.aggregation_term}-${this.sanitizeClassName(this.stripUri(d[0]))}`).classed('hovered',true);
+        d3.selectAll(`.${this.state.cuantitativeDimension.aggregation_term}-${this.sanitizeClassName(this.stripUri(String(d[0])))}`).classed('hovered',true);
     }
 
 
@@ -254,13 +262,21 @@ class BubbleGraph extends React.Component{
             width: this.props.width+"px",
             height: (this.props.height)+"px"
         }
+        const styleAttr1 = (e)=>this.state.cuantitativeDimension.name==e?{cursor:"pointer",color:"#18bc9c", marginLeft:"5px"}:
+            {cursor:"pointer",color:"black", marginLeft:"5px"};
+
+        const styleAttr2 = (e)=>this.state.xAxisDimension.name==e?{cursor:"pointer",color:"#18bc9c", marginLeft:"5px"}:
+            {cursor:"pointer",color:"black", marginLeft:"5px"};
         
         return(
             <div id="BubbleGraph" className="visualization" style={size} ref={node => this.domElement = node}>
-                <p style={{margin:0}}>Dummy component</p>
-                <p style={{margin:0}}>Select the attribute used for the sectors : {this.props.attributes.map(e=>(
-                    <span key={e.name} onClick={()=>this.selectAttribute(e)} className="option"> {e.name} </span>
+                <p style={{margin:0}}>Select the size attribute : {this.availableCuantitativeDimensions.map(e=>(
+                    <span key={e.name} onClick={()=>this.selectCuantitativeAttribute(e)} style={styleAttr1(e.name)} className="option"> {e.name} </span>
                 ))}</p>
+                <p style={{margin:0}}>Select the cluster attribute : {this.availableXAxisDimensions.map(e=>(
+                    <span key={e.name} onClick={()=>this.selectClusterAttribute(e)} style={styleAttr2(e.name)} className="option"> {e.name} </span>
+                ))}</p>
+
                 <svg ref={node => this.svg = node} 
                 width={this.props.width - params.marginRight}
                 height={this.props.height - params.marginTop}>

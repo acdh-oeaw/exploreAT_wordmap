@@ -247,6 +247,12 @@ class PackedBubbles extends React.Component{
             height: (this.props.height)+"px"
         }
 
+        const styleAttr1 = (e)=>this.state.attr1.attribute==e?{cursor:"pointer",color:"#18bc9c", marginLeft:"5px"}:
+            {cursor:"pointer",color:"black", marginLeft:"5px"};
+
+        const styleAttr2 = (e)=>this.state.attr2.attribute==e?{cursor:"pointer",color:"#18bc9c", marginLeft:"5px"}:
+            {cursor:"pointer",color:"black", marginLeft:"5px"};
+
         return (
         <div id="PackedBubbles" className="visualization" style={size} ref={node => this.domElement = node}>
             <div id='container'>
