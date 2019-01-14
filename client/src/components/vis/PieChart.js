@@ -57,6 +57,8 @@ class PieChart extends React.Component{
         this.highlightEntities = this.highlightEntities.bind(this);
         this.unhighlightEntities = this.unhighlightEntities.bind(this);
         this.setSortBy = this.setSortBy.bind(this);
+        this.stripUri = (value)=>String(value).includes('/')?value.split('/')[value.split('/').length-1]:value;
+        this.sanitizeClassName = (name)=>(name.replace(/"/g,'').replace(/\./g,'').replace(/ /g, ''));
     }
     
     componentDidMount(){
@@ -177,7 +179,7 @@ class PieChart extends React.Component{
             const sector = (<path
                 className={className}
                 d={path}
-                fill={this.props.colorScales[this.state.legend](d.key)}
+                fill={this.props.colorScales[this.state.legend](this.sanitizeClassName( this.stripUri( d.key)))} 
                 onMouseEnter={()=>this.highlightEntities(className)}
                 onMouseOut={()=>this.unhighlightEntities()}
                 onClick={()=>{
@@ -278,7 +280,10 @@ class PieChart extends React.Component{
                                                 this.props.filters[this.state.selected_attribute.aggregation_term].filter(d.key);
                                                 this.props.updateFilteredData();
                                             }}>
-                                        <circle cx="0" cy="0" r="6" fill={this.props.colorScales[this.state.legend](d.key)}></circle>
+                                        <circle cx="0" cy="0" r="6" fill={
+                                            this.props.colorScales[this.state.legend](
+                                                this.sanitizeClassName( 
+                                                    this.stripUri( d.key)))}></circle>
                                         <text x="7" y="5">
                                             {d.key.includes('/')?d.key.split('/')[d.key.split('/').length-1]:d.key} ( {d.value} )
                                         </text>

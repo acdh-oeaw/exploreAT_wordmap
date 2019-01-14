@@ -184,7 +184,8 @@ class ParallelCoordinates extends React.Component{
                 const node = d3.select(this);
                 d3.entries(d).filter(x=>x!='value').map(entry=>node.classed(`${entry.key}-${sanitizeClassName(stripUri(String(entry.value)))}`, true))
             })
-            .attr('stroke',(d,i)=>this.props.colorScales[this.state.colorAttribute](d[this.state.colorAttribute]))
+            .attr('stroke',(d,i)=>this.props.colorScales[this.state.colorAttribute](
+                this.sanitizeClassName( this.stripUri( String( d[this.state.colorAttribute])))))
             .on("mouseover", this.highlightEntities)
             .on("mouseout", this.uhighlightEntities);
 
@@ -248,7 +249,8 @@ class ParallelCoordinates extends React.Component{
                 d3.entries(d).map(entry=>node.classed(`${entry.key}-${sanitizeClassName(stripUri(String(entry.value)))}`, true))
             })
             .attr('d', d=>this.linePath(d))
-            .attr('stroke',(d,i)=>this.props.colorScales[this.state.colorAttribute](d[this.state.colorAttribute]))
+            .attr('stroke',(d,i)=>this.props.colorScales[this.state.colorAttribute](
+                this.sanitizeClassName( this.stripUri( String( d[this.state.colorAttribute])))))
             .on("mouseover", this.highlightEntities)
             .on("mouseout", this.unhighlightEntities);
     }
@@ -347,7 +349,8 @@ class ParallelCoordinates extends React.Component{
 
     updateColorAttribute(attribute){
         d3.select(this.active).selectAll('path')
-            .attr('stroke',(d,i)=>this.props.colorScales[this.state.colorAttribute](d[this.state.colorAttribute]))
+            .attr('stroke',(d,i)=>this.props.colorScales[this.state.colorAttribute](
+                this.sanitizeClassName( this.stripUri( String( d[this.state.colorAttribute])))))
         this.setState({colorAttribute: attribute})
     }
 
@@ -385,7 +388,10 @@ class ParallelCoordinates extends React.Component{
                                     className={`${this.state.colorAttribute}-${last_field_of_uri(String(d))}`}
                                     onMouseEnter={()=>this.highlightEntitiesBySelector(`.${this.state.colorAttribute}-${this.sanitizeClassName(this.stripUri(String(d)))}`)}
                                     onMouseOut={()=>this.unhighlightEntities()}>
-                                <circle cx="0" cy="0" r="6" fill={this.props.colorScales[this.state.colorAttribute](d)}></circle>
+                                <circle cx="0" cy="0" r="6" fill={
+                                        this.props.colorScales[this.state.colorAttribute](
+                                            this.sanitizeClassName( 
+                                                this.stripUri( d)))}></circle>
                                 <text x="7" y="5">
                                     {this.stripUri(d)}
                                 </text>

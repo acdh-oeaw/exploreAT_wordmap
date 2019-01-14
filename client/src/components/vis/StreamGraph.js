@@ -218,7 +218,8 @@ class StreamGraph extends React.Component{
             .selectAll("path")
             .data(this.state.data)
             .enter().append("path")
-            .attr("fill", ([name]) => this.props.colorScales[this.state.cuantitativeDimension.aggregation_term](name))
+            .attr("fill", ([name]) => this.props.colorScales[this.state.cuantitativeDimension.aggregation_term](
+                this.sanitizeClassName( this.stripUri( String( name)))))
             .attr("d", ([, values]) => area(values))
             .attr('class', d=>`${this.state.cuantitativeDimension.aggregation_term}-${this.sanitizeClassName(this.stripUri(String(d[0])))}`)
             .on("mouseover", this.highlightEntities)

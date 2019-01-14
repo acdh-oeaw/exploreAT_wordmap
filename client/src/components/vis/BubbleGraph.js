@@ -184,7 +184,8 @@ class BubbleGraph extends React.Component{
             .data(this.state.data)
             .enter().append("circle")
             .attr("r", d=>radius(d.value))
-            .attr("fill", d => this.props.colorScales[this.state.cuantitativeDimension.aggregation_term](d[this.state.cuantitativeDimension.aggregation_term]))
+            .attr("fill", d => this.props.colorScales[this.state.cuantitativeDimension.aggregation_term](
+                this.sanitizeClassName( this.stripUri( String (d[this.state.cuantitativeDimension.aggregation_term])))))
 
           svg.append("g")
               .call(xAxis);
