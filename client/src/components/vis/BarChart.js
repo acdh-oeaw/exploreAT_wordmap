@@ -54,6 +54,7 @@ class BarChart extends React.Component{
         this.highlightEntities = this.highlightEntities.bind(this);
         this.unhighlightEntities = this.unhighlightEntities.bind(this);
         this.setSortBy = this.setSortBy.bind(this);
+        this.stripUri = (value)=>String(value).includes('/')?value.split('/')[value.split('/').length-1]:value;
         this.sanitizeClassName = (name)=>(name.replace(/"/g,'').replace(/\./g,'').replace(/ /g, ''));
     }
 
@@ -142,7 +143,7 @@ class BarChart extends React.Component{
             const className = `${this.state.legend}-${this.sanitizeClassName(classValue)}`;
             console.log()
             const bar = (<rect 
-                fill={this.props.colorScales[this.state.legend](d.key)} 
+                fill={this.props.colorScales[this.state.legend](this.sanitizeClassName( this.stripUri( d.key)))} 
                 className={className}
                 x={0}
                 y={0}
@@ -234,7 +235,10 @@ class BarChart extends React.Component{
                                                 this.props.updateFilteredData();
                                             }}
                                             onMouseOut={()=>this.unhighlightEntities()}>
-                                        <circle cx="0" cy="0" r="6" fill={this.props.colorScales[this.state.legend](d.key)}></circle>
+                                        <circle cx="0" cy="0" r="6" fill={
+                                            this.props.colorScales[this.state.legend](
+                                                this.sanitizeClassName( 
+                                                    this.stripUri( d.key)))}></circle>
                                         <text x="7" y="5">
                                             {last_field_of_uri(d.key)} ( {d.value} )
                                         </text>

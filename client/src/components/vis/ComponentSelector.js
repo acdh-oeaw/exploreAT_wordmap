@@ -1,7 +1,6 @@
 import * as d3 from 'd3';
 import React from 'react';
 import Dropdown from 'react-dropdown';
-import Carousel from 'nuka-carousel';
 import 'react-dropdown/style.css'
 import OptionTags from './OptionTags.js';
 
