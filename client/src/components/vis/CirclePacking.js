@@ -97,17 +97,67 @@ class CirclePacking extends React.Component{
     updateData(data, hierarchy){
         const results = [];
         
-        for(let d of data)
-            results
-                .push(hierarchy
-                    .map(x=>d[x.attribute])
-                    .reduce((a,b)=>a+'.'+this.sanitizeClassName(this.stripUri(String(b))),""));
+        const parents = new Map();
+        parents.set('root', {id:'root',size:null});
 
-        return results;
+        for(let d of data)
+            results.push(
+                {id: hierarchy
+                    .map(x=>d[x.attribute])
+                    .reduce((a,b,i)=>{
+                        const accumulated = a+(a==''?'':'.')+this.sanitizeClassName(this.stripUri(String(b)));
+                        if(i<hierarchy.length-1 && parents.get(accumulated) == undefined)
+                            parents.set(accumulated,{id:accumulated,size:null});
+                        return accumulated;
+                    },"root"),
+                size:1
+                }
+            );
+
+        return Array.concat(Array.from(parents.values()),results);
     }
 
     renderCirclePacking(){
-        console.log(this.state.data);
+        const stripUri = this.stripUri,
+            sanitizeClassName = this.sanitizeClassName,
+            height = this.props.height,
+            width = this.props.width-200;
+
+        const stratify = d3.stratify()
+            .parentId(function(d) { return d.id.substring(0, d.id.lastIndexOf(".")); });
+
+        const pack = d3.pack()
+            .size([width - 2, height - 2])
+            .padding(3);
+
+        const vData = stratify(this.state.data);
+
+        let vLayout = d3.pack().size([width, height]);
+
+        // Layout + Data
+        const vRoot = d3.hierarchy(vData).sum(function (d) { return d.data.size; });
+        const vNodes = vRoot.descendants();
+        vLayout(vRoot);
+        let g = d3.select(this.svg).select('g');
+        if(g != undefined)
+            g.remove();
+        g = d3.select(this.svg).attr('width', width).attr('height', height).append('g');
+        
+        const vSlices = g.selectAll('g').data(vNodes).enter().append('g');
+
+        // Draw on screen
+        vSlices.append('tittle')
+            .text(d=>d.data.id.split('.')[d.data.depth])
+            
+        vSlices.append('circle').attr('cx', function (d) { return d.x; })
+            .attr('cy', function (d) { return d.y; })
+            .attr('r', function (d) { return d.r; })
+            .attr('class', d=>d.data.depth==0?'':`${this.state.hierarchy[d.data.depth-1]['attribute']}-${d.data.id.split('.')[d.data.depth]}`)
+            .on("mouseover", this.highlightEntities)
+            .on("mouseout", this.unhighlightEntities)
+            .style('fill',d=>d.data.depth==0
+                ?'white'
+                :this.props.colorScales[this.state.hierarchy[d.data.depth-1]['attribute']](d.data.id.split('.')[d.data.depth]));
     }
 
     moveAttribute(prevIndex,newIndex){
@@ -125,8 +175,11 @@ class CirclePacking extends React.Component{
         this.props.updateFilteredData()
     }
 
-    highlightEntities(selector){
-        d3.selectAll('.'+selector).classed('hovered',true);
+    highlightEntities(d){
+        if(d.data.depth != 0){
+            const selector = `.${this.state.hierarchy[d.data.depth-1]['attribute']}-${d.data.id.split('.')[d.data.depth]}`;
+            d3.selectAll(selector).classed('hovered',true);
+        }
     }
 
     unhighlightEntities(d){
@@ -155,7 +208,9 @@ class CirclePacking extends React.Component{
         }
         
         return(
-            <div id="Dummy" className="visualization" style={size} ref={node => this.domElement = node}>
+            <div id="CirclePacking" className="visualization" style={size} ref={node => this.domElement = node}>
+                <svg ref={node => this.svg = node}></svg>
+                <div className="menu">
                 {this.state.hierarchy.map((x,i)=>(
                     <div key={x.attribute}>
                         <span >
@@ -170,8 +225,8 @@ class CirclePacking extends React.Component{
                         <br/>
                     </div>
                 ))
-                    
                 }
+                </div>
             </div>
         );
     }
