@@ -180,6 +180,9 @@ class BubbleGraph extends React.Component{
         circles.exit().remove();
         circles
             .enter().append("circle")
+            .attr('transform', `translate(${width/2},${height/2})`);
+
+        node.selectAll('circle')
             .attr("r", d=>radius(d.value))
             .attr("fill", d => this.props.colorScales[this.state.cuantitativeDimension.aggregation_term](
                 this.sanitizeClassName( this.stripUri( String (d[this.state.cuantitativeDimension.aggregation_term])))))
@@ -198,14 +201,15 @@ class BubbleGraph extends React.Component{
 
         this.state.simulation.nodes(this.state.data)
             .on('tick', function() {
-                circles
+                node.selectAll('circle')
                     .attr('transform', d => {
                         const x = Math.max(params.paddingLeft, Math.min(d.x, width - params.paddingRight));
                         const y = Math.max(params.paddingTop, Math.min(d.y, height - params.paddingBottom));
 
                         return `translate(${x}, ${y})`
                     })
-        })
+        });
+        this.state.simulation.alpha(1).restart() ;
     }
 
     updateBubbleGraphSize(){
