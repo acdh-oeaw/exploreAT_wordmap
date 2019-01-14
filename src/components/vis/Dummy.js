@@ -101,7 +101,8 @@ class CirclePacking extends React.Component{
         const parents = new Map();
         parents.set('root', {id:'root',size:null});
 
-        for(let d of data)
+        for(let d of data){
+            let values = {};
             results.push(
                 {id: hierarchy
                     .map(x=>d[x.attribute])
@@ -114,6 +115,7 @@ class CirclePacking extends React.Component{
                 size:1
                 }
             );
+        }
 
         return Array.prototype.concat(Array.from(parents.values()),results);
     }
@@ -121,15 +123,16 @@ class CirclePacking extends React.Component{
     renderCirclePacking(){
         const stripUri = this.stripUri,
             sanitizeClassName = this.sanitizeClassName,
-            height = this.props.height,
-            width = this.props.width-200;
+            height = this.props.height-params.marginTop,
+            width = this.props.width-params.marginRight-params.legendWidth;
 
         const stratify = d3.stratify()
             .parentId(function(d) { return d.id.substring(0, d.id.lastIndexOf(".")); });
 
         const pack = d3.pack()
-            .size([width - 2, height - 2])
-            .padding(3);
+            .size([width - params.paddingRight - params.paddingLeft
+                , height - params.paddingBottom - params.paddingTop])
+            .padding(4);
 
         const vData = stratify(this.state.data);
 
@@ -139,26 +142,37 @@ class CirclePacking extends React.Component{
         const vRoot = d3.hierarchy(vData).sum(function (d) { return d.data.size; });
         const vNodes = vRoot.descendants();
         vLayout(vRoot);
-        let g = d3.select(this.svg).select('g');
-        if(g != undefined)
-            g.remove();
-        g = d3.select(this.svg).attr('width', width).attr('height', height).append('g');
         
-        const vSlices = g.selectAll('g').data(vNodes).enter().append('g');
+        let g = d3.select(this.svg).select('g#vis');
+        
+        let vSlices = g.selectAll('g').data(vNodes);
+        vSlices.exit().remove();
+        vSlices.enter().append('g').each(function(d){
+            const node = d3.select(this);
+            node.append('title');
+            node.append('circle');
+        });
 
+        vSlices = g.selectAll('g');
+        const componentRef = this;
         // Draw on screen
-        vSlices.append('tittle')
-            .text(d=>d.data.id.split('.')[d.data.depth])
-            
-        vSlices.append('circle').attr('cx', function (d) { return d.x; })
-            .attr('cy', function (d) { return d.y; })
-            .attr('r', function (d) { return d.r; })
-            .attr('class', d=>d.data.depth==0?'':`${this.state.hierarchy[d.data.depth-1]['attribute']}-${d.data.id.split('.')[d.data.depth]}`)
-            .on("mouseover", this.highlightEntities)
-            .on("mouseout", this.unhighlightEntities)
+        vSlices.each(function(d){
+            const node = d3.select(this);
+            node.select('title')
+                .text(d=>d.data.id.split('.')[d.data.depth]);
+
+            node.select('circle')
+            .attr('class', d=>d.data.depth==0?'':`${componentRef.state.hierarchy[d.data.depth-1]['attribute']}-${d.data.id.split('.')[d.data.depth]}`)
+            .on("mouseover", componentRef.highlightEntities)
+            .on("mouseout", componentRef.unhighlightEntities)
             .style('fill',d=>d.data.depth==0
                 ?'white'
-                :this.props.colorScales[this.state.hierarchy[d.data.depth-1]['attribute']](d.data.id.split('.')[d.data.depth]));
+                :componentRef.props.colorScales[componentRef.state.hierarchy[d.data.depth-1]['attribute']](d.data.id.split('.')[d.data.depth]))
+            .transition()
+                .attr('cx', function (d) { return d.x; })
+                .attr('cy', function (d) { return d.y; })
+                .attr('r', function (d) { return d.r; });
+        });
     }
 
     moveAttribute(prevIndex,newIndex){
@@ -210,7 +224,11 @@ class CirclePacking extends React.Component{
         
         return(
             <div id="CirclePacking" className="visualization" style={size} ref={node => this.domElement = node}>
-                <svg ref={node => this.svg = node}></svg>
+                <svg ref={node => this.svg = node} 
+                    width={this.props.width-params.marginRight-params.legendWidth} 
+                    height={this.props.height-params.marginTop}>
+                    <g id="vis" transform={`translate(${params.paddingLeft},${params.paddingTop})`}></g>
+                </svg>
                 <div className="menu">
                 {this.state.hierarchy.map((x,i)=>(
                     <div key={x.attribute}>

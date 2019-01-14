@@ -91,6 +91,9 @@ class Explorer extends React.Component{
   }
 
   createColorScales(data){
+    const stripUri = (value)=>String(value).includes('/')?value.split('/')[value.split('/').length-1]:value;
+    const sanitizeClassName = (name)=>(name.replace(/"/g,'').replace(/\./g,'').replace(/ /g, ''));
+
     const colorScales = {}, domains = {};
     d3.keys(data[0]).map(x=>{
       colorScales[x]=d3.scaleOrdinal( d3.schemeSet3);
@@ -99,8 +102,8 @@ class Explorer extends React.Component{
 
     data.map(d=>{
       d3.keys(d).map(x=>{
-        if(!domains[x][d[x]])
-          domains[x][d[x]] = 1;
+        if(!domains[x][sanitizeClassName( stripUri( String( d[x])))])
+          domains[x][sanitizeClassName( stripUri( String( d[x])))] = 1;
       });
     });
 
