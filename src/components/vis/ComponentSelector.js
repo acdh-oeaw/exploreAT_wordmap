@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import React from 'react';
 import Dropdown from 'react-dropdown';
+import Carousel from 'nuka-carousel';
 import 'react-dropdown/style.css'
 import OptionTags from './OptionTags.js';
 
@@ -108,7 +109,7 @@ class ComponentSelector extends React.Component{
     createComponent(){
         if(this.state.name != "" && this.state.attributes.length>0 && this.state.type != ""){
             this.props.addComponent(this.state.name, this.state.attributes, this.state.type);
-            this.setState({name: "", attributes: [], typeIndex: 0, showComponents:false});
+            this.setState({name: "", attributes: [], showComponents:false});
         }
     }
 
@@ -116,58 +117,14 @@ class ComponentSelector extends React.Component{
         let useful_visualizations = this.props.availableComponents;
         const vis_incompatibilities = [];
 
-        let nonAggregated = 0, 
-            aggregated = 0;
-
-        this.state.attributes.map(a=>{
-                nonAggregated += (a.aggregation=='none')?1:0;
-                aggregated += (a.aggregation=='none')?0:1;
-            });
-
-        if(aggregated > 0){
-            useful_visualizations = useful_visualizations.filter(vis=>vis!='Filter');
-            vis_incompatibilities.push(`Textual searchs can only be done over the values of non aggregated variables.`);
-
-            useful_visualizations = useful_visualizations.filter(vis=>vis!='Parallel Coordinates');
-            vis_incompatibilities.push(`Metrics cannot be used with Parallel Coordinates.`);
-
-            useful_visualizations = useful_visualizations.filter(vis=>vis!='Circle Packing');
-            vis_incompatibilities.push(`Metrics cannot be used to create a hierarchy in Circle Packing.`);
-        }
-
-        if(aggregated == 0){
-            useful_visualizations = useful_visualizations.filter(vis=>vis!='Violin Plot');
-            vis_incompatibilities.push(`Violin Plot needs an aggregation (such as count) to show distribution.`);
-
-            useful_visualizations = useful_visualizations.filter(vis=>vis!='Jitter Violin Plot');
-            vis_incompatibilities.push(`Jitter Violin Plot needs an aggregation (such as count) to show distribution.`);
-
-            useful_visualizations = useful_visualizations.filter(vis=>vis!='Bubble Graph');
-            vis_incompatibilities.push(`Bubble Graph needs at least one aggregation in order to calculate the bubbles size`);
-
-            useful_visualizations = useful_visualizations.filter(vis=>vis!='Stream Graph');
-            vis_incompatibilities.push(`Stream Graph needs at least one aggregation in order to calculate the sector size`);
-        }
-
-        if(nonAggregated > 0){
-            useful_visualizations = useful_visualizations.filter(vis=>vis!='Violin Plot');
-            vis_incompatibilities.push(`Violin Plot can only show distribution of aggregated data.`);
-
-            useful_visualizations = useful_visualizations.filter(vis=>vis!='Jitter Violin Plot');
-            vis_incompatibilities.push(`Jitter Violin Plot can only show distribution of aggregated data.`);
-        }
-
-        if(nonAggregated == 0){
-            useful_visualizations = useful_visualizations.filter(vis=>vis!='Bubble Graph');
-            vis_incompatibilities.push(`Bubble Graph needs at least one non aggregated value to create the clusters`);
-
-            useful_visualizations = useful_visualizations.filter(vis=>vis!='Stream Graph');
-            vis_incompatibilities.push(`Stream Graph needs at least one non aggregated value to distribute `);
-        }
-
-        if(nonAggregated < 2){
+        if(this.state.attributes.length < 2){
             useful_visualizations = useful_visualizations.filter(vis=>vis!='Parallel Coordinates');
             vis_incompatibilities.push(`At least two values have to selected to use Parallel Coordinates.`);
+        }
+
+        if(true === this.state.attributes.reduce((a,b)=>a||b.aggregation!='none',false)){
+            useful_visualizations = useful_visualizations.filter(vis=>vis!='Parallel Coordinates');
+            vis_incompatibilities.push(`Metrics cannot be used with Parallel Coordinates.`);
         }
 
         this.state.attributes.map(a=>{
@@ -189,7 +146,7 @@ class ComponentSelector extends React.Component{
             vis_incompatibilities.push(`All attributes must have the same amount of entries to be displayed in a table.`);
         }
 
-        this.setState({showComponents:true, type:useful_visualizations[0], useful_visualizations:useful_visualizations, vis_incompatibilities:vis_incompatibilities}, ()=>this.handleNextType(0));
+        this.setState({showComponents:true, type:useful_visualizations[0], useful_visualizations:useful_visualizations, vis_incompatibilities:vis_incompatibilities});
     }
 
     backToEntities(){
@@ -198,12 +155,8 @@ class ComponentSelector extends React.Component{
 
     renderMenu(){
         const carouselOptions = {
-            "Filter":<img className="button" alt="Filter" title="Filter" key="Filter" 
-                height={this.props.height-200} src={"/public/filter.svg"}/>,
             "Bar Chart":<img className="button" alt="Bar Chart" title="Bar Chart" key="Bar Chart" 
                 height={this.props.height-200} src={"/public/bar.svg"}/>,
-            "Bubble Graph":<img className="button" alt="Bubble Graph" title="Bubble Graph" key="Bubble Graph" 
-                height={this.props.height-200} src={"/public/bubblegraph.svg"}/>,
             "Circle Packing":<img className="button" alt="Circle Packing" title="Circle Packing" key="Circle Packing" 
                 height={this.props.height-200} src={"/public/circlepacking.svg"}/>,
             "Parallel Coordinates":<img className="button" alt="Parallel Coordinates" title="Parallel Coordinates" key="Parallel Coordinates" 
@@ -214,10 +167,6 @@ class ComponentSelector extends React.Component{
                 height={this.props.height-200} src={"/public/streamgraph.svg"}/>,
             "Table":<img className="button" alt="Table" title="Table" key="Table" 
                 height={this.props.height-200} src={"/public/table.svg"}/>,
-            "Violin Plot":<img className="button" alt="Violin Plot" title="Violin Plot" key="Violin Plot" 
-                height={this.props.height-200} src={"/public/violinplot.svg"}/>,
-            "Jitter Violin Plot":<img className="button" alt="Jitter Violin Plot" title="Jitter Violin Plot" key="Jitter Violin Plot" 
-                height={this.props.height-200} src={"/public/jitterviolinplot.svg"}/>,
         };
 
         if(this.state.name != "" && this.state.attributes.length>0 && this.state.showComponents === true){
@@ -238,7 +187,7 @@ class ComponentSelector extends React.Component{
                 </ul>
                 <a onClick={()=>alert(this.state.vis_incompatibilities.map(e=>`${e}\n`))} style={{cursor:'pointer'}}>Show incompatiblities </a>
                 <br/>
-                <a onClick={this.createComponent}>Create view</a>
+                <a onClick={this.createComponent}>Create component</a>
             </div>
             );
         }else{
@@ -246,11 +195,11 @@ class ComponentSelector extends React.Component{
             return(
             <div className="menu-panel">
             <ul>
-                <li>Name for the new view :</li>
+                <li>Name for the new component :</li>
                 <li><input type="text" value={this.state.name} onChange={this.handleNameChange} /></li>
             </ul>
             <ul>
-                <li>Variables to explore on the new view :</li>
+                <li>Variables to explore on the new component :</li>
                 <li>
                     <OptionTags 
                         tags={this.state.attributes}
