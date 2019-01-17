@@ -760,6 +760,10 @@ div#CirclePacking{
   justify-content: space-between;
 }
 
+div#CirclePacking circle{
+  stroke:ghostwhite;
+}
+
 div#CirclePacking circle.hovered{
   stroke:black;
 }
