@@ -155,30 +155,18 @@ class ComponentSelector extends React.Component{
 
     renderMenu(){
         const carouselOptions = {
-            "Table":<img 
-                className="button" alt="Table" title="Table" key="Table"
-                height={this.props.height-200} src="/public/table.svg" 
-            />,
-            "Pie Chart":<img 
-                className="button" alt="Pie Chart" title="Pie Chart" key="Pie Chart"
-                height={this.props.height-200} src="/public/pie.svg" 
-            />,
-            "Parallel Coordinates":<img 
-                className="button" alt="Parallel Coordinates" title="Parallel Coordinates" key="Parallel Coordinates"
-                height={this.props.height-200} src="/public/ppcc.svg" 
-            />,
-            "Bar Chart":<img 
-                className="button" alt="Bar Chart" title="Bar Chart" key="Bar Chart"
-                height={this.props.height-200} src="/public/bar.svg" 
-            />,
-            "Stream Graph":<img 
-                className="button" alt="Stream Graph" title="Stream Graph" key="Stream Graph"
-                height={this.props.height-200} src="/public/streamgraph.svg" 
-            />,
-            "Circle Packing":<img 
-                className="button" alt="Circle Packing" title="Circle Packing" key="Circle Packing"
-                height={this.props.height-200} src="/public/circlepacking.svg" 
-            />,
+            "Bar Chart":<img className="button" alt="Bar Chart" title="Bar Chart" key="Bar Chart" 
+                height={this.props.height-200} src={"/public/bar.svg"}/>,
+            "Circle Packing":<img className="button" alt="Circle Packing" title="Circle Packing" key="Circle Packing" 
+                height={this.props.height-200} src={"/public/circlepacking.svg"}/>,
+            "Parallel Coordinates":<img className="button" alt="Parallel Coordinates" title="Parallel Coordinates" key="Parallel Coordinates" 
+                height={this.props.height-200} src={"/public/ppcc.svg"}/>,
+            "Pie Chart":<img className="button" alt="Pie Chart" title="Pie Chart" key="Pie Chart" 
+                height={this.props.height-200} src={"/public/pie.svg"}/>,
+            "Stream Graph":<img className="button" alt="Stream Graph" title="Stream Graph" key="Stream Graph" 
+                height={this.props.height-200} src={"/public/streamgraph.svg"}/>,
+            "Table":<img className="button" alt="Table" title="Table" key="Table" 
+                height={this.props.height-200} src={"/public/table.svg"}/>,
         };
 
         if(this.state.name != "" && this.state.attributes.length>0 && this.state.showComponents === true){
