@@ -91,7 +91,7 @@ class CirclePacking extends React.Component{
             this.setState({data, hierarchyChanged:false}, this.renderCirclePacking);
         }
         if(prevProps.width != this.props.width || prevProps.height != this.props.height){
-            this.renderCirclePacking
+            this.renderCirclePacking()
         }
     }
 
