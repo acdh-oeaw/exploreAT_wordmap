@@ -1,4 +1,4 @@
-FROM node:8.12.0-alpine
+FROM node:10.15.0-alpine
 
 # Create app directory and use it as the working directory
 RUN mkdir -p /srv/app/exploreat_client
@@ -11,4 +11,5 @@ RUN npm install
 
 COPY . /srv/app/exploreat_client
 
-CMD ["npm", "dev"]
+CMD ["npm",  "run-script", "dev", ]
+EXPOSE 3000

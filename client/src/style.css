@@ -25,6 +25,7 @@ div#app {
 }
 
 div#app div.content, div#app div#source_selector{
+  height:100%;
   flex: 1 1 auto;
 }
 
@@ -37,13 +38,17 @@ div#app div.content, div#app div#source_selector{
 #header{
 	z-index: 2;
 	background-color: #2c3e50;
-	padding: 0.2em 0;
+	padding: 0.1em 0;
+}
+
+div.header{
+  height: 30px;
 }
 
 #header div:nth-child(1){
 	padding-left: 2em;
-	height: 40px;
 	background-color: white;
+  height: 34px;
 	margin:0.2em 0;
 	display: flex;
 	flex-direction: row;
@@ -60,11 +65,10 @@ div#app div.content, div#app div#source_selector{
 #header h3{	margin: 0 1em;}
 
 #header img{
-	margin-top:1.7em;
-	height:4.5em;
+	margin-top:2em;
+	height:4em;
 	background-color: white;
-	border-radius: 100%;
-	border:solid 5px #2c3e50;
+	border:solid 4px #2c3e50;
 }
 
 #header img:hover{
@@ -105,9 +109,9 @@ div.content div.header{
 }
 
 div.content div.header h2{
-	font-size: 2em;
+	font-size: 1.5em;
 	display: inline-block;
-	margin: 0 0 0 5.3em ;
+	margin: 0 0 0 6.6em ;
 }
 
 div.content div.header div.info{
@@ -272,6 +276,12 @@ g.entity text.attribute-selected {
 /* Explorer ---------------------------------------------------------------------------
  * https://projects.lukehaas.me/css-loaders/
 */
+div#explorer div.header span.button{cursor:pointer; color:black;}
+
+.sortBy{
+  cursor: pointer;
+}
+
 div#explorer, div#explorer div.content{
   height: 100%;
 }
@@ -329,6 +339,7 @@ div#OptionTags div.tag#add-tag{
 }
 
 div#OptionTags div#options{
+  background-color: white;
   font-size: 0.85em;
   padding:3px;
   box-shadow: rgba(0, 0, 0, 0.34) 3px 2px 9px 1px;
@@ -353,6 +364,8 @@ div#OptionTags div#options a{
   padding-bottom: 1px;
   margin-right: 5px;
 }
+
+.slider-control-bottomcenter{display: none;}
 
 /* Loader
 */
@@ -428,7 +441,10 @@ div.visWrapper div.header{
 	justify-content: space-between;
 	padding:1px;
   line-height: 1.1em;
+  height: initial;
 }
+
+div.visWrapper div.content{background-color: white;}
 
 div.visWrapper div.header p{
 	margin: 0;
@@ -650,6 +666,10 @@ div#BarChart g#bars text.barValue{
   font-size: 0.8em;
 }
 
+div#BarChart rect.hovered{
+  stroke:black;
+  stroke-width:2;
+}
 /* Parallel coordinates -----------------------------------------------------------------
 */
 
@@ -669,4 +689,81 @@ div#ParallelCoordinates g.inactive path{
 
 div#ParallelCoordinates g.axis text{
   font-size: 0.8em;
+}
+
+div#ParallelCoordinates g.active .hovered{
+  stroke:#4f4f4f;
+  stroke-width: 1px;
+}
+
+/* Pie Chart -----------------------------------------------------------------
+*/
+div#PieChart path.hovered{
+  stroke:black;
+  stroke-width:2;
+}
+
+/* Legends -----------------------------------------------------------------
+*/
+g.legend .hovered text{
+  font-weight: bold;
+}
+
+g.legend .hovered circle{
+  stroke:black;
+  stroke-width:1.5;
+}
+
+/* StreamGraph ---------------------------------------------------------------------------
+*/
+g#streamGraph .hovered{
+  stroke:black;
+  stroke-width:1.5;
+}
+
+/* miniature carousel ---------------------------------------------------------------------------
+*/
+
+div#miniatureCarousel{
+    width:100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-top:15px;
+}
+
+div#miniatureCarousel img, div#miniatureCarousel button{
+    display: inline-block;
+}
+
+div#miniatureCarousel img{
+    display: inline-block;
+    box-shadow: rgba(0, 0, 0, 0.14) 1px 2px 2px 0px, rgba(0, 0, 0, 0.2) 2px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 5px 9px 0px;
+}
+
+div#miniatureCarousel button{
+    border: none;
+    color: #18bc9c;
+    background-color:white;
+}
+
+div#miniatureCarousel button:focus{
+    background-color:white;
+}
+
+/* Circle packing ---------------------------------------------------------------------------
+*/
+div#CirclePacking{
+  display:flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+div#CirclePacking circle{
+  stroke:ghostwhite;
+}
+
+div#CirclePacking circle.hovered{
+  stroke:black;
 }

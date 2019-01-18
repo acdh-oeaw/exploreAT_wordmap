@@ -23,71 +23,23 @@ class ParallelCoordinates extends React.Component{
     constructor(props){
         super(props);
 
+        const sorting = {};
+        this.props.attributes.map(x=>sorting[x.name]='up');
         this.state = {
-            colorAttribute: this.props.attributes[0].name
+            colorAttribute: this.props.attributes[0].name,
+            sorting: sorting,
+            sortingChanged: false
         };
 
-        this.data = [];
-        this.filters = [];
-
-        for(let i=0; i<this.props.attributes[0].data_total; i++){
-            let entry = {};
-            this.props.attributes.map(attr=>{
-                // The uris are shrotten 
-                let value = attr.data[attr.name][i].valueOf();
-                    value = String(value).includes('/')?value.split('/')[value.split('/').length-1]:value
-                entry[attr.name] = value;
-            })
-            this.data.push(entry);
-        }
-
+        this.updateData();
+        this.updateScales();
         this.node = d3.select(this.node);
-        this.lineGenerator = d3.line();
         
         //Helper functions
+        this.lineGenerator = d3.line();
+        this.stripUri = (value)=>String(value).includes('/')?value.split('/')[value.split('/').length-1]:value
+        this.sanitizeClassName = (name)=>(name.replace(/"/g,'').replace(/\./g,'').replace(/ /g, ''));
 
-        this.xScale = d3.scalePoint()
-          .domain(this.props.attributes.map(x=>x.name))
-          .range([params.paddingLeft, this.props.width-params.paddingRight-params.legendWidth-params.marginRight]);
-        
-        this.yScales = {};
-        this.props.attributes.map(x=>{
-            const attribute_values = [];
-                x.data[x.name].map(e=>{
-                    let value = e.valueOf();
-                        value = String(value).includes('/')?value.split('/')[value.split('/').length-1]:value;
-                    if(!attribute_values.includes(value))
-                        attribute_values.push(value);
-                });
-            this.yScales[x.name] = d3.scalePoint()
-                .domain(attribute_values)
-                .range([this.props.height-params.marginTop -params.paddingBottom, params.paddingTop + params.marginTop+20])
-            });
-
-
-        this.yAxis = {};
-        d3.entries(this.yScales).map((x,i)=>{
-            if(i < d3.keys(this.yScales).length/2)
-                this.yAxis[x.key] = d3.axisLeft(x.value).tickFormat(d=>String(d).substring(0,params.axisTickLength));
-            else
-                this.yAxis[x.key] = d3.axisRight(x.value).tickFormat(d=>String(d).substring(0,params.axisTickLength));
-        });
-
-        this.yBrushes = {};
-        let extent = [
-            [-(params.brush_width/2), params.paddingTop + 20 + params.marginTop],
-            [params.brush_width/2, this.props.height-params.paddingBottom-params.marginTop]
-        ];
-
-        d3.entries(this.yScales).map(x=>{
-            this.yBrushes[x.key]= d3.brushY()
-                .extent(extent)
-                .on('brush', ()=>this.brushEventHandler(x.key))
-                .on('end', ()=>this.brushEventHandler(x.key));
-        });
-
-        this.colorScale = d3.scaleOrdinal( d3.schemeSet3)
-            .domain(this.yScales[this.props.attributes[0].name].domain());
         //Binding of class methods
         
         this.inside = (x,feature)=>this.filters[feature][0]<=x && x <=this.filters[feature][1];
@@ -98,32 +50,72 @@ class ParallelCoordinates extends React.Component{
         this.updateScales = this.updateScales.bind(this);
         this.repositionScales = this.repositionScales.bind(this);
         this.updateColorAttribute = this.updateColorAttribute.bind(this);
+        this.highlightEntities = this.highlightEntities.bind(this);
+        this.highlightEntitiesBySelector = this.highlightEntitiesBySelector.bind(this);
+        this.unhighlightEntities = this.unhighlightEntities.bind(this);
+        this.updateData = this.updateData.bind(this);
+        this.toggleSortingOrder = this.toggleSortingOrder.bind(this);
     }
 
     componentDidMount(){
         this.renderParallelCoordinates();
-    this.setState({did_mount : true});
+        this.setState({did_mount : true});
     }
 
     componentWillUnmount(){
     }
 
-    componentWillUpdate(nextProps, nextState){
-    }
-
     componentDidUpdate(prevProps, prevState, snapshot){
         if(this.state.did_mount == true){
+            if(prevProps.data != this.props.data)
+                this.updateData()
+
             this.updateScales();
             if(prevProps.width != this.props.width || prevProps.height != this.props.height){
                 this.repositionScales();
+            }else if(this.state.sortingChanged === true){
+                this.repositionScales();
+                this.state.sortingChanged = false;
             }
+
             this.updateParallelCoordinates();
         }
     }
 
+    highlightEntities(d){
+        d3.entries(d).map(entry=>{
+            d3.selectAll(`.${entry.key}-${this.sanitizeClassName(this.stripUri(entry.value))}`).classed('hovered',true)
+        })
+    }
+
+    highlightEntitiesBySelector(d){
+        d3.selectAll(d).classed('hovered',true)
+    }
+
+    unhighlightEntities(d){
+        d3.selectAll(".hovered").classed('hovered',false)
+    }
+
+    updateData(){
+        this.data = [];
+        this.filters = [];
+
+        for(let i=0; i<this.props.data.length; i++){
+            let entry = {};
+            this.props.attributes.map(attr=>{
+                // The uris are shrotten 
+                let value = this.props.data[i][attr.name].valueOf();
+                entry[attr.name] = value;
+            })
+            this.data.push(entry);
+        }
+    }
+
     brushEventHandler(feature){
+        // Ignore brush-by-zoom
         if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") 
-            return; // ignore brush-by-zoom
+            return; 
+        // Handle wether to remove filters or apply a new one
         if(d3.event.selection != null){
             this.filters[feature] = d3.event.selection[0]>d3.event.selection[1]?[
                     d3.event.selection[1],d3.event.selection[0]
@@ -141,6 +133,14 @@ class ParallelCoordinates extends React.Component{
                 .style('fill','black');
         }
         this.applyFilters();
+    }
+
+    toggleSortingOrder(attribute){
+        const sortingUpdated = (prev,attribute)=>{
+            prev[attribute] = prev[attribute]=='up'?'down':'up';
+            return(prev);
+        }; 
+        this.setState(prev=>({sorting: sortingUpdated(prev.sorting, attribute), sortingChanged:true}));
     }
 
     selected(d){
@@ -173,12 +173,21 @@ class ParallelCoordinates extends React.Component{
                 .attr('d', d=>this.linePath(d));
 
         // active data
+        const stripUri = this.stripUri,
+            sanitizeClassName = this.sanitizeClassName;
         d3.select(this.active).selectAll('path')
           .data(this.data)
           .enter()
             .append('path')
             .attr('d', d=>this.linePath(d))
-            .attr('stroke',(d,i)=>this.colorScale(d[this.state.colorAttribute]));
+            .each(function(d){
+                const node = d3.select(this);
+                d3.entries(d).filter(x=>x!='value').map(entry=>node.classed(`${entry.key}-${sanitizeClassName(stripUri(String(entry.value)))}`, true))
+            })
+            .attr('stroke',(d,i)=>this.props.colorScales[this.state.colorAttribute](
+                this.sanitizeClassName( this.stripUri( String( d[this.state.colorAttribute])))))
+            .on("mouseover", this.highlightEntities)
+            .on("mouseout", this.uhighlightEntities);
 
         // Vertical axis for the features
         const featureAxisG = pcSvg.selectAll('g.feature')
@@ -208,10 +217,12 @@ class ParallelCoordinates extends React.Component{
 
         featureAxisG
           .append("text")
+          .attr("class", "SortBy")
           .attr("transform", "rotate(-20)")
           .attr('y', params.paddingTop+ params.marginTop + 10)
           .attr('x', -20)
-          .text(d=>d.name);
+          .text(d=>d.name+(this.state.sorting[d.name]=="up"?"⯆":"⯅"))
+          .on("click",d=>this.toggleSortingOrder(d.name));
     }
 
     updateParallelCoordinates(){
@@ -230,9 +241,18 @@ class ParallelCoordinates extends React.Component{
         active.exit().remove();
         active.enter().append('path');
 
+        const stripUri = this.stripUri,
+            sanitizeClassName = this.sanitizeClassName;
         d3.select(this.active).selectAll('path')
+            .each(function(d){
+                const node = d3.select(this);
+                d3.entries(d).map(entry=>node.classed(`${entry.key}-${sanitizeClassName(stripUri(String(entry.value)))}`, true))
+            })
             .attr('d', d=>this.linePath(d))
-            .attr('stroke',(d,i)=>this.colorScale(d[this.state.colorAttribute]));
+            .attr('stroke',(d,i)=>this.props.colorScales[this.state.colorAttribute](
+                this.sanitizeClassName( this.stripUri( String( d[this.state.colorAttribute])))))
+            .on("mouseover", this.highlightEntities)
+            .on("mouseout", this.unhighlightEntities);
     }
 
     updateScales(){
@@ -240,26 +260,35 @@ class ParallelCoordinates extends React.Component{
           .domain(this.props.attributes.map(x=>x.name))
           .range([params.paddingLeft, this.props.width-params.paddingRight-params.legendWidth - params.marginRight]);
         
-        this.yScales = {};
-        this.props.attributes.map(x=>{
-            const attribute_values = [];
-                x.data[x.name].map(e=>{
-                    let value = e.valueOf();
-                        value = String(value).includes('/')?value.split('/')[value.split('/').length-1]:value;
-                    if(!attribute_values.includes(value))
-                        attribute_values.push(value);
-                });
-            this.yScales[x.name] = d3.scalePoint()
-                .domain(attribute_values)
-                .range([this.props.height-params.marginTop - params.paddingBottom, params.paddingTop + params.marginTop +20])
+        const domain = {}, 
+              range = [this.props.height-params.marginTop - params.paddingBottom, params.paddingTop + params.marginTop +20];
+
+        // Each attribute has its own array with the unique values used as the domain
+        this.props.attributes.map(attr=>domain[attr.name] = []);
+        this.data.map(x=>{  
+            this.props.attributes.map(attr=>{
+                let value = x[attr.name].valueOf();
+                    value = String(value).includes('/')?value.split('/')[value.split('/').length-1]:value;
+                if(!domain[attr.name].includes(value))
+                    domain[attr.name].push(value);
             });
+        });
+
+        // Each attribute has an scale for the y axis
+        this.yScales = {};
+        const sortUp = (a,b)=>(a<b), sortDown = (a,b)=>(a>b);
+        this.props.attributes.map(attr=>{
+            this.yScales[attr.name] = d3.scalePoint()
+                .domain(this.props.colorScales[attr.name].domain().sort(this.state.sorting[attr.name]=='up'?sortUp:sortDown))
+                .range(range)
+        });
 
         this.yAxis = {};
         d3.entries(this.yScales).map((x,i)=>{
             if(i < d3.keys(this.yScales).length/2)
-                this.yAxis[x.key] = d3.axisLeft(x.value).tickFormat(d=>String(d).substring(0,params.axisTickLength));
+                this.yAxis[x.key] = d3.axisLeft(x.value).tickFormat(d=>this.stripUri(String(d)).substring(0,params.axisTickLength));
             else
-                this.yAxis[x.key] = d3.axisRight(x.value).tickFormat(d=>String(d).substring(0,params.axisTickLength));
+                this.yAxis[x.key] = d3.axisRight(x.value).tickFormat(d=>this.stripUri(String(d)).substring(0,params.axisTickLength));
         });    
 
         this.yBrushes = {};
@@ -310,22 +339,24 @@ class ParallelCoordinates extends React.Component{
 
         featureAxisG
           .append("text")
+          .attr("class", "SortBy")
           .attr("transform", "rotate(-20)")
           .attr('y', params.paddingTop+ params.marginTop + 10)
           .attr('x', -20)
-          .text(d=>d.name);
+          .text(d=>d.name+(this.state.sorting[d.name]=="up"?"⯆":"⯅"))
+          .on("click",d=>this.toggleSortingOrder(d.name));
       }
 
     updateColorAttribute(attribute){
-        this.colorScale = d3.scaleOrdinal( d3.schemeSet3)
-            .domain(this.yScales[attribute].domain())
-
         d3.select(this.active).selectAll('path')
-            .attr('stroke',(d,i)=>this.colorScale(d[attribute]));
+            .attr('stroke',(d,i)=>this.props.colorScales[this.state.colorAttribute](
+                this.sanitizeClassName( this.stripUri( String( d[this.state.colorAttribute])))))
         this.setState({colorAttribute: attribute})
     }
 
     render(){
+        const last_field_of_uri = (uri)=>uri.includes('/')?uri.split('/')[uri.split('/').length-1]:uri;
+
         const size = {
             width: this.props.width+"px",
             height: (this.props.height)+"px"
@@ -350,16 +381,23 @@ class ParallelCoordinates extends React.Component{
                                 {this.state.colorAttribute}
                             </text>
                         </g>
-                        {this.colorScale.domain().map((d,i)=>(
+                        {this.props.colorScales[this.state.colorAttribute].domain().map((d,i)=>(
                             (45 + i*16 > this.props.height-params.marginTop - params.paddingBottom)?'':
-                            <g transform={`translate(0,${17 + i*16})`} key={'legend-'+i}>
-                                <circle cx="0" cy="0" r="6" fill={this.colorScale(d)}></circle>
+                            <g transform={`translate(0,${17 + i*16})`} 
+                                    key={'legend-'+i}
+                                    className={`${this.state.colorAttribute}-${last_field_of_uri(String(d))}`}
+                                    onMouseEnter={()=>this.highlightEntitiesBySelector(`.${this.state.colorAttribute}-${this.sanitizeClassName(this.stripUri(String(d)))}`)}
+                                    onMouseOut={()=>this.unhighlightEntities()}>
+                                <circle cx="0" cy="0" r="6" fill={
+                                        this.props.colorScales[this.state.colorAttribute](
+                                            this.sanitizeClassName( 
+                                                this.stripUri( d)))}></circle>
                                 <text x="7" y="5">
-                                    {d}
+                                    {this.stripUri(d)}
                                 </text>
                             </g>
                         ))}
-                        {(this.colorScale.domain().length*16 + 47 <
+                        {(this.props.colorScales[this.state.colorAttribute].domain().length*16 + 47 <
                           this.props.height-params.marginTop - params.paddingBottom)?'':
                             <g transform={`translate(0,${this.props.height-params.marginTop - params.paddingBottom - 35})`}>
                                 <text x="7" y="15"> . . . </text>

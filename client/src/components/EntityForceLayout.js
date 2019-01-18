@@ -76,12 +76,12 @@ class EntityForceLayout extends React.Component{
 		const links = d3.select(this.node).selectAll("path.link");
 		links.style('stroke', d=>{
 			const query = this.attributeToQuery(d.relationship, d.source.entity);
-			//console.log(d, query, newState.active_nodes[newState.active_nodes.length-1])
 			if(d.source.entity == data.active_nodes[data.active_nodes.length-1]){
 				return('blue')
 			}
-			if(data.triples.includes(query.sparql_triple))
+			if(data.triples.includes(query.sparql_triple)){
 				return('rgb(102, 180, 58)')
+			}
 			return('black');
 		});
 		const nodes = d3.select(this.node).selectAll('g.node circle').style('fill',d=>{

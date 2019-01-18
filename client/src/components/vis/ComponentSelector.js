@@ -7,6 +7,15 @@ import OptionTags from './OptionTags.js';
 /* ComponentSelector
  * Allows the creation of new vis components by calling the addComponent function
  * provided as a prop, using the selected name, type and subset of entities.
+ *
+ * Each of the attributes selected is stored as an object with the following attributes :
+    name: a full descriptive name for the attribute,
+    type: data type for the tag,
+    attribute: attribute selected to be displayed or aggregated,
+    aggregation: the type of aggregation to be used,
+    aggregation_term: the attribute by which to aggregate,
+    data_total: the total count of different values,
+    unique: the total size of the dataset
  */
 
 class ComponentSelector extends React.Component{
@@ -17,6 +26,7 @@ class ComponentSelector extends React.Component{
             name: "",
             attributes: [],
             type: "",
+            typeIndex: 0,
             showComponents: false,
             data : [],
             useful_visualizations: [],
@@ -24,7 +34,8 @@ class ComponentSelector extends React.Component{
         };
 
         this.handleNameChange = this.handleNameChange.bind(this);
-        this.handleTypeChange = this.handleTypeChange.bind(this);
+        this.handlePrevType = this.handlePrevType.bind(this);
+        this.handleNextType = this.handleNextType.bind(this);
         this.createComponent = this.createComponent.bind(this);
         this.renderMenu = this.renderMenu.bind(this);
         this.showComponents = this.showComponents.bind(this);
@@ -38,43 +49,30 @@ class ComponentSelector extends React.Component{
     };
 
     addAttribute(attribute){
-        if(attribute)
+        if(attribute){
             this.setState((prevState)=>{
                 const index = prevState.attributes.map(a=>a.name).indexOf(attribute.name);
+                // If it is not already included
                 if(index ==-1){
-                        let data = {};
                     if(attribute.aggregation == 'none'){
-                        data[attribute.attribute] = this.props.data.map(d=>d[attribute.attribute]);
-                        attribute.data = data;
-                        attribute.data_length = this.props.data.length;
+                        attribute.unique = this.props.data.length;
                         attribute.data_total = this.props.data.length;
-                    }
-                    else{
-                        let total = 0;
+                    }else{
+                        // Compute the amount of different groups available
                         const attribute_values = {};
                         this.props.data.map(e=>{
-                            if(!attribute_values[e[attribute.attribute]])
-                                attribute_values[e[attribute.attribute]] = e;
+                            if(!attribute_values[e[attribute.aggregation_term]])
+                                attribute_values[e[attribute.aggregation_term]]=1;
                         });
-                        d3.values(attribute_values).map(e=>{
-                            if(data[e[attribute.aggregation_term]]){
-                                total += 1;
-                                data[e[attribute.aggregation_term]] += 1;
-                            }
-                            else{
-                                total += 1;
-                                data[e[attribute.aggregation_term]] = 1;
-                            }
-                        });
-                        attribute.data = data;
-                        attribute.data_length = d3.keys(data).length;
-                        attribute.data_total = total;
+                        attribute.unique = d3.keys(attribute_values).length;
+                        attribute.data_total = this.props.data.length;
 
                     } 
                     prevState.attributes.push(attribute)
                 }
                 return(prevState);
             });
+        }
     }
 
     removeAttribute(attribute){
@@ -85,9 +83,27 @@ class ComponentSelector extends React.Component{
             });
     }
 
-    handleTypeChange(type){
-        this.setState({type: type.value});
-    };
+    handlePrevType(newIndex){
+        let index = newIndex>=0?newIndex:this.props.availableComponents.length-1;
+        index = index<this.props.availableComponents.length?index:0;
+        while(!this.state.useful_visualizations.includes(this.props.availableComponents[index])){
+            index = index - 1;
+            index = index>=0?index:this.props.availableComponents.length-1;
+        }
+
+        this.setState({typeIndex: index, type: this.props.availableComponents[index]});
+    }
+
+    handleNextType(newIndex){
+        let index = newIndex>0?newIndex:this.props.availableComponents.length-1;
+        index = index<this.props.availableComponents.length?index:0;
+        while(!this.state.useful_visualizations.includes(this.props.availableComponents[index])){
+            index += 1;
+            index = index<this.props.availableComponents.length?index:0;
+        }
+        
+        this.setState({typeIndex: index, type: this.props.availableComponents[index]});
+    }
 
     createComponent(){
         if(this.state.name != "" && this.state.attributes.length>0 && this.state.type != ""){
@@ -111,25 +127,25 @@ class ComponentSelector extends React.Component{
         }
 
         this.state.attributes.map(a=>{
-            if(a.data_length > 120){
+            if(a.unique > 120){
                 vis_incompatibilities.push(`${a.name} takes too many different values to be used with a Pie Chart.`);
                 vis_incompatibilities.push(`${a.name} takes too many different values to be used with an Bar Chart.`);
             }
         })
 
-        if(false === this.state.attributes.reduce((a,b)=>a&&b.data_length<140,true)){
+        if(false === this.state.attributes.reduce((a,b)=>a&&b.unique<140,true)){
             useful_visualizations = useful_visualizations.filter(vis=>vis!='Pie Chart');
             vis_incompatibilities.push(`No attribute has less than 120 different values to be used with a Pie Chart.`);
             useful_visualizations = useful_visualizations.filter(vis=>vis!='Bar Chart');
             vis_incompatibilities.push(`No attribute has less than 120 different values to be used with an Bar Chart.`);
         }
 
-        if(false === this.state.attributes.reduce((a,b)=>a&&(b.data_length == this.state.attributes[0].data_length),true)){
+        if(false === this.state.attributes.reduce((a,b)=>a&&(b.unique == this.state.attributes[0].unique),true)){
             useful_visualizations = useful_visualizations.filter(vis=>vis!='Table');
             vis_incompatibilities.push(`All attributes must have the same amount of entries to be displayed in a table.`);
         }
 
-        this.setState({showComponents:true, useful_visualizations:useful_visualizations, vis_incompatibilities:vis_incompatibilities});
+        this.setState({showComponents:true, type:useful_visualizations[0], useful_visualizations:useful_visualizations, vis_incompatibilities:vis_incompatibilities});
     }
 
     backToEntities(){
@@ -137,6 +153,21 @@ class ComponentSelector extends React.Component{
     }
 
     renderMenu(){
+        const carouselOptions = {
+            "Bar Chart":<img className="button" alt="Bar Chart" title="Bar Chart" key="Bar Chart" 
+                height={this.props.height-200} src={"/public/bar.svg"}/>,
+            "Circle Packing":<img className="button" alt="Circle Packing" title="Circle Packing" key="Circle Packing" 
+                height={this.props.height-200} src={"/public/circlepacking.svg"}/>,
+            "Parallel Coordinates":<img className="button" alt="Parallel Coordinates" title="Parallel Coordinates" key="Parallel Coordinates" 
+                height={this.props.height-200} src={"/public/ppcc.svg"}/>,
+            "Pie Chart":<img className="button" alt="Pie Chart" title="Pie Chart" key="Pie Chart" 
+                height={this.props.height-200} src={"/public/pie.svg"}/>,
+            "Stream Graph":<img className="button" alt="Stream Graph" title="Stream Graph" key="Stream Graph" 
+                height={this.props.height-200} src={"/public/streamgraph.svg"}/>,
+            "Table":<img className="button" alt="Table" title="Table" key="Table" 
+                height={this.props.height-200} src={"/public/table.svg"}/>,
+        };
+
         if(this.state.name != "" && this.state.attributes.length>0 && this.state.showComponents === true){
             return(
             <div className="menu-panel">
@@ -144,13 +175,13 @@ class ComponentSelector extends React.Component{
                     <li>Variables chosen <a onClick={()=>this.backToEntities()}>(back to selection)</a> :</li>
                     <li>{this.state.attributes.reduce((a,b)=>b.name+', '+a, "")}</li>
                     <hr/><br/>
-                    <li>Type of component to be created :</li>
+                    <li>Current selected visualization : {this.state.type}</li>
                     <li>
-                        <Dropdown 
-                            options={this.state.useful_visualizations} 
-                            onChange={this.handleTypeChange} 
-                            value={this.state.useful_visualizations[0]} 
-                            placeholder="Select an type" />
+                        <div id="miniatureCarousel">
+                        <button onClick={()=>this.handlePrevType(this.state.typeIndex-1)}>{"< Previous"}</button>
+                        {carouselOptions[this.props.availableComponents[this.state.typeIndex]]}
+                        <button onClick={()=>this.handleNextType(this.state.typeIndex+1)}>{"Next >"}</button>
+                        </div>
                     </li>
                 </ul>
                 <a onClick={()=>alert(this.state.vis_incompatibilities.map(e=>`${e}\n`))} style={{cursor:'pointer'}}>Show incompatiblities </a>

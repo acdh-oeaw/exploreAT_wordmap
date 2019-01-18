@@ -128,9 +128,10 @@ class RdfBasedSourceSelector extends React.Component{
 			          <input type="text" value={this.state.sparql} onChange={this.handleSparqlChange} />
 			        </label>
 		      	</form>
-                <a onClick={()=>this.setSources(this.state.ontology, this.state.sparql)} style={
-                    (this.state.ontology != null && this.state.sparql.length>0 && this.state.prefix.length>0)?{display:"block"}:{display:"none"}
-                }>Go</a>
+                    {(this.state.ontology != null && this.state.sparql.length>0 && this.state.prefix.length>0)?(
+                        <button onClick={()=>this.setSources(this.state.ontology, this.state.sparql)} >Go</button>
+                        ):(<button disabled >Go</button>)
+                    }
 	      	</div>
 	    );
 	}

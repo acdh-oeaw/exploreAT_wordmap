@@ -27,6 +27,9 @@ const SourceSelector = (ENTITIES_FROM_RDF === true)?
 class EntitySelector extends React.Component{
 	constructor(props){
 		super(props);
+
+		const {ontology,sparql} = props.getEntitySelectionSources();
+
 		this.state={
 			current_search: "",
 			selected_entities: [],
@@ -34,7 +37,8 @@ class EntitySelector extends React.Component{
 			active_nodes: [],
 			active_edges: [],
 			test_nodes : [],
-			ontology:null
+			ontology:ontology,
+			sparql:sparql
 		};
 
 		this.wrapper = new UrlParamWrapper();
@@ -60,7 +64,7 @@ class EntitySelector extends React.Component{
 		const getAttributeForElement = (array, element, attribute, accesor)=>(
 			array.reduce((final, actual)=>(
 				accesor(actual)==element?actual[attribute]:final), undefined)
-			);
+		);
 
 		let object = {};
 
@@ -196,6 +200,7 @@ class EntitySelector extends React.Component{
 
 	setSources(ontology, sparql){
 		if(ontology != null && sparql.length>0){
+			this.props.setEntitySelectionSources(ontology, sparql);
 			this.setState({ontology:ontology, sparql:sparql});
 		}
 	}
