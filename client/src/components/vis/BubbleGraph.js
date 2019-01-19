@@ -29,8 +29,8 @@ import React from 'react';
 const params = {
     legendWidth: 200,
     marginTop: 25, // for the selection of 
-    marginRight: 10, // because of the padding of the container
-    paddingLeft:20,
+    marginRight: 30, // because of the padding of the container
+    paddingLeft:30,
     paddingTop: 10,
     paddingRight: 10,
     paddingBottom: 10,
@@ -115,8 +115,8 @@ class BubbleGraph extends React.Component{
     updateData(data, cuantTerm, aggrTerm){
         let results_map = {}, aggregated = new Map();
         for(let x of data){
-            const label = x[cuantTerm.aggregation_term], 
-                aggrTerm_value = x[aggrTerm.attribute];
+            const label = String(x[cuantTerm.aggregation_term]), 
+                aggrTerm_value = String(x[aggrTerm.attribute]);
             let value = 1;
 
             // building an array with the calculation done over the aggregation term 
@@ -147,6 +147,7 @@ class BubbleGraph extends React.Component{
     }
 
     renderBubbleGraph(){
+        console.log(this.state.data);
         const stripUri = this.stripUri,
             sanitizeClassName = this.sanitizeClassName,
             height = this.props.height-60,
@@ -203,7 +204,7 @@ class BubbleGraph extends React.Component{
             .on('tick', function() {
                 node.selectAll('circle')
                     .attr('transform', d => {
-                        const x = Math.max(params.paddingLeft, Math.min(d.x, width - params.paddingRight));
+                        const x = Math.max(0, Math.min(d.x, width));
                         const y = Math.max(params.paddingTop, Math.min(d.y, height - params.paddingBottom));
 
                         return `translate(${x}, ${y})`
@@ -245,7 +246,7 @@ class BubbleGraph extends React.Component{
             .on('tick', function() {
                 svg.selectAll('circle')
                     .attr('transform', d => {
-                        const x = Math.max(params.paddingLeft, Math.min(d.x, width - params.paddingRight));
+                        const x = Math.max(0, Math.min(d.x, width));
                         const y = Math.max(params.paddingTop, Math.min(d.y, height - params.paddingBottom));
 
                         return `translate(${x}, ${y})`
