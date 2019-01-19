@@ -2,6 +2,19 @@ import * as d3 from 'd3';
 import React from 'react';
 
 /* ViolinPlot
+ * ViolinPlot visualization for representing the evolution or distribution 
+ * of an aggregation over a variable
+ * 
+ * It must receive at least one aggregated attribute and another one not aggregated
+ *
+ * The component updates each time the data is been filtered, or the size of the
+ * container changes.
+ *
+ * The following props are been passed to the component:
+ - data: the array of objects for each of the entries
+ - filters: a js object with the keys been the names of the dimensions and the key the filters
+ - updateFilteredData: a method to be called each time a filter is been changed in this component,
+ -      which will trigger an update that will enable the components to be aware of the filters.
  */
 
  /* How highlighting can be done
@@ -11,15 +24,12 @@ import React from 'react';
   *
   * onMouseEnter={()=>this.highlightEntities(`${this.state.legend}-${last_field_of_uri(String(d.key))}`)}
   * onMouseOut={()=>this.unhighlightEntities()}
+
  */
 const params = {
     legendWidth: 200,
-    marginTop: 25, // for the selection of 
-    marginRight: 10, // because of the padding of the container
-    paddingLeft:20,
-    paddingTop: 10,
-    paddingRight: 10,
-    paddingBottom: 10,
+    margin: 25, // for the selection of 
+    padding: 90,
  };
 
 class ViolinPlot extends React.Component{
@@ -27,17 +37,10 @@ class ViolinPlot extends React.Component{
         super(props);
         this.updateData = this.updateData.bind(this);
 
-        this.availableCuantitativeDimensions = 
-            props.attributes.filter(x=>x.type="num"||x.aggregation!="none");
-        this.availableXAxisDimensions = 
-            props.attributes.filter(x=>x.type="String"&&x.aggregation=="none");
-
         const state = {
-            cuantitativeDimension: this.availableCuantitativeDimensions[0],
-            xAxisDimension: this.availableXAxisDimensions[0],
-            data: this.updateData(props.data,
-                this.availableCuantitativeDimensions[0],
-                this.availableXAxisDimensions[0]),
+            selected_attribute: props.attributes[0],
+            data: this.updateData(props.data, props.attributes[0]),
+            searchTerm: '',
         };
 
         this.state = state;
@@ -69,7 +72,8 @@ class ViolinPlot extends React.Component{
         shouldUpdate = shouldUpdate || (nextProps.height != this.props.height);
         shouldUpdate = shouldUpdate || (nextProps.data != this.props.data);
         shouldUpdate = shouldUpdate || (nextState.data != this.state.data);
-        shouldUpdate = shouldUpdate || (nextState.selected_attribute != this.state.selected_attribute);
+        shouldUpdate = shouldUpdate || (nextState.cuantitativeDimension != this.state.cuantitativeDimension);
+        shouldUpdate = shouldUpdate || (nextState.xAxisDimension != this.state.xAxisDimension);
 
         return shouldUpdate;
     }
@@ -77,152 +81,116 @@ class ViolinPlot extends React.Component{
     componentDidUpdate(prevProps, prevState, snapshot) {
         if(prevProps.data != this.props.data){
             const data = this.updateData(this.props.data,
-                this.state.cuantitativeDimension,
-                this.state.xAxisDimension);
+                this.state.selected_attribute);
                 
-            this.setState({data});
+            this.setState({data},this.updateViolinPlot);
         }
         if(prevProps.width != this.props.width){
-            this.renderViolinPlot();
+            this.updateViolinPlot();
         }
         if(prevProps.height != this.props.height){
-            this.renderViolinPlot();
+            this.updateViolinPlot();
         }
     }
 
     // UpdateData makes the aggregation
-    updateData(data, cuantTerm, aggrTerm){
-        let uniqueCuantTermKeys = new Map();
-        let results_map = {}, aggregated = new Map();
-        for(let x of data){
-            const label = x[cuantTerm.aggregation_term], 
-                aggrTerm_value = x[aggrTerm.attribute];
-            let value = 1;
+    updateData(data, attribute){
+        let results = {}, total=0, max=0;
+        if(attribute.aggregation != 'none'){
+            let unique = {}
+            data.map(x=>{
+                if(!unique[x[attribute.attribute]])
+                    unique[x[attribute.attribute]] = x;
+            });
 
-            // building an array with the calculation done over the aggregation term 
-            // aggregated by the attributed used in the x axis 
-            if(results_map[label]){
-                if(results_map[label][aggrTerm_value])
-                    value = results_map[label][aggrTerm_value] + 1;
-            }else{
-                results_map[label] = {};
-            }
-            results_map[label][aggrTerm_value] = value;
-
-            // building a Map with each of different values of the aggregated data so that 
-            // there's extra computation by calculating twice the the times the value, but the data 
-            // is looped once
-            let entry = {}
-            entry[cuantTerm.aggregation_term] = label;
-            entry[aggrTerm.attribute] = aggrTerm_value;
-            entry.value = value;
-
-            aggregated.set(aggrTerm_value, aggregated.has(aggrTerm_value)?
-                aggregated.get(aggrTerm_value).set(label, entry):
-                (new Map()).set(label,entry));
-
-            uniqueCuantTermKeys.set(label,1);
-        }
-        results_map = null;
-        
-        // give each label a default value of 0 if there is no entry for it for a certain aggregation term
-        for(let label of uniqueCuantTermKeys.keys()){
-            for(let key of aggregated.keys()){
-                let entry = {}
-                entry[cuantTerm.aggregation_term] = label;
-                entry.value = 0;
-                entry[aggrTerm.attribute] = key;
-                if(!aggregated.get(key).has(label)){
-                    aggregated.get(key).set(label, entry);
+            d3.values(unique).map(x=>{
+                if(results[x[attribute.aggregation_term]]){
+                    results[x[attribute.aggregation_term]] += 1;
                 }
-            }
+                else{
+                    results[x[attribute.aggregation_term]] = 1;
+                    total += 1;
+                }
+            })
+        }else{
+            results = data.map(x=>({Attribute:x}));
         }
 
-        // calculate and assign the offsets for each of the entries
-        const offsets = d3.stack()
-                .keys(Array.from(uniqueCuantTermKeys.keys()))
-                .value((d, key) => d.get(key).value)
-                .offset(d3.stackOffsetSilhouette)(
-            Array.from(aggregated.values())
-        );
+        const mean = d3.values(results).reduce((a,b)=>{
+            if(b > max)
+                max=b;
+            return a+b;
+        },0) / total;
 
-        for (const layer of offsets) {
-            for (const d of layer) {
-                d.data.get(layer.key).values = [d[0], d[1]];
-            }
-        }
-
-        // it is returned a flatten data structure
-        const result = new Map();
-        for(let label of uniqueCuantTermKeys.keys())
-            result.set(label, []);
-
-        for(let entries of Array.from(aggregated.values()).map(map=>Array.from(map.values()))){
-            entries.map(d=>{
-                result.get(d[cuantTerm.aggregation_term]).push(d)});
-        }        
-
-        return(Array.from(result.keys()).map(x=>[x,result.get(x)]));
+        return({entries:d3.entries(results),
+            mean:mean,
+            total:total,
+            max:max
+        });
     }
 
     renderViolinPlot(){
         const stripUri = this.stripUri,
             sanitizeClassName = this.sanitizeClassName,
-            height = this.props.height-60,
-            width = this.props.width-60;
+            height = this.props.height,
+            width = this.props.width,
+            center = this.props.width/2-params.margin-params.padding;
+        console.log(this.state.data);
 
-        const x = d3.scalePoint()
-            .domain(this.state.data[0][1].map(d=>d[this.state.xAxisDimension.attribute]))
-            .range([params.paddingLeft, width - params.marginRight-params.paddingRight]);
+        const yScale = d3.scaleLinear()
+            .domain([0,this.state.data.max])
+            .range([this.props.height-params.padding, params.padding]);
 
-        const y = d3.scaleLinear()
-            .domain(
-                [d3.min(Array.prototype.concat(...this.state.data.map(x=>x[1])).map(d => d.values[0])), 
-                d3.max(Array.prototype.concat(...this.state.data.map(x=>x[1])).map(d => d.values[1]))])
-            .range([height-params.paddingBottom, params.marginTop+params.paddingTop]);
+        const histogram = d3.histogram()
+            .domain(yScale.domain())
+            .thresholds(yScale.ticks(20))    // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+            .value(d => d.value);
 
-        const xAxis = g => g
-            .attr("transform", `translate(0,${height})`)
-            .call(d3.axisBottom(x).ticks(width / 80).tickSizeOuter(0))
+        const bins = histogram(this.state.data.entries);
+        const maxnum = bins.map(x=>x.length).reduce((a,b)=>a>b?a:b);
+
+        const xNumScale = d3.scaleLinear()
+            .domain([-maxnum,maxnum])
+            .range([0,this.props.width-params.margin*2-params.padding*2]);
+
+        const yAxis = g => g
+            .attr("transform", `translate(${params.padding},0)`)
+            .call(d3.axisLeft(yScale))
             .call(g => g.select(".domain").remove());
 
-
-        const area = d3.area()
-            .curve(d3.curveStep)
-            .x(d => x(d[this.state.xAxisDimension.attribute]))
-            .y0(d => y(d.values[0]))
-            .y1(d => y(d.values[1]));
-
         const svg = d3.select(this.svg);
-        const prev = svg.selectAll('g');
-        if(prev)
-            prev.remove();
-        svg.append("g")
-            .attr('id','streamGraph')
-            .selectAll("path")
-            .data(this.state.data)
-            .enter().append("path")
-            .attr("fill", ([name]) => this.props.colorScales[this.state.cuantitativeDimension.aggregation_term](name))
-            .attr("d", ([, values]) => area(values))
-            .attr('class', d=>`${this.state.cuantitativeDimension.aggregation_term}-${this.sanitizeClassName(this.stripUri(d[0]))}`)
-            .on("mouseover", this.highlightEntities)
-            .on("mouseout", this.unhighlightEntities)
-            .append("title")
-              .text(([name, value]) => `${name}`);
+        
+        const node = d3.select(this.vis)
+            .attr('transform', `translate(${params.padding + 35},0)`);
 
-          svg.append("g")
-              .call(xAxis);
+        const violin = d3.select(this.vis)
+            .select('path')
+            .datum(bins)
+            .style("fill","#69b3a2")
+            .attr("d", (d,i)=>d3.area()
+                .x0(function(x){ return(xNumScale(-x.length)) } )
+                .x1(function(x){ return(xNumScale(x.length)) } )
+                .y(function(d){ return(yScale(d.x0)) } )
+                .curve(d3.curveCatmullRom)    // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
+                (d)
+            );
+
+        d3.select(this.axis)
+              .call(yAxis);
+ 
+        console.log('HEERE')
     }
 
-    selectAttribute(attribute){
-        const {data, total} = this.updatedData(attribute);
+    updateViolinPlot(){
+        this.renderViolinPlot();
+    }
+
+    selectAttribute(attr){
+        const data = this.updatedData(this.props.data, attr);
 
         this.setState({
-            data, 
-            total,
-            legend: attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
-            sector_dimension:attribute.name, 
-            selected_attribute: attribute,
+            data,
+            selected_attribute: attr,
         })
     }
 
@@ -233,8 +201,9 @@ class ViolinPlot extends React.Component{
     }
 
     highlightEntities(d){
-        d3.selectAll(`.${this.state.cuantitativeDimension.aggregation_term}-${this.sanitizeClassName(this.stripUri(d[0]))}`).classed('hovered',true);
+        d3.selectAll(`.${this.state.cuantitativeDimension.aggregation_term}-${this.sanitizeClassName(this.stripUri(String(d[0])))}`).classed('hovered',true);
     }
+
 
     unhighlightEntities(d){
         d3.selectAll(".hovered").classed('hovered',false)
@@ -260,16 +229,20 @@ class ViolinPlot extends React.Component{
             width: this.props.width+"px",
             height: (this.props.height)+"px"
         }
+        const style = (e)=>this.state.selected_attribute==e?{cursor:"pointer",color:"#18bc9c", marginLeft:"5px"}:
+        {cursor:"pointer",color:"black", marginLeft:"5px"};
         
         return(
             <div id="ViolinPlot" className="visualization" style={size} ref={node => this.domElement = node}>
-                <p style={{margin:0}}>Dummy component</p>
-                <p style={{margin:0}}>Select the attribute used for the sectors : {this.props.attributes.map(e=>(
-                    <span key={e.name} onClick={()=>this.selectAttribute(e)} className="option"> {e.name} </span>
+                <p style={{margin:'0 10px'}}>Select the attribute used for the bars : {this.props.attributes.map(e=>(
+                    <span key={e.name} onClick={()=>this.selectAttribute(e)} className="option" style={style(e.name)}> {e.name} </span>
                 ))}</p>
+
                 <svg ref={node => this.svg = node} 
-                width={this.props.width - params.marginRight}
-                height={this.props.height - params.marginTop}>
+                    width={this.props.width-params.margin*2} 
+                    height={this.props.height-params.margin*2}>
+                    <g id="vis" ref={node => this.vis = node}><path></path></g>
+                    <g id="axis" ref={node => this.axis = node}></g>
                 </svg>
             </div>
         );
