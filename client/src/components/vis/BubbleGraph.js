@@ -28,12 +28,8 @@ import React from 'react';
  */
 const params = {
     legendWidth: 200,
-    marginTop: 25, // for the selection of 
-    marginRight: 30, // because of the padding of the container
-    paddingLeft:30,
-    paddingTop: 10,
-    paddingRight: 10,
-    paddingBottom: 10,
+    margin: 25, // for the selection of 
+    padding: 90,
  };
 
 class BubbleGraph extends React.Component{
@@ -78,6 +74,7 @@ class BubbleGraph extends React.Component{
     }
 
     componentWillUnmount(){
+        this.state.simulation.stop();
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -147,15 +144,14 @@ class BubbleGraph extends React.Component{
     }
 
     renderBubbleGraph(){
-        console.log(this.state.data);
         const stripUri = this.stripUri,
             sanitizeClassName = this.sanitizeClassName,
             height = this.props.height-60,
-            width = this.props.width-60;
+            width = this.props.width;
 
         const x = d3.scalePoint()
             .domain(this.state.data.map(d=>d[this.state.xAxisDimension.attribute]))
-            .range([params.paddingLeft, width - params.marginRight-params.paddingRight]);
+            .range([params.padding + params.margin, width - params.padding - params.margin]);
 
         const radius = d3.scaleLinear()
             .domain(
@@ -175,18 +171,27 @@ class BubbleGraph extends React.Component{
         
         const node = d3.select(this.vis);
 
+
         const circles = node
             .selectAll('circle')
             .data(this.state.data);
         circles.exit().remove();
         circles
             .enter().append("circle")
-            .attr('transform', `translate(${width/2},${height/2})`);
+            .attr('transform', `translate(${width/2},${height/2})`)
+            .append('title');
 
         node.selectAll('circle')
             .attr("r", d=>radius(d.value))
             .attr("fill", d => this.props.colorScales[this.state.cuantitativeDimension.aggregation_term](
-                this.sanitizeClassName( this.stripUri( String (d[this.state.cuantitativeDimension.aggregation_term])))))
+                this.sanitizeClassName( this.stripUri( String (d[this.state.cuantitativeDimension.aggregation_term])))));
+
+        const attrName = this.state.cuantitativeDimension.aggregation_term;
+        node.selectAll('circle')
+            .each(function(d){
+                d3.select(this).select('title')
+                    .text(d=>d[attrName]);
+            })
 
         d3.select(this.axis)
               .call(xAxis);
@@ -204,8 +209,8 @@ class BubbleGraph extends React.Component{
             .on('tick', function() {
                 node.selectAll('circle')
                     .attr('transform', d => {
-                        const x = Math.max(0, Math.min(d.x, width));
-                        const y = Math.max(params.paddingTop, Math.min(d.y, height - params.paddingBottom));
+                        const x = Math.max(params.margin, Math.min(d.x, width-params.margin));
+                        const y = Math.max(params.margin, Math.min(d.y, height - params.margin));
 
                         return `translate(${x}, ${y})`
                     })
@@ -217,11 +222,11 @@ class BubbleGraph extends React.Component{
         const stripUri = this.stripUri,
             sanitizeClassName = this.sanitizeClassName,
             height = this.props.height-60,
-            width = this.props.width-60;
+            width = this.props.width;
 
         const x = d3.scalePoint()
             .domain(this.state.data.map(d=>d[this.state.xAxisDimension.attribute]))
-            .range([params.paddingLeft, width - params.marginRight-params.paddingRight]);
+            .range([params.padding + params.margin, width - params.padding - params.margin]);
 
         const xAxis = g => g
             .attr("transform", `translate(0,${height})`)
@@ -246,8 +251,8 @@ class BubbleGraph extends React.Component{
             .on('tick', function() {
                 svg.selectAll('circle')
                     .attr('transform', d => {
-                        const x = Math.max(0, Math.min(d.x, width));
-                        const y = Math.max(params.paddingTop, Math.min(d.y, height - params.paddingBottom));
+                        const x = Math.max(params.margin, Math.min(d.x, width-params.margin));
+                        const y = Math.max(params.margin, Math.min(d.y, height - params.margin));
 
                         return `translate(${x}, ${y})`
                     })
@@ -327,8 +332,8 @@ class BubbleGraph extends React.Component{
                 ))}</p>
 
                 <svg ref={node => this.svg = node} 
-                    width={this.props.width-params.marginRight} 
-                    height={this.props.height-params.marginTop}>
+                    width={this.props.width-params.margin} 
+                    height={this.props.height-params.margin}>
                     <g id="vis" ref={node => this.vis = node}></g>
                     <g id="axis" ref={node => this.axis = node}></g>
                 </svg>
