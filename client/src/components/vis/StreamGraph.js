@@ -111,8 +111,8 @@ class StreamGraph extends React.Component{
         let uniqueCuantTermKeys = new Map();
         let results_map = {}, aggregated = new Map();
         for(let x of data){
-            const label = x[cuantTerm.aggregation_term], 
-                aggrTerm_value = x[aggrTerm.attribute];
+            const label = String(x[cuantTerm.aggregation_term]), 
+                aggrTerm_value = String(x[aggrTerm.attribute]);
             let value = 1;
 
             // building an array with the calculation done over the aggregation term 
