@@ -116,14 +116,49 @@ class ComponentSelector extends React.Component{
         let useful_visualizations = this.props.availableComponents;
         const vis_incompatibilities = [];
 
-        if(this.state.attributes.length < 2){
-            useful_visualizations = useful_visualizations.filter(vis=>vis!='Parallel Coordinates');
-            vis_incompatibilities.push(`At least two values have to selected to use Parallel Coordinates.`);
-        }
+        let nonAggregated = 0, 
+            aggregated = 0;
 
-        if(true === this.state.attributes.reduce((a,b)=>a||b.aggregation!='none',false)){
+        this.state.attributes.map(a=>{
+                nonAggregated += (a.aggregation=='none')?1:0;
+                aggregated += (a.aggregation=='none')?0:1;
+            });
+
+        if(aggregated > 0){
             useful_visualizations = useful_visualizations.filter(vis=>vis!='Parallel Coordinates');
             vis_incompatibilities.push(`Metrics cannot be used with Parallel Coordinates.`);
+
+            useful_visualizations = useful_visualizations.filter(vis=>vis!='Circle Packing');
+            vis_incompatibilities.push(`Metrics cannot be used to create a hierarchy in Circle Packing.`);
+        }
+
+        if(aggregated == 0){
+            useful_visualizations = useful_visualizations.filter(vis=>vis!='Violin Plot');
+            vis_incompatibilities.push(`Violin Plot needs an aggregation (such as count) to show distribution.`);
+
+            useful_visualizations = useful_visualizations.filter(vis=>vis!='Bubble Graph');
+            vis_incompatibilities.push(`Bubble Graph needs at least one aggregation in order to calculate the bubbles size`);
+
+            useful_visualizations = useful_visualizations.filter(vis=>vis!='Stream Graph');
+            vis_incompatibilities.push(`Stream Graph needs at least one aggregation in order to calculate the sector size`);
+        }
+
+        if(nonAggregated > 0){
+            useful_visualizations = useful_visualizations.filter(vis=>vis!='Violin Plot');
+            vis_incompatibilities.push(`Violin Plot can only show distribution of aggregated data.`);
+        }
+
+        if(nonAggregated == 0){
+            useful_visualizations = useful_visualizations.filter(vis=>vis!='Bubble Graph');
+            vis_incompatibilities.push(`Bubble Graph needs at least one non aggregated value to create the clusters`);
+
+            useful_visualizations = useful_visualizations.filter(vis=>vis!='Stream Graph');
+            vis_incompatibilities.push(`Stream Graph needs at least one non aggregated value to distribute `);
+        }
+
+        if(nonAggregated < 2){
+            useful_visualizations = useful_visualizations.filter(vis=>vis!='Parallel Coordinates');
+            vis_incompatibilities.push(`At least two values have to selected to use Parallel Coordinates.`);
         }
 
         this.state.attributes.map(a=>{
