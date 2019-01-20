@@ -24,6 +24,7 @@ import PieChart from './vis/PieChart';
 import StreamGraph from './vis/StreamGraph';
 import Table from './vis/Table';
 import ViolinPlot from './vis/ViolinPlot';
+import JitterViolinPlot from './vis/JitterViolinPlot';
 
 const ReactGridLayout = WidthProvider(RGL);
 
@@ -72,7 +73,8 @@ class Explorer extends React.Component{
         "Pie Chart": PieChart, 
         "Stream Graph": StreamGraph,
         "Table": Table, 
-        "Violin Plot":ViolinPlot
+        "Violin Plot":ViolinPlot,
+        "Jitter Violin Plot":JitterViolinPlot,
     };
   }
 
