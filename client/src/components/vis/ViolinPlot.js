@@ -83,13 +83,13 @@ class ViolinPlot extends React.Component{
             const data = this.updateData(this.props.data,
                 this.state.selected_attribute);
                 
-            this.setState({data},this.updateViolinPlot);
+            this.setState({data},this.renderViolinPlot);
         }
         if(prevProps.width != this.props.width){
-            this.updateViolinPlot();
+            this.renderViolinPlot();
         }
         if(prevProps.height != this.props.height){
-            this.updateViolinPlot();
+            this.renderViolinPlot();
         }
     }
 
@@ -135,7 +135,6 @@ class ViolinPlot extends React.Component{
             height = this.props.height,
             width = this.props.width,
             center = this.props.width/2-params.margin-params.padding;
-        console.log(this.state.data);
 
         const yScale = d3.scaleLinear()
             .domain([0,this.state.data.max])
@@ -158,12 +157,10 @@ class ViolinPlot extends React.Component{
             .call(d3.axisLeft(yScale))
             .call(g => g.select(".domain").remove());
 
-        const svg = d3.select(this.svg);
-        
-        const node = d3.select(this.vis)
+        d3.select(this.vis)
             .attr('transform', `translate(${params.padding + 35},0)`);
 
-        const violin = d3.select(this.vis)
+        d3.select(this.vis)
             .select('path')
             .datum(bins)
             .style("fill","#69b3a2")
@@ -177,21 +174,15 @@ class ViolinPlot extends React.Component{
 
         d3.select(this.axis)
               .call(yAxis);
- 
-        console.log('HEERE')
-    }
-
-    updateViolinPlot(){
-        this.renderViolinPlot();
     }
 
     selectAttribute(attr){
-        const data = this.updatedData(this.props.data, attr);
+        const data = this.updateData(this.props.data, attr);
 
         this.setState({
             data,
             selected_attribute: attr,
-        })
+        },this.renderViolinPlot)
     }
 
     // Example of to use filtering
@@ -227,7 +218,7 @@ class ViolinPlot extends React.Component{
     render(){
         const size = {
             width: this.props.width+"px",
-            height: (this.props.height)+"px"
+            height: this.props.height+"px"
         }
         const style = (e)=>this.state.selected_attribute==e?{cursor:"pointer",color:"#18bc9c", marginLeft:"5px"}:
         {cursor:"pointer",color:"black", marginLeft:"5px"};
@@ -235,7 +226,7 @@ class ViolinPlot extends React.Component{
         return(
             <div id="ViolinPlot" className="visualization" style={size} ref={node => this.domElement = node}>
                 <p style={{margin:'0 10px'}}>Select the attribute used for the bars : {this.props.attributes.map(e=>(
-                    <span key={e.name} onClick={()=>this.selectAttribute(e)} className="option" style={style(e.name)}> {e.name} </span>
+                    <span key={e.name} onClick={()=>this.selectAttribute(e)} className="option" style={style(e)}> {e.name} </span>
                 ))}</p>
 
                 <svg ref={node => this.svg = node} 
