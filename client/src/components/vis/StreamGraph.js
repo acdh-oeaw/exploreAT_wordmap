@@ -33,7 +33,8 @@ const params = {
     paddingLeft:20,
     paddingTop: 10,
     paddingRight: 10,
-    paddingBottom: 10,
+    paddingBottom: 70,
+    axisTickLength:14
  };
 
 class StreamGraph extends React.Component{
@@ -198,8 +199,11 @@ class StreamGraph extends React.Component{
             .range([height-params.paddingBottom, params.marginTop+params.paddingTop]);
 
         const xAxis = g => g
-            .attr("transform", `translate(0,${height})`)
-            .call(d3.axisBottom(x).ticks(width / 80).tickSizeOuter(0))
+            .attr("transform", `translate(0,${height-params.paddingBottom})`)
+            .call(d3.axisBottom(x)
+                .ticks(width / 80)
+                .tickSizeOuter(0)
+                .tickFormat(d=>this.stripUri(String(d)).substring(0,params.axisTickLength)))
             .call(g => g.select(".domain").remove());
 
 
@@ -227,8 +231,11 @@ class StreamGraph extends React.Component{
             .append("title")
               .text(([name, value]) => `${name}`);
 
-          svg.append("g")
-              .call(xAxis);
+        svg.append("g")
+            .call(xAxis);
+        d3.selectAll('g.tick text')
+            .attr("transform", "rotate(50), translate(8,-5)")
+            .attr('text-anchor','start');
     }
 
     selectCuantitativeAttribute(attribute){
