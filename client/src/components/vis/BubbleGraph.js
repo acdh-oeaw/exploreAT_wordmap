@@ -29,7 +29,7 @@ import React from 'react';
 const params = {
     legendWidth: 200,
     margin: 25, // for the selection of 
-    padding: 90,
+    padding: 70,
     axisTickLength: 14,
     paddingBottom: 70,
  };
