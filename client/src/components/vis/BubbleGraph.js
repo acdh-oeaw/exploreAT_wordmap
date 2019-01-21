@@ -99,8 +99,7 @@ class BubbleGraph extends React.Component{
             const data = this.updateData(this.props.data,
                 this.state.cuantitativeDimension,
                 this.state.xAxisDimension);
-                
-            this.setState({data});
+            this.setState({data},this.renderBubbleGraph);
         }
         if(prevProps.width != this.props.width){
             this.updateBubbleGraphSize();
@@ -189,13 +188,12 @@ class BubbleGraph extends React.Component{
             .attr("r", d=>radius(d.value))
             .attr('class',d=>`${attrName}-${stripUri(String(d[attrName]))}`)
             .attr("fill", d => this.props.colorScales[this.state.cuantitativeDimension.aggregation_term](
-                this.sanitizeClassName( this.stripUri( String (d[this.state.cuantitativeDimension.aggregation_term])))))
+                this.sanitizeClassName( this.stripUri( String(d[this.state.cuantitativeDimension.aggregation_term])))))
             .on("mouseover", this.highlightEntities)
             .on("mouseout", this.unhighlightEntities)
-            .on("click",d=>{
-                this.props.filters[this.state.selected_attribute.aggregation_term].filter(d.key);
-                this.props.updateFilteredData();
-            });
+            .on("click",d=>this.filterBySomeAttribute(
+                this.state.cuantitativeDimension.aggregation_term, 
+                String(d[this.state.cuantitativeDimension.aggregation_term])));
 
         node.selectAll('circle')
             .each(function(d){
@@ -262,8 +260,8 @@ class BubbleGraph extends React.Component{
         this.state.forceY.y((d) => (this.props.height / 2) - params.axisTickLength)
 
         this.state.simulation
-                .force('x', this.state.forceX)
-                .force('y', this.state.forceY)
+            .force('x', this.state.forceX)
+            .force('y', this.state.forceY)
 
         this.state.simulation.nodes(this.state.data)
             .on('tick', function() {
@@ -301,7 +299,7 @@ class BubbleGraph extends React.Component{
 
     // Example of to use filtering
     filterBySomeAttribute(attribute, value){
-        this.props.filters[attribute].filter(value);
+        this.props.filters[attribute].filter(x=>String(x).includes(value));
         this.props.updateFilteredData()
     }
 
