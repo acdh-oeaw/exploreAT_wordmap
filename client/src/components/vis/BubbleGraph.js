@@ -30,6 +30,8 @@ const params = {
     legendWidth: 200,
     margin: 25, // for the selection of 
     padding: 90,
+    axisTickLength: 14,
+    paddingBottom: 70,
  };
 
 class BubbleGraph extends React.Component{
@@ -160,11 +162,11 @@ class BubbleGraph extends React.Component{
             .range([5,20]);
 
         const xAxis = g => g
-            .attr("transform", `translate(0,${height})`)
+            .attr("transform", `translate(0,${height - params.paddingBottom})`)
             .call(d3.axisBottom(x)
                 .ticks(width / 80)
                 .tickSizeOuter(0)
-                .tickFormat(d=>this.sanitizeClassName(this.stripUri(String(d)))))
+                .tickFormat(d=>this.stripUri(String(d)).substring(0,params.axisTickLength)))
             .call(g => g.select(".domain").remove());
 
         const svg = d3.select(this.svg);
@@ -196,8 +198,12 @@ class BubbleGraph extends React.Component{
         d3.select(this.axis)
               .call(xAxis);
 
+        svg.selectAll('g.tick text')
+            .attr("transform", "rotate(50), translate(8,-5)")
+            .attr('text-anchor','start');
+
         this.state.forceX.x((d) => x(d[this.state.xAxisDimension.attribute]))
-        this.state.forceY.y((d) => this.props.height / 2)
+        this.state.forceY.y((d) => (this.props.height / 2) - params.axisTickLength)
 
         this.state.simulation
             .velocityDecay(0.3)
@@ -229,19 +235,23 @@ class BubbleGraph extends React.Component{
             .range([params.padding + params.margin, width - params.padding - params.margin]);
 
         const xAxis = g => g
-            .attr("transform", `translate(0,${height})`)
+            .attr("transform", `translate(0,${height - params.paddingBottom})`)
             .call(d3.axisBottom(x)
                 .ticks(width / 80)
                 .tickSizeOuter(0)
-                .tickFormat(d=>this.sanitizeClassName(this.stripUri(String(d)))))
+                .tickFormat(d=>this.stripUri(String(d)).substring(0,params.axisTickLength)))
             .call(g => g.select(".domain").remove());
 
         const svg = d3.select(this.svg);
         d3.select(this.axis)
               .call(xAxis);
 
+        svg.selectAll('g.tick text')
+            .attr("transform", "rotate(50), translate(8,-5)")
+            .attr('text-anchor','start');
+
         this.state.forceX.x((d) => x(d[this.state.xAxisDimension.attribute]))
-        this.state.forceY.y((d) => this.props.height / 2)
+        this.state.forceY.y((d) => (this.props.height / 2) - params.axisTickLength)
 
         this.state.simulation
                 .force('x', this.state.forceX)
