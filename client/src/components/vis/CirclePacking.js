@@ -91,7 +91,7 @@ class CirclePacking extends React.Component{
             this.setState({data, hierarchyChanged:false}, this.renderCirclePacking);
         }
         if(prevProps.width != this.props.width || prevProps.height != this.props.height){
-            this.renderCirclePacking
+            this.renderCirclePacking();
         }
     }
 
@@ -156,6 +156,7 @@ class CirclePacking extends React.Component{
         vSlices = g.selectAll('g');
         const componentRef = this;
         // Draw on screen
+        const filterBySomeAttribute = this.filterBySomeAttribute;
         vSlices.each(function(d){
             const node = d3.select(this);
             node.select('title')
@@ -165,6 +166,7 @@ class CirclePacking extends React.Component{
             .attr('class', d=>d.data.depth==0?'':`${componentRef.state.hierarchy[d.data.depth-1]['attribute']}-${d.data.id.split('.')[d.data.depth]}`)
             .on("mouseover", componentRef.highlightEntities)
             .on("mouseout", componentRef.unhighlightEntities)
+            .on("click",d=>filterBySomeAttribute(componentRef.state.hierarchy[d.data.depth-1]['attribute'],d.data.id.split('.')[d.data.depth]))
             .style('fill',d=>d.data.depth==0
                 ?'white'
                 :componentRef.props.colorScales[componentRef.state.hierarchy[d.data.depth-1]['attribute']](d.data.id.split('.')[d.data.depth]))
@@ -186,7 +188,7 @@ class CirclePacking extends React.Component{
 
     // Example of to use filtering
     filterBySomeAttribute(attribute, value){
-        this.props.filters[attribute].filter(value);
+        this.props.filters[attribute].filter(x=>String(x).includes(value));
         this.props.updateFilteredData()
     }
 
