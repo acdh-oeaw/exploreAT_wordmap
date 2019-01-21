@@ -769,3 +769,7 @@ div#CirclePacking{
 div#CirclePacking circle.hovered{
   stroke:black;
 }
+
+div#BubbleGraph circle.hovered{
+  stroke:black;
+}

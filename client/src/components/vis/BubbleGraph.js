@@ -183,12 +183,20 @@ class BubbleGraph extends React.Component{
             .attr('transform', `translate(${width/2},${height/2})`)
             .append('title');
 
+        const attrName = this.state.cuantitativeDimension.aggregation_term;
+
         node.selectAll('circle')
             .attr("r", d=>radius(d.value))
+            .attr('class',d=>`${attrName}-${stripUri(String(d[attrName]))}`)
             .attr("fill", d => this.props.colorScales[this.state.cuantitativeDimension.aggregation_term](
-                this.sanitizeClassName( this.stripUri( String (d[this.state.cuantitativeDimension.aggregation_term])))));
+                this.sanitizeClassName( this.stripUri( String (d[this.state.cuantitativeDimension.aggregation_term])))))
+            .on("mouseover", this.highlightEntities)
+            .on("mouseout", this.unhighlightEntities)
+            .on("click",d=>{
+                this.props.filters[this.state.selected_attribute.aggregation_term].filter(d.key);
+                this.props.updateFilteredData();
+            });
 
-        const attrName = this.state.cuantitativeDimension.aggregation_term;
         node.selectAll('circle')
             .each(function(d){
                 d3.select(this).select('title')
@@ -298,7 +306,8 @@ class BubbleGraph extends React.Component{
     }
 
     highlightEntities(d){
-        d3.selectAll(`.${this.state.cuantitativeDimension.aggregation_term}-${this.sanitizeClassName(this.stripUri(String(d[0])))}`).classed('hovered',true);
+        const attrName = this.state.cuantitativeDimension.aggregation_term;
+        d3.selectAll(`.${attrName}-${this.stripUri(String(d[attrName]))}`).classed('hovered',true);
     }
 
 
