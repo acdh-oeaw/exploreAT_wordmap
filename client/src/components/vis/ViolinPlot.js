@@ -28,8 +28,8 @@ import React from 'react';
  */
 const params = {
     legendWidth: 200,
-    margin: 25, // for the selection of 
-    padding: 90,
+    margin: 15, // for the selection of 
+    padding: 50,
  };
 
 class ViolinPlot extends React.Component{
@@ -165,8 +165,8 @@ class ViolinPlot extends React.Component{
             .datum(bins)
             .style("fill","#69b3a2")
             .attr("d", (d,i)=>d3.area()
-                .x0(function(x){ return(xNumScale(-x.length)) } )
-                .x1(function(x){ return(xNumScale(x.length)) } )
+                .x0(function(x){ return(xNumScale(-x.length) - 1) } )
+                .x1(function(x){ return(xNumScale(x.length) + 1) } )
                 .y(function(d){ return(yScale(d.x0)) } )
                 .curve(d3.curveCatmullRom)    // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
                 (d)
