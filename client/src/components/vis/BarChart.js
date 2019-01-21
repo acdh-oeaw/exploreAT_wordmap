@@ -141,7 +141,7 @@ class BarChart extends React.Component{
             // shortter names will yield faster search results
             let classValue = last_field_of_uri(String(d.key.valueOf()));
             const className = `${this.state.legend}-${this.sanitizeClassName(classValue)}`;
-            console.log()
+            
             const bar = (<rect 
                 fill={this.props.colorScales[this.state.legend](this.sanitizeClassName( this.stripUri( d.key)))} 
                 className={className}

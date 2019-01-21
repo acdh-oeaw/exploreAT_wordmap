@@ -48,6 +48,7 @@ class PieChart extends React.Component{
             keySortOrder:'up',
             valueSortOrder:'up',
             sortingFunction: this.sortingFunctions['key']['up'],
+            mounted:false,
         };
 
 
@@ -62,13 +63,7 @@ class PieChart extends React.Component{
     }
     
     componentDidMount(){
-        const attribute = this.props.attributes[0]
-        this.setState({
-            legend:attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
-            data:attribute.data, 
-            sector_dimension:attribute.name, 
-            total:attribute.data_total
-        });
+        
     }
 
     componentWillUnmount(){
@@ -86,6 +81,7 @@ class PieChart extends React.Component{
         shouldUpdate = shouldUpdate || (nextProps.height != this.props.height);
         shouldUpdate = shouldUpdate || (nextProps.data != this.props.data);
         shouldUpdate = shouldUpdate || (nextState.data != this.state.data);
+        shouldUpdate = shouldUpdate || (nextState.mounted != this.state.mounted);
         shouldUpdate = shouldUpdate || (nextState.selected_attribute != this.state.selected_attribute);
 
         return shouldUpdate;
