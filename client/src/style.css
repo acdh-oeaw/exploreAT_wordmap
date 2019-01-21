@@ -121,8 +121,13 @@ div.content div.header div.info{
 }
 
 div.content div.header span{
-	font-size: 1.1em;
-  margin-right: 4em;
+  font-size:0.7em;
+}
+
+@media screen and (min-width : 950px){
+  div.content div.header span{
+    font-size:1em;
+  }  
 }
 
 /* Sources ---------------------------------------------------------------------------

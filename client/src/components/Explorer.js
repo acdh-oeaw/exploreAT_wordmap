@@ -230,13 +230,13 @@ class Explorer extends React.Component{
   render(){
     return(<div id="explorer">
         <div className="header">
-          <h2>Explorer page</h2>
+          <h2>Explorer</h2>
           <div className="info">
-              <span>Ontologies referenced : {this.prefixes.map(p=>p.prefix).join(', ')}</span>
-              <span>Sparql entry point : {this.api_url}</span>
+              <span className="button" onClick={()=>alert(this.prefixes.map(p=>p.prefix).join(', '))}>Show ontology</span>
+              <span className="button" onClick={()=>alert(this.api_url)}>Show Sparql endpoint </span>
               <span className="button" onClick={()=>alert(this.state.available_entities.map(e=>`${e}\n`))}>Show variables </span>
               <span className="button" onClick={()=>this.resetAllFilters()}>Reset all filters </span>
-              <NavLink to={"/entities/"}> <span className="button">Go back to entity selection</span> </NavLink>
+              <NavLink to={"/entities/"}> <span className="button">Back to entity selection</span> </NavLink>
           </div>
         </div>
         <div className="content">
