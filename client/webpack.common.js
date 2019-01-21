@@ -11,7 +11,7 @@ module.exports = (env,args)=>{
   return {
   entry: {
     javascript: './src/index.js',
-    html: './public/index.html'
+    html: './src/index.html'
   },
   output: {
     path: path.join(__dirname, outputDirectory),
@@ -50,7 +50,7 @@ module.exports = (env,args)=>{
   plugins: [
     new CleanWebpackPlugin([outputDirectory]),
     new HtmlWebPackPlugin({
-      template: "./public/index.html"
+      template: "./src/index.html"
     }),
   ]
   }
