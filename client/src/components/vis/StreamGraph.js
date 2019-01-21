@@ -233,7 +233,7 @@ class StreamGraph extends React.Component{
 
         svg.append("g")
             .call(xAxis);
-        d3.selectAll('g.tick text')
+        svg.selectAll('g.tick text')
             .attr("transform", "rotate(50), translate(8,-5)")
             .attr('text-anchor','start');
     }
