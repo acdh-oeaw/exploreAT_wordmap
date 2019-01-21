@@ -208,7 +208,7 @@ class ComponentSelector extends React.Component{
             "Violin Plot":<img className="button" alt="Violin Plot" title="Violin Plot" key="Violin Plot" 
                 height={this.props.height-200} src={"/public/violinplot.svg"}/>,
             "Jitter Violin Plot":<img className="button" alt="Jitter Violin Plot" title="Jitter Violin Plot" key="Jitter Violin Plot" 
-                height={this.props.height-200} src={"/public/violinplot.svg"}/>,
+                height={this.props.height-200} src={"/public/jitterviolinplot.svg"}/>,
         };
 
         if(this.state.name != "" && this.state.attributes.length>0 && this.state.showComponents === true){
