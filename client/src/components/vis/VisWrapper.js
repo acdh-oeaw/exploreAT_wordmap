@@ -40,7 +40,11 @@ class VisWrapper extends React.Component{
         return(
             <div className="visWrapper" width={this.props.width} height={this.props.height}>
                 <div className="header">
-                    <div></div>
+                    <button style={buttonStyle}
+                            className="button" 
+                            onClick={()=>alert(this.props.help)}>  
+                        help
+                    </button>
                     <p> {this.props.name} </p>
                     <button style={buttonStyle}
                             className="button" 

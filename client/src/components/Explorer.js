@@ -76,6 +76,7 @@ class Explorer extends React.Component{
         "Violin Plot":ViolinPlot,
         "Jitter Violin Plot":JitterViolinPlot,
     };
+    console.log(this.availableComponents['Circle Packing'], this.availableComponents['Circle Packing'].help)
   }
 
   componentDidMount(){
@@ -167,7 +168,11 @@ class Explorer extends React.Component{
 
       this.setState(prevState=>{
         prevState.layout[name] = {x: 0, y: 0, w: 2, h: 4, isDraggable:true};
-        prevState.visComponents[name]={attributes:attributes,data:this.state.data,instance:newInstance};
+        prevState.visComponents[name]={
+          attributes:attributes,
+          data:this.state.data,
+          instance:newInstance,
+          help:this.availableComponents[type].prototype.help};
         return prevState;
       });
     }
@@ -197,6 +202,7 @@ class Explorer extends React.Component{
 				height={this.state.layout[c.key].h * 90 + (this.state.layout[c.key].h - 1)*10 - 30}
 				name={c.key}
 				attributes={c.value.attributes}
+        help={c.value.help}
 				data={this.state.data}
 				filters={this.state.filters}
         colorScales={this.colorScales}
