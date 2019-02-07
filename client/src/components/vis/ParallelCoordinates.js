@@ -410,4 +410,13 @@ class ParallelCoordinates extends React.Component{
     }
 }
 
+ParallelCoordinates.prototype.help="Parallel Coordinates\n"+
+    "Used to represent visually a large number of attributes for each of the available entries.\n\n"+
+    "Data used in the visualization:\n"+
+    "Non aggregated attributes which will determine each of the columns in the parallel coodinate visualization.\n\n"+
+    "Visual representation:\n"+
+    "A set of lines, each representing an entry, which cross through each of the columns at the correspondant height for its value for such attribute.\n\n"+
+    "Configuration:\n"+
+    "The attribute which is used for colouring can be selected by clicking in its name.";
+
 export default ParallelCoordinates;
