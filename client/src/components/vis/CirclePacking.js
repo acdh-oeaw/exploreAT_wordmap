@@ -39,6 +39,7 @@ const params = {
 class CirclePacking extends React.Component{
     constructor(props){
         super(props);
+
         // Auxiliary functions to manage strings
         this.stripUri = (value)=>String(value).includes('/')?value.split('/')[value.split('/').length-1]:value;
         this.sanitizeClassName = (name)=>(name.replace(/"/g,'').replace(/\./g,'').replace(/ /g, ''));
@@ -252,5 +253,14 @@ class CirclePacking extends React.Component{
         );
     }
 }
+
+CirclePacking.prototype.help="Circle Packing\n"+
+    "Used to visually represent hierarchies.\n\n"+
+    "Data used in the visualization:\n"+
+    "Non aggregated variables, which each represent a category.\n\n"+
+    "Visual representation:\n"+
+    "Each circle represents a category so that circles within the same parent circle share the same value for that category\n\n"+
+    "Configuration:\n"+
+    "The top-down order in which the variables appear is the order they will be used for creating the levels.";
 
 export default CirclePacking;
