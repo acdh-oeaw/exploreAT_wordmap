@@ -265,8 +265,10 @@ BarChart.prototype.help="Bar Chart\n"+
     "Data used in the visualization:\n"+
     "Aggregated variables, which have the count of occurrencies for each value of the aggregation term.\n\n"+
     "Visual representation:\n"+
-    "Each of the different values of the variable used for aggregating has its own bar with a height proportional to the occurencies count.\n\n"+
+    "Each of the different values of the variable used for aggregating has its own bar with a height \n"+
+    "proportional to the occurencies count.\n\n"+
     "Configuration:\n"+
-    "The available aggregations for representation can be cycled through by clicking on the names, and the order in which the values appear changed by clicking in the correspondant arrow of in the legend";
+    "The available aggregations for representation can be cycled through by clicking on the names, and \n"+
+    "the order in which the values appear changed by clicking in the correspondant arrow of in the legend.";
 
 export default BarChart;
