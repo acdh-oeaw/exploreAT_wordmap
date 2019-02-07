@@ -2,6 +2,7 @@ import React from "react";
 import * as d3 from 'd3';
 import UrlParamWrapper from '../aux/UrlParamWrapper';
 import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
+import * as cola from 'webcola'
 
 const params = {
 	nodeColor: 'lightgreen',
@@ -38,7 +39,7 @@ class EntityForceLayout extends React.Component{
 	}
 
 	componentWillUnmount(){
-		this.simulation.stop();
+		//this.simulation.stop();
 	}
 	componentDidUpdate(prevProps, prevState, snapshot){
 		if(this.state.loaded === true){
@@ -98,7 +99,7 @@ class EntityForceLayout extends React.Component{
 
 		const sizeScale = d3.scaleLinear()
 			.domain([0,40000])
-			.range([25,45])
+			.range([17,40])
 			.clamp(true);
 
 		const nodehash = {};
@@ -116,23 +117,27 @@ class EntityForceLayout extends React.Component{
 		);
 
 
-		const linkForce = d3.forceLink().distance(160);
+		const linkForce = d3.forceLink().distance(160).strength(0.1);
 
-		const simulation = d3.forceSimulation()
-			.alphaDecay(0.025)
-			.force('charge', d3.forceManyBody().strength(-45))
-			.force('center', d3.forceCenter(d3.select('svg').node().getBoundingClientRect().width/2, 100))
-			.force('collide', d3.forceCollide(function(d){
-			    sizeScale(nodehash[d.entity])*12
-			}))
-			.force('link', linkForce)
-			.on('tick', forceTick);
+		console.log(cola.d3adaptor(d3))
 
-		simulation.nodes(this.props.entities);
-		simulation.force("link").links(edges);
-		simulation.current_ticks = 0;
 
-		this.simulation = simulation;
+		const layout = cola.d3adaptor(d3)
+		    .linkDistance(75)
+		    .size([width, height])
+		    .nodes(this.props.entities.map(x=>{
+		    	x.width = sizeScale(x.count)*2+22;
+		    	x.height = sizeScale(x.count)*2+22;
+		    	x.id = x.entity;
+		    	return x;
+		    }))
+		    .flowLayout('x',10)
+		    .links(edges)
+		    .symmetricDiffLinkLengths(30)
+		    .jaccardLinkLengths(65, 1)
+		    .handleDisconnected(true)
+		    .avoidOverlaps(true)
+		    .start(40,0,20);
 
 		const edgeEnter = d3.select(this.node).selectAll("path.link")
 			.data(edges, d => `${d.source.entity}-${d.target.entity}`)
@@ -157,10 +162,7 @@ class EntityForceLayout extends React.Component{
 			.on("click",(d)=>{
 				this.props.selectEntity(d.entity)
 			})
-			.call(d3.drag()
-            .on("start",dragstarted)
-            .on("drag",dragged)
-            .on("end",dragended));
+			.call(layout.drag);
 
 		nodeEnter.append('circle')
 			.attr('r', e=>sizeScale(e.count))
@@ -177,11 +179,16 @@ class EntityForceLayout extends React.Component{
 		nodeEnter.append("title")
       		.text(d=>`${d.count} diferent entries`);
 
+      	layout.on('tick',forceTick);
+
 		function forceTick() {
-			simulation.current_ticks += 1;
+			//simulation.current_ticks += 1;/
 			const rect = d3.select('svg').node().getBoundingClientRect(),
 		    width = rect.width,
 		    height = rect.height;
+
+		    const link = d3.select('svg').selectAll("path.link"),
+		    	node = d3.selectAll("g.node");
 
 		    d3.select('svg').selectAll("path.link")
 				.attr("d", function(d) {
@@ -208,8 +215,8 @@ class EntityForceLayout extends React.Component{
 
 		function dragstarted(d)
 		{
-			simulation.restart();
-			simulation.alpha(1).alphaDecay(0.025);
+			//layout.restart();
+			//layout.alpha(1)//.alphaDecay(0.025);
 			d.fx = d.x;
 			d.fy = d.y;
 		}
@@ -229,8 +236,8 @@ class EntityForceLayout extends React.Component{
 
 	render() {
 	    return (
-            <div id="graph" width={this.props.width} height={this.props.height}>
-                <svg width="100%" height="50%" ref={node => this.svg = node}>
+            <div id="graph">
+                <svg ref={node => this.svg = node}>
                   <defs>
                     <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
                       <path d="M0,0 L0,6 L9,3 z" fill="#f00" />
