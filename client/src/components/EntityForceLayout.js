@@ -95,7 +95,7 @@ class EntityForceLayout extends React.Component{
 	createGraph(){
 		const rect = this.svg.getBoundingClientRect(),
 	    width = rect.width,
-	    height = rect.height;
+	    height = rect.height-10;
 
 		const sizeScale = d3.scaleLinear()
 			.domain([0,40000])
@@ -126,8 +126,8 @@ class EntityForceLayout extends React.Component{
 		    .linkDistance(75)
 		    .size([width, height])
 		    .nodes(this.props.entities.map(x=>{
-		    	x.width = sizeScale(x.count)*2+22;
-		    	x.height = sizeScale(x.count)*2+22;
+		    	x.width = Math.max(sizeScale(x.count)*2,sizeScale(x.count)*2+x.entity.length*2);
+		    	x.height = sizeScale(x.count)*2+25;
 		    	x.id = x.entity;
 		    	return x;
 		    }))
@@ -185,7 +185,7 @@ class EntityForceLayout extends React.Component{
 			//simulation.current_ticks += 1;/
 			const rect = d3.select('svg').node().getBoundingClientRect(),
 		    width = rect.width,
-		    height = rect.height;
+		    height = rect.height-10;
 
 		    const link = d3.select('svg').selectAll("path.link"),
 		    	node = d3.selectAll("g.node");
