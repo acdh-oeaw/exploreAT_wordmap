@@ -317,4 +317,13 @@ class StreamGraph extends React.Component{
     }
 }
 
+StreamGraph.prototype.help="Stream Graph\n"+
+    "Used to see how some aggregation changes along an non-aggregated variable.\n\n"+
+    "Data used in the visualization:\n"+
+    "One aggregation wich will determine the size of the lines, and a second not-aggregated variable which will be used to display the changes of that aggregation along an horizontal axis.\n\n"+
+    "Visual representation:\n"+
+    "A set of lines of varying width which represent a value of the variable used for aggregating. Each line will have a width proportional to the occurrencies count at each of the values of the horizontal axis.\n\n"+
+    "Configuration:\n"+
+    "The available aggregations for creating or distributing the lines can be cycled through by clicking on the names.";
+
 export default StreamGraph;
