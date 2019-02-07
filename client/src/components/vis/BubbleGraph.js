@@ -362,10 +362,14 @@ class BubbleGraph extends React.Component{
 BubbleGraph.prototype.help="Bubble Graph\n"+
     "Used to visually identify how the disrtibution of some aggregation changes with a second variable.\n\n"+
     "Data used in the visualization:\n"+
-    "One aggregation wich will determine the size of the bubbles, and a second not-aggregated variable which will be used to distribute and cluster the bubbles along an horizontal axis.\n\n"+
+    "One aggregation wich will determine the size of the bubbles, and a second not-aggregated variable\n"+
+    "which will be used to distribute and cluster the bubbles along an horizontal axis.\n\n"+
     "Visual representation:\n"+
-    "A set of bubbles which represent a value for the variable used for aggregating, which size is proportional to the number of occurencies. The bubbles are distributed along an horizontal axis based on the value of the not-aggregated variableselected.\n\n"+
+    "A set of bubbles which represent a value for the variable used for aggregating, which size is\n"+
+    "proportional to the number of occurencies. The bubbles are distributed along an horizontal axis based\n"+
+    "on the value of the not-aggregated variableselected.\n\n"+
     "Configuration:\n"+
-    "The available aggregations for creating or clustering the bubbles can be cycled through by clicking on the names.";
+    "The available aggregations for creating or clustering the bubbles can be cycled through by clicking on\n"+
+    "the names.";
 
 export default BubbleGraph;
