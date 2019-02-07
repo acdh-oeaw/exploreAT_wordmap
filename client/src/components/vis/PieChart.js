@@ -301,4 +301,13 @@ class PieChart extends React.Component{
     }
 }
 
+PieChart.prototype.help="Pie Chart\n"+
+    "Used to visually represent distribution of aggregated data.\n\n"+
+    "Data used in the visualization:\n"+
+    "Aggregated variables, which have the count of occurrencies for each value of the aggregation term.\n\n"+
+    "Visual representation:\n"+
+    "Each of the different values of the variable used for aggregating has its own section of the circle with a radious proportional to the occurencies count.\n\n"+
+    "Configuration:\n"+
+    "The available aggregations for representation can be cycled through by clicking on the names, and the order in which the values appear changed by clicking in the correspondant arrow of in the legend";
+
 export default PieChart;
