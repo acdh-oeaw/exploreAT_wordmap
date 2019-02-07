@@ -48,7 +48,7 @@ class RdfBasedSourceSelector extends React.Component{
         }
 
         const fr = new FileReader()
-        fr.onload = (e)=> this.setState({ontology: (parseOntology(e.target.result))});
+        fr.onload = (e)=> this.setState({ontology: (parseOntology(e.target.result))},()=>console.log(this.state.ontology));
 
         fr.readAsText(event.target.files[0]);
     }

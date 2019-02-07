@@ -1,6 +1,7 @@
 import React from "react";
 import UrlParamWrapper from '../aux/UrlParamWrapper';
 import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
+import {NavLink} from "react-router-dom";
 import * as d3 from 'd3';
 
 /**
@@ -56,16 +57,22 @@ class SparqlQueryCreator extends React.Component{
                         
                     </g>
                     {this.props.test_nodes.map((test_node,position)=>(
-                    <g transform={`translate(${(position+1)*300},0)`} key={position} className="entity">
+                    <g transform={`translate(${(position+1)*200 + 100},0)`} key={position} className="entity">
                         <circle r="20" cx="22" cy="42" fill="rgb(102, 180, 58)"></circle>
                         {(position<(this.props.test_nodes.length-1))?(
                             <g>
-                            <line x1={45} x2={300} y1={42} y2={42} stroke={'grey'}></line>
+                            <line x1={45} x2={200} y1={42} y2={42} stroke={'grey'}></line>
                             <text x={80} y={35} fontSize={15} fontWeight={'bold'} fill="rgb(102, 180, 58)">
                                 {this.wrapper.nameOfEntity(this.props.active_edges[position])}
                             </text>
                             </g>
-                        ):""}
+                        ):(<g>
+                            <line stroke-dasharray="5,5" x1={45} x2={120} y1={42} y2={42} stroke={'red'}></line>
+                            {this.props.triples.length>0?(
+                                <line stroke-dasharray="5,5" x1={45} x2={120} y1={42} y2={100} stroke={'green'}></line>
+                            ):""}
+                            </g>
+                        )}
                         <text x="0" y="15">
                             {this.wrapper.nameOfEntity(test_node.name)}
                         </text>
@@ -83,11 +90,30 @@ class SparqlQueryCreator extends React.Component{
                         }
                     </g>
                     ))}
-                    <g 
-                        transform={`translate(${d3.select('body').node().getBoundingClientRect().width - 160},100)`} 
-                        style={({display: this.props.test_nodes.length>0?'inherit':'none'})}>
-                        <text id="resetQueryButton" onClick={()=>this.props.resetQuery()}>reset the query</text>
-                    </g>
+                    {this.props.test_nodes.length==0?"":(()=>{
+                            const position = this.props.test_nodes.length;
+                            return(
+                            <g transform={`translate(${position*200 + 220},0)`}>
+                                <g className="entity">
+                                    <circle r="20" cx="22" cy="42" 
+                                        strokeDasharray="5,5" fill='white' 
+                                        cursor='pointer' stroke='red'
+                                        onClick={()=>this.props.resetQuery()}></circle>
+                                    <text x="0" y="15" >Reset the query</text>
+                                </g>
+                                {(this.props.triples.length>0)?(
+                                    <g transform={'translate(0,60)'} className="entity">
+                                        <NavLink to={this.props.url}>
+                                        <circle r="20" cx="22" cy="42" 
+                                            strokeDasharray="5,5" fill='white' 
+                                            cursor='pointer' stroke="rgb(102, 180, 58)"></circle>
+                                        </NavLink>
+                                        <text x="0" y="15">Go to dashboard</text>
+                                    </g>
+                                ):""}
+                            </g>)
+                        })()
+                    }
                 </svg>
             </div>
 	    );
@@ -95,4 +121,3 @@ class SparqlQueryCreator extends React.Component{
 }
 
 export default SparqlQueryCreator;
-

@@ -213,11 +213,27 @@ class EntitySelector extends React.Component{
 				/>
 			);
 		}else{
+			const prefixes_used = {};
+
+			if(this.state.ontology != null){
+				const prefixes_available = this.state.ontology.prefixes.map(p=>p.prefix);
+				this.state.triples.map(t=>{
+					const predicate = t.split(' ')[1],
+					i = prefixes_available.indexOf(predicate.split(':')[0]);
+					if(i >= 0)
+						prefixes_used[predicate.split(':')[0]] = this.state.ontology.prefixes[i].uri;
+				});
+				prefixes_used[this.state.ontology.ontology_prefix]=this.state.ontology.ontology_base;
+			}
+
+			const url = (this.state.triples.length == 0)?"":
+				"/explorer/prefixes/" + d3.entries(prefixes_used).reduce((final, actual)=>final+this.wrapper.urlToParam(actual.key+'+'+actual.value)+",","") + 
+				"/sparql/" + this.wrapper.urlToParam(this.state.sparql)+
+				"/entities/" + this.state.triples.reduce((final, actual)=>final+this.wrapper.urlToParam(actual)+",","");
+
 			return(
 				<div className="content">
                     <EntityForceLayout 
-                         width={'100%'}
-                         height={'50%'}
                          entities={this.state.ontology.entities.map(e=>({entity:e.name, count:e.count}))}
                          relationships={this.state.ontology.relationships}
                          selectEntity={this.selectNode}
@@ -231,6 +247,8 @@ class EntitySelector extends React.Component{
                          sparql={this.state.sparql}
                     /> 
                     <SparqlQueryCreator 
+                    	  triples={this.state.triples}
+                    	  url={url}
                           test_nodes={this.state.test_nodes}
                           active_edges={this.state.active_edges}
                           selectAttribute={this.selectAttribute}
@@ -270,9 +288,6 @@ class EntitySelector extends React.Component{
 		              	<span>Ontology : {this.state.ontology.ontology_base}</span>
 		              	<span>Sparql entry point : {this.state.sparql}</span>
 		          </div>
-		            <NavLink to={url} style={
-			      		(this.state.triples.length>0)?{display:"block"}:{display:"none"}
-			      	} id="link-to-dashboard"> Go to dashboard</NavLink>
 		        </div>
 		        }
 		        {this.renderContent()}		        

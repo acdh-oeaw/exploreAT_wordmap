@@ -187,9 +187,17 @@ div#explorer.entitySelector div.content{
 
 div#explorer.entitySelector div.content div#graph{
   border-bottom: solid cadetblue;
+  height: 70%; 
+  width: 100%; 
+  padding:0.5em;
 }
 
-div#explorer.entitySelector div.content div{height: 50%; width: 100%; padding:1em;}
+div#explorer.entitySelector div.content div#nodes{
+  min-height: 250px;
+  height: 30%;
+  width: 100%; 
+  padding: 0.1em;
+}
 
 div#explorer.entitySelector .tooltip{
 	width:100%;
@@ -204,6 +212,7 @@ div#explorer.entitySelector .tooltip p{
 }
 
 div#explorer.entitySelector svg{
+  display:block;
   height:100%;
   width:100%;
 }
