@@ -259,8 +259,10 @@ CirclePacking.prototype.help="Circle Packing\n"+
     "Data used in the visualization:\n"+
     "Non aggregated variables, which each represent a category.\n\n"+
     "Visual representation:\n"+
-    "Each circle represents a category so that circles within the same parent circle share the same value for that category\n\n"+
+    "Each circle represents a category so that circles within the same parent\n"+
+    "circle share the same value for that category\n\n"+
     "Configuration:\n"+
-    "The top-down order in which the variables appear is the order they will be used for creating the levels.";
+    "The top-down order in which the variables appear is the order they will\n"+
+    "be used for creating the levels.";
 
 export default CirclePacking;
