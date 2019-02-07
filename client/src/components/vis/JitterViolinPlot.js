@@ -262,4 +262,14 @@ class JitterViolinPlot extends React.Component{
     }
 }
 
+JitterViolinPlot.prototype.help="Jitter Violin Plot\n"+
+    "Allows to see the distribution of some data both in a global and a detailed perspective.\n\n"+
+    "Data used in the visualization:\n"+
+    "A numerical attribute (usually an aggregation) which distribution is shown.\n\n"+
+    "Visual representation:\n"+
+    "In the right side of the visualization, a violin plot allows to see what the distribution\n"+
+    "for that count is, while the left side allows to see individual entities and identify outliers\n\n"+
+    "Configuration:\n"+
+    "The available aggregations for the representation can be cycled through by clicking on the names.";
+
 export default JitterViolinPlot;
