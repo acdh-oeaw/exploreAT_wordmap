@@ -240,4 +240,14 @@ class ViolinPlot extends React.Component{
     }
 }
 
+ViolinPlot.prototype.help="Violin Plot\n"+
+    "Allows to see the distribution of some numerical data.\n\n"+
+    "Data used in the visualization:\n"+
+    "A numerical attribute (usually an aggregation) which distribution is shown.\n\n"+
+    "Visual representation:\n"+
+    "The violin plot is a horizontally symetrical version of a turned density plot,\n"
+    "where the width is proportional to the amount of occurencies of that value of \nthe aggregation.\n\n"+
+    "Configuration:\n"+
+    "The available aggregations for the representation can be cycled through by clicking on the names.";
+
 export default ViolinPlot;
