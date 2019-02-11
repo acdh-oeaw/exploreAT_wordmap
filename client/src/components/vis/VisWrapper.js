@@ -11,20 +11,7 @@ class VisWrapper extends React.Component{
     constructor(props){
         super(props);
     }
-
-    /*
-                        <button style={buttonStyle}
-                            className="button" 
-                            onClick={()=>console.log('null')}>    
-                            edit
-                        </button>
-                        <button style={buttonStyle}
-                            className="button" 
-                            onClick={()=>console.log('null')}>    
-                            export
-                        </button>
-    */
-
+    
     render(){
         const buttonStyle = {
             border: 'none',
