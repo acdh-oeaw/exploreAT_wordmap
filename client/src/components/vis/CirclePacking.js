@@ -124,20 +124,23 @@ class CirclePacking extends React.Component{
     renderCirclePacking(){
         const stripUri = this.stripUri,
             sanitizeClassName = this.sanitizeClassName,
-            height = this.props.height-params.marginTop,
-            width = this.props.width-params.marginRight-params.legendWidth;
+            height = this.props.height-params.marginTop -7,
+            width = this.props.width-params.marginRight-params.legendWidth-7;
 
         const stratify = d3.stratify()
             .parentId(function(d) { return d.id.substring(0, d.id.lastIndexOf(".")); });
 
+            /*
         const pack = d3.pack()
-            .size([width - params.paddingRight - params.paddingLeft
-                , height - params.paddingBottom - params.paddingTop])
-            .padding(4);
+            .size([width - params.paddingRight - params.paddingLeft -20 
+                , height - params.paddingBottom - params.paddingTop - 20])
+            .padding(20);
 
+        console.log(pack.padding())
+        */
         const vData = stratify(this.state.data);
 
-        let vLayout = d3.pack().size([width, height]);
+        let vLayout = d3.pack().size([width-7, height-7]).padding(7);
 
         // Layout + Data
         const vRoot = d3.hierarchy(vData).sum(function (d) { return d.data.size; });
@@ -233,9 +236,21 @@ class CirclePacking extends React.Component{
                     <g id="vis" transform={`translate(${params.paddingLeft},${params.paddingTop})`}></g>
                 </svg>
                 <div className="menu">
+                <svg height={this.state.hierarchy.length * 30} width={this.state.hierarchy.length * 30 + 6}>
+                    {this.state.hierarchy.map((x,i)=>(
+                        <g key={i}  transform={`translate(${this.state.hierarchy.length*14.5/(i+1)},0)`}>
+                            <circle r={(this.state.hierarchy.length * 14.5)/(i*1.1+1)}  
+                                cy={this.state.hierarchy.length*14.5 + 1}>
+                            </circle>
+                            <text y={this.state.hierarchy.length * 14.5 +3} 
+                                x={(this.state.hierarchy.length * 14.5)/(i*1.2+1) + 5}
+                                textAnchor="middle">{i}</text>
+                        </g>
+                    ))}
+                </svg>
                 {this.state.hierarchy.map((x,i)=>(
                     <div key={x.attribute}>
-                        <span >
+                        <span >{i} ) 
                         {x.attribute} 
                         {i>0
                             ?<span className="button" onClick={()=>this.moveAttribute(i,i-1)}> up </span>

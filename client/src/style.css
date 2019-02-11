@@ -779,6 +779,23 @@ div#CirclePacking circle.hovered{
   stroke:black;
 }
 
+div#CirclePacking circle{
+  stroke:grey;
+  stroke-width:1.2;
+}
+
+div#CirclePacking div.menu{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 5px;
+}
+
+div#CirclePacking div.menu circle{
+  stroke:lightgrey;
+  fill:white;
+}
+
 div#BubbleGraph circle.hovered{
   stroke:black;
 }
