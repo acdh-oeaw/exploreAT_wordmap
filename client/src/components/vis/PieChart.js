@@ -249,17 +249,15 @@ class PieChart extends React.Component{
                     </g>
                    <g className="legend" transform={`translate(${this.props.width - params.legendWidth },30)`}>
                         <g transform={`translate(0,0)`}>
-                            <text x="7" y="0">
-                                {this.state.legend}
-                                <tspan onClick={()=>this.setSortBy("key")} className={"sortBy"}> 
-                                    {(this.state.keySortOrder == 'up')?"⯆":"⯅"}
-                                </tspan>
-                                ( value 
-                                <tspan onClick={()=>this.setSortBy("value")} className={"sortBy"}> 
-                                    {(this.state.valueSortOrder == 'up')?"⯆":"⯅"}
-                                </tspan>
-                                )
-                            </text>
+                            <text x="7" y="0">{this.state.legend}</text>
+                            <g transform={`translate(${this.state.legend.length * 8},-10)`} onClick={()=>this.setSortBy("key")}>
+                                {(this.state.keySortOrder == 'up')?<polygon points="0 0, 13 0, 6.5 10.5" fill="black"/>:<polygon points="0 10.5, 6.5 0, 13 10.5" fill="black"/>}
+                            </g>
+                            <text x={this.state.legend.length * 8 + 16}>( value </text>
+                            <g transform={`translate(${(this.state.legend.length+8) * 8},-10)`} onClick={()=>this.setSortBy("value")}>
+                                {(this.state.valueSortOrder == 'up')?<polygon points="0 0, 13 0, 6.5 10.5" fill="black"/>:<polygon points="0 10.5, 6.5 0, 13 10.5" fill="black"/>}
+                            </g>
+                            <text x={(this.state.legend.length+10) * 8}> )</text>
                         </g>
                         {(()=>{
                             let legend = "";
