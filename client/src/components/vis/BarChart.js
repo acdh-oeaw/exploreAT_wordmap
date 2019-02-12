@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
 import React from 'react';
+import { Icon } from 'react-materialize';
 
 /* BarChart
  * BarChart component to show aggregated data
@@ -179,21 +180,23 @@ class BarChart extends React.Component{
         const last_field_of_uri = (uri)=>uri.includes('/')?uri.split('/')[uri.split('/').length-1]:uri;
         return(
         <g className="legend">
-            <g transform={`translate(5,${params.paddingTop})`}>
-                <text x="0" y="0">
+            <g transform={`translate(5,${params.paddingTop})`}
+                onClick={()=>this.setSortBy("value")}>
+                <text x="0" y="0" className={"sortBy"}>
                     Value 
-                    <tspan onClick={()=>this.setSortBy("value")} className={"sortBy"}> 
-                        {(this.state.valueSortOrder == 'up')?"⯆":"⯅"}
-                    </tspan>
                 </text>
+                <g transform={`translate(40,-10)`}>
+                    {(this.state.valueSortOrder == 'up')?<polygon points="0 0, 13 0, 6.5 10.5" fill="black"/>:<polygon points="0 10.5, 6.5 0, 13 10.5" fill="black"/>}
+                </g>
             </g>
-            <g transform={`translate(${dimensions.width-params.paddingRight-this.state.legend.length*5+15},${params.paddingTop+dimensions.height})`}>
-                <text x="0" y="0">
+            <g transform={`translate(${dimensions.width-params.paddingRight-this.state.legend.length*5+15},${params.paddingTop+dimensions.height})`}
+                onClick={()=>this.setSortBy("key")}>
+                <text x="0" y="0" className={"sortBy"}>
                     {this.state.legend}
-                    <tspan onClick={()=>this.setSortBy("key")} className={"sortBy"}> 
-                        {(this.state.keySortOrder == 'up')?"⯆":"⯅"}
-                    </tspan>
                 </text>
+                <g transform={`translate(${this.state.legend.length * 8},-10)`}>
+                    {(this.state.keySortOrder == 'up')?<polygon points="0 0, 13 0, 6.5 10.5" fill="black"/>:<polygon points="0 10.5, 6.5 0, 13 10.5" fill="black"/>}
+                </g>
             </g>
             <g transform={`translate(0,${params.paddingTop+dimensions.height+10})`}>
                 {d3.entries(this.state.data).sort(this.state.sortingFunction).map((d,i,all)=>(
