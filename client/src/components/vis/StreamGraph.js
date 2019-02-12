@@ -170,7 +170,7 @@ class StreamGraph extends React.Component{
         }
 
         // it is returned a flatten data structure
-        const result = new Map();
+        let result = new Map();
         for(let label of uniqueCuantTermKeys.keys())
             result.set(label, []);
 
@@ -179,7 +179,13 @@ class StreamGraph extends React.Component{
                 result.get(d[cuantTerm.aggregation_term]).push(d)});
         }        
 
-        return(Array.from(result.keys()).map(x=>[x,result.get(x)]));
+        // As an array of pairs (id, value(id))
+        result = Array.from(result.keys()).map(x=>[x,result.get(x)])
+        result = result.map(x=>{
+            x[1] = x[1].sort((a,b)=>a[aggrTerm.attribute]>b[aggrTerm.attribute]);
+            return x
+        });
+        return(result);
     }
 
     renderStreamGraph(){
@@ -189,7 +195,7 @@ class StreamGraph extends React.Component{
             width = this.props.width-60;
 
         const x = d3.scalePoint()
-            .domain(this.state.data[0][1].map(d=>d[this.state.xAxisDimension.attribute]))
+            .domain(this.state.data[0][1].map(d=>d[this.state.xAxisDimension.attribute]).sort((a,b)=>a>b))
             .range([params.paddingLeft, width - params.marginRight-params.paddingRight]);
 
         const y = d3.scaleLinear()
