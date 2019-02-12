@@ -119,9 +119,6 @@ class EntityForceLayout extends React.Component{
 
 		const linkForce = d3.forceLink().distance(160).strength(0.1);
 
-		console.log(cola.d3adaptor(d3))
-
-
 		const layout = cola.d3adaptor(d3)
 		    .linkDistance(75)
 		    .size([width, height])

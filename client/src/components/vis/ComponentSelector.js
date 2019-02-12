@@ -136,6 +136,9 @@ class ComponentSelector extends React.Component{
             useful_visualizations = useful_visualizations.filter(vis=>vis!='Violin Plot');
             vis_incompatibilities.push(`Violin Plot needs an aggregation (such as count) to show distribution.`);
 
+            useful_visualizations = useful_visualizations.filter(vis=>vis!='Jitter Violin Plot');
+            vis_incompatibilities.push(`Jitter Violin Plot needs an aggregation (such as count) to show distribution.`);
+
             useful_visualizations = useful_visualizations.filter(vis=>vis!='Bubble Graph');
             vis_incompatibilities.push(`Bubble Graph needs at least one aggregation in order to calculate the bubbles size`);
 
@@ -146,6 +149,9 @@ class ComponentSelector extends React.Component{
         if(nonAggregated > 0){
             useful_visualizations = useful_visualizations.filter(vis=>vis!='Violin Plot');
             vis_incompatibilities.push(`Violin Plot can only show distribution of aggregated data.`);
+
+            useful_visualizations = useful_visualizations.filter(vis=>vis!='Jitter Violin Plot');
+            vis_incompatibilities.push(`Jitter Violin Plot can only show distribution of aggregated data.`);
         }
 
         if(nonAggregated == 0){
@@ -229,7 +235,7 @@ class ComponentSelector extends React.Component{
                 </ul>
                 <a onClick={()=>alert(this.state.vis_incompatibilities.map(e=>`${e}\n`))} style={{cursor:'pointer'}}>Show incompatiblities </a>
                 <br/>
-                <a onClick={this.createComponent}>Create component</a>
+                <a onClick={this.createComponent}>Create view</a>
             </div>
             );
         }else{
@@ -237,11 +243,11 @@ class ComponentSelector extends React.Component{
             return(
             <div className="menu-panel">
             <ul>
-                <li>Name for the new component :</li>
+                <li>Name for the new view :</li>
                 <li><input type="text" value={this.state.name} onChange={this.handleNameChange} /></li>
             </ul>
             <ul>
-                <li>Variables to explore on the new component :</li>
+                <li>Variables to explore on the new view :</li>
                 <li>
                     <OptionTags 
                         tags={this.state.attributes}

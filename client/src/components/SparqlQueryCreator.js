@@ -67,9 +67,9 @@ class SparqlQueryCreator extends React.Component{
                             </text>
                             </g>
                         ):(<g>
-                            <line stroke-dasharray="5,5" x1={45} x2={120} y1={42} y2={42} stroke={'red'}></line>
+                            <line strokeDasharray="5,5" x1={45} x2={120} y1={42} y2={42} stroke={'red'}></line>
                             {this.props.triples.length>0?(
-                                <line stroke-dasharray="5,5" x1={45} x2={120} y1={42} y2={100} stroke={'green'}></line>
+                                <line strokeDasharray="5,5" x1={45} x2={120} y1={42} y2={100} stroke={'green'}></line>
                             ):""}
                             </g>
                         )}

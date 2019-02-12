@@ -38,8 +38,7 @@ const ReactGridLayout = WidthProvider(RGL);
  */
 class Explorer extends React.Component{ 
   constructor(props){
-    super(props);    
-    console.log(d3)
+    super(props);  
     this.state = {
       data : null,
       available_entities:[],
@@ -217,7 +216,7 @@ class Explorer extends React.Component{
       <div key="selector" style={({display: this.state.loaded===true?'block':'none'})}>
         <VisSelectorWrapper width={this.state.layout.selector.w * Math.trunc(document.body.clientWidth/6) - 25} 
 				height={this.state.layout.selector.h * 90 + (this.state.layout.selector.h - 1)*10 - 30}
-				name={"Component Selector"}
+				name={"View Selector"}
 				addComponent={this.addComponent}
 				entities={this.state.available_entities}
 				data={this.state.data}
