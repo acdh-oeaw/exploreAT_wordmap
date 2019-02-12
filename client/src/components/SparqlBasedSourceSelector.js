@@ -18,7 +18,7 @@ class SparqlBasedSourceSelector extends React.Component{
         super(props);
         this.state={
             prefix:"oldcan",
-            sparql:"http://localhost:3030/oldcan/query",
+            sparql:"http://dboe-jena.hephaistos.arz.oeaw.ac.at/dboe/query",
             ontology:"https://explorations4u.acdh.oeaw.ac.at/ontology/oldcan",
             current_state: "",
             loading: false

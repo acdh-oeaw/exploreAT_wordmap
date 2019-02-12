@@ -20,8 +20,7 @@ class RdfBasedSourceSelector extends React.Component{
     constructor(props){
         super(props);
         this.state={
-            prefix:"oldcan",
-            sparql:"http://localhost:3030/oldcan/query",
+            sparql:"http://dboe-jena.hephaistos.arz.oeaw.ac.at/dboe/query",
             ontology_url:"https://explorations4u.acdh.oeaw.ac.at/ontology/oldcan",
             ontology:null,
             ontology_from_file : true,
@@ -31,7 +30,6 @@ class RdfBasedSourceSelector extends React.Component{
         this.sparqlQueries = new SparqlQueryBuilder();
         this.wrapper = new UrlParamWrapper();
         this.handleOntologyUrlChange = this.handleOntologyUrlChange.bind(this);
-        this.handlePrefixChange = this.handlePrefixChange.bind(this);
         this.handleSparqlChange = this.handleSparqlChange.bind(this);
         this.handleOntologyFileChange = this.handleOntologyFileChange.bind(this);
         this.toggleOntologySource = this.toggleOntologySource.bind(this);
@@ -88,10 +86,6 @@ class RdfBasedSourceSelector extends React.Component{
 		this.setState({sparql: event.target.value});
 	};
 
-	handlePrefixChange(event){
-		this.setState({prefix: event.target.value});
-	};
-
     toggleOntologySource(){
         this.setState(prevState=>{
             prevState.ontology_from_file = !prevState.ontology_from_file;
@@ -118,17 +112,12 @@ class RdfBasedSourceSelector extends React.Component{
                           <input type="text" value={this.state.ontology_url} onChange={this.handleOntologyUrlChange} />
                         </label>
                     </span>
-                    
-			        <label>
-			          Prefix for the ontology:
-			          <input type="text" value={this.state.prefix} onChange={this.handlePrefixChange} />
-			        </label>
 			        <label>
 			          Sparql endpoint:
 			          <input type="text" value={this.state.sparql} onChange={this.handleSparqlChange} />
 			        </label>
 		      	</form>
-                    {(this.state.ontology != null && this.state.sparql.length>0 && this.state.prefix.length>0)?(
+                    {(this.state.ontology != null && this.state.sparql.length>0)?(
                         <button onClick={()=>this.setSources(this.state.ontology, this.state.sparql)} >Go</button>
                         ):(<button disabled >Go</button>)
                     }
