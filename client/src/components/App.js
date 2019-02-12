@@ -42,7 +42,7 @@ class App extends React.Component {
             <div>
               <div>
                 <a href="https://www.oeaw.ac.at/acdh/projects/exploreat/" target="blank"><img src="/public/square_logo.png"></img></a>
-                <h3>Novel interactive visual tools for non-standard dictionaries</h3>
+                <h3>Novel interactive visual tools for open-linked data</h3>
               </div>
               <div id="links">
                 <NavLink to="/">Home</NavLink>
