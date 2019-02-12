@@ -152,14 +152,24 @@ class JitterViolinPlot extends React.Component{
             .domain([-maxnum,maxnum])
             .range([0,this.props.width-params.margin*2-params.padding*2]);
 
-        const yAxis = g => g
-            .attr("transform", `translate(${params.padding},0)`)
-            .call(d3.axisLeft(yScale))
-            .call(g => g.select(".domain").remove());
-
         d3.select(this.vis)
             .attr('transform', `translate(${params.padding + 35},0)`);
 
+        const yAxis = g => g
+            .attr("transform", `translate(${params.padding},0)`)
+            .call(d3.axisRight(yScale).tickSize(width-params.padding))
+            .call(g => g.select(".domain").remove());
+
+        d3.select(this.axis)
+              .call(customYAxis);
+
+        function customYAxis(g) {
+          g.call(yAxis);
+          g.select(".domain").remove();
+          g.selectAll(".tick:not(:first-of-type) line").attr("stroke", "#777").attr("stroke-dasharray", "2,2");
+          g.selectAll(".tick text").attr("x", 4).attr("dy", -4);
+        }
+        
         d3.select(this.vis)
             .select('path')
             .datum(bins)
@@ -193,9 +203,6 @@ class JitterViolinPlot extends React.Component{
             .selectAll('circle.point title')
             .text(d=>d.key)
 
-
-        d3.select(this.axis)
-              .call(yAxis);
     }
 
     selectAttribute(attr){
