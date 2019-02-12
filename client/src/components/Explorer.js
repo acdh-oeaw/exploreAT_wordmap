@@ -76,7 +76,6 @@ class Explorer extends React.Component{
         "Violin Plot":ViolinPlot,
         "Jitter Violin Plot":JitterViolinPlot,
     };
-    console.log(this.availableComponents['Circle Packing'], this.availableComponents['Circle Packing'].help)
   }
 
   componentDidMount(){

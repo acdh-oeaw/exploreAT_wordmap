@@ -274,8 +274,10 @@ class EntitySelector extends React.Component{
 			prefixes_used[this.state.ontology.ontology_prefix]=this.state.ontology.ontology_base;
 		}
 		
+		const prefixes = d3.entries(prefixes_used).reduce((final, actual)=>final+this.wrapper.urlToParam(actual.key+'+'+actual.value)+",","");
+
 		const url = (this.state.triples.length == 0)?"":
-			"/explorer/prefixes/" + d3.entries(prefixes_used).reduce((final, actual)=>final+this.wrapper.urlToParam(actual.key+'+'+actual.value)+",","") + 
+			"/explorer/prefixes/" + prefixes + 
 			"/sparql/" + this.wrapper.urlToParam(this.state.sparql)+
 			"/entities/" + this.state.triples.reduce((final, actual)=>final+this.wrapper.urlToParam(actual)+",","");
 
@@ -285,8 +287,8 @@ class EntitySelector extends React.Component{
 	    		<div className="header">
 		          <h2>Entity selector</h2>
 		          <div className="info">
-		              	<span>Ontology : {this.state.ontology.ontology_base}</span>
-		              	<span>Sparql entry point : {this.state.sparql}</span>
+		              	<span className="button" onClick={()=>alert(this.state.ontology.ontology_base)}>Show ontology</span>
+              			<span className="button" onClick={()=>alert(this.state.sparql)}>Show Sparql endpoint </span>
 		          </div>
 		        </div>
 		        }
