@@ -13,7 +13,7 @@ import React from 'react';
     marginTop: 30, // for the selection of 
     marginRight: 80, // because of the padding of the container
     paddingLeft:60,
-    paddingTop: 8,
+    paddingTop: 18,
     paddingRight: 28,
     paddingBottom: 28,
     axisTickLength:14
@@ -156,8 +156,12 @@ class ParallelCoordinates extends React.Component{
     }
 
     linePath(d){
+        const stripUri = (value)=>String(value).includes('/')?value.split('/')[value.split('/').length-1]:value;
+        const sanitizeClassName = (name)=>(name.replace(/"/g,'').replace(/\./g,'').replace(/ /g, ''));
+        const trimmed = (x)=>sanitizeClassName( stripUri( String( x)));
+
         const _data = d3.entries(d);
-        let points = _data.map(x=>([this.xScale(x.key),this.yScales[x.key](x.value)]));
+        let points = _data.map(x=>([this.xScale(x.key),this.yScales[x.key](trimmed(x.value))]));
         return(this.lineGenerator(points));
     }
 
@@ -215,14 +219,21 @@ class ParallelCoordinates extends React.Component{
               .call(yBrushes[d.name]);
         });
 
-        featureAxisG
-          .append("text")
-          .attr("class", "SortBy")
-          .attr("transform", "rotate(-20)")
-          .attr('y', params.paddingTop+ params.marginTop + 10)
-          .attr('x', -20)
-          .text(d=>d.name+(this.state.sorting[d.name]=="up"?"⯆":"⯅"))
-          .on("click",d=>this.toggleSortingOrder(d.name));
+        const sort = featureAxisG
+            .append('g')
+            .attr("class", "SortBy")
+            .attr("transform", `translate(-20,${params.paddingTop+ params.marginTop + 10}) rotate(-20)`)
+            .on("click",d=>this.toggleSortingOrder(d.name));
+
+        sort
+            .append("text")
+            .text(d=>d.name)
+
+        sort
+            .append('polygon')
+            .attr('transform', d=>`translate(${d.name.length * 7.5},-10)`)
+            .attr('fill','black')
+            .attr('points',d=>(this.state.sorting[d.name]=="up"?"0 0, 13 0, 6.5 10.5":"0 10.5, 6.5 0, 13 10.5"));            
     }
 
     updateParallelCoordinates(){
@@ -337,14 +348,21 @@ class ParallelCoordinates extends React.Component{
               .call(yBrushes[d.name]);
         });
 
-        featureAxisG
-          .append("text")
-          .attr("class", "SortBy")
-          .attr("transform", "rotate(-20)")
-          .attr('y', params.paddingTop+ params.marginTop + 10)
-          .attr('x', -20)
-          .text(d=>d.name+(this.state.sorting[d.name]=="up"?"⯆":"⯅"))
-          .on("click",d=>this.toggleSortingOrder(d.name));
+        const sort = featureAxisG
+            .append('g')
+            .attr("class", "SortBy")
+            .attr("transform", `translate(-20,${params.paddingTop+ params.marginTop + 10}) rotate(-20)`)
+            .on("click",d=>this.toggleSortingOrder(d.name));
+
+        sort
+            .append("text")
+            .text(d=>d.name)
+
+        sort
+            .append('polygon')
+            .attr('fill','black')
+            .attr('transform', d=>`translate(${d.name.length * 7.5},-10)`)
+            .attr('points',d=>(this.state.sorting[d.name]=="up"?"0 0, 13 0, 6.5 10.5":"0 10.5, 6.5 0, 13 10.5"));               
       }
 
     updateColorAttribute(attribute){
