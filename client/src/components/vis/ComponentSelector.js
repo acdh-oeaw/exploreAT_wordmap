@@ -201,8 +201,6 @@ class ComponentSelector extends React.Component{
                 height={this.props.height-200} src={"/public/bubblegraph.svg"}/>,
             "Circle Packing":<img className="button" alt="Circle Packing" title="Circle Packing" key="Circle Packing" 
                 height={this.props.height-200} src={"/public/circlepacking.svg"}/>,
-            "Packed Bubbles":<img className="button" alt="Packed Bubbles" title="Packed Bubbles" key="Packed Bubbles" 
-                height={this.props.height-200} src={"/public/circlepacking.svg"}/>,
             "Parallel Coordinates":<img className="button" alt="Parallel Coordinates" title="Parallel Coordinates" key="Parallel Coordinates" 
                 height={this.props.height-200} src={"/public/ppcc.svg"}/>,
             "Pie Chart":<img className="button" alt="Pie Chart" title="Pie Chart" key="Pie Chart" 

@@ -18,7 +18,6 @@ import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
 import BarChart from './vis/BarChart';
 import BubbleGraph from './vis/BubbleGraph';
 import CirclePacking from './vis/CirclePacking';
-import PackedBubbles from './vis/PackedBubbles';
 import ParallelCoordinates from './vis/ParallelCoordinates';
 import PieChart from './vis/PieChart';
 import StreamGraph from './vis/StreamGraph';
@@ -67,7 +66,6 @@ class Explorer extends React.Component{
         "Bar Chart":BarChart, 
         "Bubble Graph":BubbleGraph,
         "Circle Packing":CirclePacking,
-        "Packed Bubbles":PackedBubbles,
         "Parallel Coordinates": ParallelCoordinates,
         "Pie Chart": PieChart, 
         "Stream Graph": StreamGraph,
