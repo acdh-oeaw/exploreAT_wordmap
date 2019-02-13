@@ -38,7 +38,7 @@ const ReactGridLayout = WidthProvider(RGL);
 class Explorer extends React.Component{ 
   constructor(props){
     super(props);    
-    
+    console.log(d3)
     this.state = {
       data : null,
       available_entities:[],
