@@ -118,7 +118,7 @@ class CirclePacking extends React.Component{
             );
         }
 
-        return Array.concat(Array.from(parents.values()),results);
+        return Array.prototype.concat(Array.from(parents.values()),results);
     }
 
     renderCirclePacking(){
