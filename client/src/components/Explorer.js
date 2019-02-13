@@ -11,14 +11,19 @@ import UrlParamWrapper from '../aux/UrlParamWrapper';
 import ComponentSelector from './vis/ComponentSelector';
 import VisSelectorWrapper from './vis/VisSelectorWrapper';
 import VisWrapper from './vis/VisWrapper';
-import Table from './vis/Table';
-import PackedBubbles from './vis/PackedBubbles';
-import PieChart from './vis/PieChart';
-import BarChart from './vis/BarChart';
-import StreamGraph from './vis/StreamGraph';
-import CirclePacking from './vis/CirclePacking';
 import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
+//
+// Import visualization
+
+import BarChart from './vis/BarChart';
+import BubbleGraph from './vis/BubbleGraph';
+import CirclePacking from './vis/CirclePacking';
+import PackedBubbles from './vis/PackedBubbles';
 import ParallelCoordinates from './vis/ParallelCoordinates';
+import PieChart from './vis/PieChart';
+import StreamGraph from './vis/StreamGraph';
+import Table from './vis/Table';
+import ViolinPlot from './vis/ViolinPlot';
 
 const ReactGridLayout = WidthProvider(RGL);
 
@@ -59,12 +64,15 @@ class Explorer extends React.Component{
     this.resetAllFilters = this.resetAllFilters.bind(this);
     // Include here the components that will be available for selection
     this.availableComponents = {
-      "Table": Table, 
-      "Pie Chart": PieChart, 
-      "Bar Chart":BarChart, 
-      "Parallel Coordinates": ParallelCoordinates,
-      "Stream Graph": StreamGraph,
-      "Circle Packing":CirclePacking
+        "Bar Chart":BarChart, 
+        "Bubble Graph":BubbleGraph,
+        "Circle Packing":CirclePacking,
+        "Packed Bubbles":PackedBubbles,
+        "Parallel Coordinates": ParallelCoordinates,
+        "Pie Chart": PieChart, 
+        "Stream Graph": StreamGraph,
+        "Table": Table, 
+        "Violin Plot":ViolinPlot
     };
   }
 

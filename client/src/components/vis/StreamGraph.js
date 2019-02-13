@@ -202,7 +202,7 @@ class StreamGraph extends React.Component{
 
 
         const area = d3.area()
-            .curve(d3.curveStep)
+            .curve(d3.curveCatmullRom)
             .x(d => x(d[this.state.xAxisDimension.attribute]))
             .y0(d => y(d.values[0]))
             .y1(d => y(d.values[1]));
