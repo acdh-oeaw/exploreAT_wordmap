@@ -112,40 +112,46 @@ function parseOntologyJson(json){
     // En owl 
     if(ontology_parsed.fields.includes('owl:ObjectProperty')){
         json['owl:ObjectProperty'].map(attr=>{
-            if(attr['rdf:about']){
-                const entry = {
-                    relationship: shorttenUriWithPrefix(
+                if(attr['rdf:about'] && attr['rdfs:domain'] && attr['rdfs:range']){
+                    const relationship= shorttenUriWithPrefix(
                             attr['rdf:about'], 
                             ontology_parsed.ontology_base, 
                             ontology_parsed.ontology_prefix),
-                    value: 6.5
-                }; 
-                if(attr['rdfs:domain'] && attr['rdfs:range']){
-                    const domain = attr['rdfs:domain'].length == undefined?[attr['rdfs:domain']]:attr['rdfs:domain'];
-                    const range  = attr['rdfs:range'].length == undefined?[attr['rdfs:range']]:attr['rdfs:range'];
+                    value= 6.5;
+
+                    let domain = attr['rdfs:domain'].length == undefined?[attr['rdfs:domain']]:attr['rdfs:domain'];
+                    let range  = attr['rdfs:range'].length == undefined?[attr['rdfs:range']]:attr['rdfs:range'];
+
+                    if(attr['rdfs:range']['owl:Class'] && attr['rdfs:range']['owl:Class']['owl:unionOf']){
+                       range = attr['rdfs:range']['owl:Class']['owl:unionOf']['rdf:Description'].map(x=>({'rdf:resource':x['rdf:about']}))
+                    }
+
+                    if(attr['rdfs:domain']['owl:Class'] && attr['rdfs:domain']['owl:Class']['owl:unionOf']){
+                       domain = attr['rdfs:domain']['owl:Class']['owl:unionOf']['rdf:Description'].map(x=>({'rdf:resource':x['rdf:about']}))
+                    }
 
                     let combinations = [];
                     domain.map(dm=>range.map(rn=>{
                         combinations.push({domain:dm, range:rn})
                     }));
-
+                    
                     combinations.map(combination=>{
                         if(combination.domain['rdf:resource'] && combination.range['rdf:resource']){
-                            entry.source = shorttenUriWithPrefix(
-                                combination.domain['rdf:resource'], 
-                                ontology_parsed.ontology_base, 
-                                ontology_parsed.ontology_prefix);
-
-                            entry.target = shorttenUriWithPrefix(
-                                combination.range['rdf:resource'], 
-                                ontology_parsed.ontology_base, 
-                                ontology_parsed.ontology_prefix)
-                            
-                            ontology_parsed.relationships.push(entry)
+                            ontology_parsed.relationships.push({
+                                relationship : relationship,
+                                value : value,
+                                source : shorttenUriWithPrefix(
+                                    combination.domain['rdf:resource'], 
+                                    ontology_parsed.ontology_base, 
+                                    ontology_parsed.ontology_prefix),
+                                target : shorttenUriWithPrefix(
+                                    combination.range['rdf:resource'], 
+                                    ontology_parsed.ontology_base, 
+                                    ontology_parsed.ontology_prefix)
+                            })
                         }
                     });
                 }
-            }
         });
     }
 
