@@ -154,12 +154,13 @@ class SparqlQueryBuilder{
      * @return {string} the SPARQL query, keys: entity, relationship, to.
      */
     getEntityAttributes(ontology, prefix, entity){
+        const type = entity.startsWith('http')?`<${entity}>`:entity;
         return(
         `
         PREFIX ${prefix}: <${ontology}#>
         SELECT DISTINCT ?attribute
         WHERE {
-          GRAPH ?g {?subject <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ${entity}}.
+          GRAPH ?g {?subject <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ${type}}.
           GRAPH ?g {?subject ?attribute ?object}.
         }
 
