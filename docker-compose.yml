@@ -1,23 +1,8 @@
 version: '3'
 
 services:
-  # Setup node container
-  server:
-    build: ./server
-    expose:
-      - ${APP_SERVER_PORT}
-    environment:
-      API_HOST: ${API_HOST}
-      APP_SERVER_PORT: ${APP_SERVER_PORT}
-    ports: 
-      - ${APP_SERVER_PORT}:${APP_SERVER_PORT}
-    volumes:
-      - ./server/src:/srv/app/exploreat_server/src
-    command: ["yarn", "dev"]
-
-  # Setup client container
   client:
-    build: ./client
+    build: .
     environment:
       REACT_APP_PORT: ${REACT_APP_PORT}
     expose:
@@ -25,8 +10,6 @@ services:
     ports: 
       - ${REACT_APP_PORT}:${REACT_APP_PORT}
     volumes:
-      - ./client/src:/srv/app/exploreat_client/src
-      - ./client/public:/srv/app/exploreat_client/public
-    links:
-      - server
+      - ./src:/srv/app/exploreat_client/src
+      - ./public:/srv/app/exploreat_client/public
     command: ["yarn", "dev"]
