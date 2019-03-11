@@ -195,6 +195,8 @@ class ComponentSelector extends React.Component{
 
     renderMenu(){
         const carouselOptions = {
+            "Filter":<img className="button" alt="Filter" title="Filter" key="Filter" 
+                height={this.props.height-200} src={"/public/filter.svg"}/>,
             "Bar Chart":<img className="button" alt="Bar Chart" title="Bar Chart" key="Bar Chart" 
                 height={this.props.height-200} src={"/public/bar.svg"}/>,
             "Bubble Graph":<img className="button" alt="Bubble Graph" title="Bubble Graph" key="Bubble Graph" 

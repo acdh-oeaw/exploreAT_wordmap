@@ -16,6 +16,7 @@ import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
 // Import visualization
 
 import BarChart from './vis/BarChart';
+import Filter from './vis/Filter';
 import BubbleGraph from './vis/BubbleGraph';
 import CirclePacking from './vis/CirclePacking';
 import ParallelCoordinates from './vis/ParallelCoordinates';
@@ -64,6 +65,7 @@ class Explorer extends React.Component{
     // Include here the components that will be available for selection
     this.availableComponents = {
         "Bar Chart":BarChart, 
+        "Filter":Filter,
         "Bubble Graph":BubbleGraph,
         "Circle Packing":CirclePacking,
         "Parallel Coordinates": ParallelCoordinates,

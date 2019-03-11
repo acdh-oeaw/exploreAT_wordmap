@@ -803,3 +803,39 @@ div#CirclePacking div.menu circle{
 div#BubbleGraph circle.hovered{
   stroke:black;
 }
+
+/* Filter ---------------------------------------------------------------------------
+*/
+#Filter div{
+    display: block;
+    width: 99%;
+    margin: 0 auto;
+}
+
+#Filter table{
+  width: 99%;
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+}
+
+#Filter table input{
+    margin: 0;
+    height: 1em;
+}
+
+#Filter td, #Filter th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#Filter tr:nth-child(even){background-color: #f2f2f2;}
+
+#Filter tr:hover {background-color: #ddd;}
+
+#Filter th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #18bc9c;
+  color: white;
+}
