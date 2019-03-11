@@ -82,11 +82,12 @@ class SparqlQueryBuilder{
      * @return {string} The query.
      */
     getEntityCountQuery(entity, prefix){
+        const type = entity.startsWith('http')?`<${entity}>`:entity;
         let query = "";
         query += `PREFIX ${prefix.prefix}: <${prefix.uri}#>\n`;
         query += 'SELECT (count (?subject) as ?count)';
         query += '\nWHERE{ \n';
-        query += ` GRAPH ?g {?subject <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ${entity}}`;
+        query += ` GRAPH ?g {?subject <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ${type}}`;
         query += '}';
         return query;
     }
