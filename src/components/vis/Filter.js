@@ -43,14 +43,12 @@ class Filter extends React.Component{
 
         this.state = {
             sector_dimension:"",
-            filters: [
-                {attribute:'ejattr', value:'sometext'},
-                {attribute:'name', value:'alejandro'}
-            ]
+            filters: []
         };
 
         this.selectAttribute = this.selectAttribute.bind(this);
-        this.filterBySomeAttribute = this.filterBySomeAttribute.bind(this);
+        this.addFilter = this.addFilter.bind(this);
+        this.removeFilter = this.removeFilter.bind(this);
     }
 
     componentDidMount(){
@@ -62,39 +60,62 @@ class Filter extends React.Component{
     shouldComponentUpdate(nextProps, nextState) {
         let shouldUpdate = false;
 
-        shouldUpdate = shouldUpdate || (nextState.sortBy != this.state.sortBy);
-        shouldUpdate = shouldUpdate || (nextState[`${nextState.sortBy}SortOrder`] != this.state[`${nextState.sortBy}SortOrder`]);
+        shouldUpdate = shouldUpdate || (nextState.filtersChanged === true);
         shouldUpdate = shouldUpdate || (nextProps.width != this.props.width);
         shouldUpdate = shouldUpdate || (nextProps.height != this.props.height);
-        shouldUpdate = shouldUpdate || (nextProps.data != this.props.data);
-        shouldUpdate = shouldUpdate || (nextState.data != this.state.data);
-        shouldUpdate = shouldUpdate || (nextState.selected_attribute != this.state.selected_attribute);
 
         return shouldUpdate;
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if(prevProps.data != this.props.data){
-            this.setState({data,total});
-        }
-        if(prevProps.width != this.props.width){}
-        if(prevProps.height != this.props.height){}
+        if(this.state.filterChanged === true)
+            this.state.filterChanged = false
     }
 
     selectAttribute(attribute){
         this.setState({
-            data, 
-            total,
-            legend: attribute[attribute.aggregation_term!='none'?'aggregation_term':'name'],
-            sector_dimension:attribute.name, 
             selected_attribute: attribute,
         })
     }
 
-    // Example of to use filtering
-    filterBySomeAttribute(attribute, value){
-        this.props.filters[attribute].filter(value);
-        this.props.updateFilteredData()
+    addFilter(){
+        //filterBySomeAttribute(attribute, value);
+        const name = this.attrSelector.value,
+            value = this.attrValue.value,
+            filter = function(x){return x.includes(value)};
+
+        filter.isTextualFilter = true;
+
+        this.setState(prev=>{
+            this.props.filters[name].filter(filter);
+            this.props.updateFilteredData()        
+
+            prev.filters.push({
+                name: name,
+                value: value
+            });
+            prev.filtersChanged = true;
+
+            return(prev)
+        },()=>{
+            this.attrValue.value = ''; 
+        });
+    }
+
+    removeFilter(attr){
+        this.setState(prev=>{
+            prev.filters = prev.filters.filter(x=>x.name != attr);
+
+            if(this.props.filters[attr].hasCurrentFilter() === true &&
+                this.props.filters[attr].currentFilter().isTextualFilter === true){
+                this.props.filters[attr].filterAll();
+                this.props.updateFilteredData()
+            }
+
+            prev.filtersChanged = true;
+
+            return(prev);
+        });
     }
 
     render(){
@@ -103,8 +124,11 @@ class Filter extends React.Component{
             height: (this.props.height)+"px"
         }
         
+        const filteredAttributes = this.state.filters.map(d=>d.name),
+            propsAttributes = this.props.attributes.map(d=>d.name);
+
         return(
-            <div id="Filter" className="visualization" style={size} ref={node => this.domElement = node}>
+            <div id="Filter" className="visualization" style={size} >
                 <div>
                 <table>
                     <thead>
@@ -116,15 +140,21 @@ class Filter extends React.Component{
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Body content 1</td>
-                            <td><input></input></td>
-                            <td><button>Filter</button></td>
+                            <td>
+                              <select id='attribute' ref={node => this.attrSelector = node}>
+                                    {propsAttributes.filter(attr=>!filteredAttributes.includes(attr)).map(attr=>(
+                                        <option key={attr} value={attr}>{attr}</option>
+                                    ))}
+                              </select>
+                            </td>
+                            <td><input ref={node => this.attrValue = node}></input></td>
+                            <td><button onClick={()=>this.addFilter()}>Filter</button></td>
                         </tr>
                         {this.state.filters.map(x=>(
-                            <tr key={x.attribute}>
-                                <td>{x.attribute}</td>
+                            <tr key={x.name}>
+                                <td>{x.name}</td>
                                 <td>{x.value}</td>
-                                <td><button>Remove filter</button></td>
+                                <td><button onClick={()=>this.removeFilter(x.name)}>Remove filter</button></td>
                             </tr>
                         ))}
                     </tbody>

@@ -818,6 +818,10 @@ div#BubbleGraph circle.hovered{
   border-collapse: collapse;
 }
 
+#Filter table select{
+    display:block;
+}
+
 #Filter table input{
     margin: 0;
     height: 1em;
