@@ -17,6 +17,7 @@ class Table extends React.Component{
         this.columnNames = this.props.attributes.map(x=>x.name);
         this.analysisG = d3.select(this.domElement);
         this.renderCells = this.renderCells.bind(this);
+        this.stripUris = text=>(!String(text).startsWith('http'))?text:text.split('/')[text.split('/').length-1];
     }
 
     componentDidMount(){
@@ -71,12 +72,16 @@ class Table extends React.Component{
 
             if(this.props.attributes[0].aggregation=='none'){
                 this.props.attributes.map(e=>{
-                    df.push(<td key={e.attribute+i}>{d[e.attribute].valueOf()}</td>);
+                    df.push(<td key={e.attribute+i} title={d[e.attribute].valueOf()}>
+                        <span className="tableElement"> {this.stripUris(d[e.attribute].valueOf())}</span>
+                    </td>);
                 });
             }
             else{
                 d3.keys(d).map(e=>{
-                    df.push(<td key={e+i}>{d[e].valueOf()}</td>);
+                    df.push(<td key={e+i} title={d[e].valueOf()}>
+                        <span className="tableElement"> {this.stripUris(d[e].valueOf())}</span>
+                    </td>);
                 });
             }
 

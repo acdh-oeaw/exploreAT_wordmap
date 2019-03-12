@@ -517,6 +517,10 @@ div#Table p{
   padding-top: 5px;
 }
 
+div#Table .tableElement{
+    border-bottom: 2px dashed #18bc9c;
+    cursor: pointer;
+}
 /* Old rdf explorer ------------------------------------------------------------------
 */
 
