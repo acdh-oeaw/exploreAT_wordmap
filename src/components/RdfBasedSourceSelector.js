@@ -23,7 +23,6 @@ class RdfBasedSourceSelector extends React.Component{
             sparql:"http://dboe-jena.hephaistos.arz.oeaw.ac.at/dboe/query",
             ontology_url:"https://explorations4u.acdh.oeaw.ac.at/ontology/oldcan",
             ontology:null,
-            ontology_from_file : true,
         };
 
         this.sparql = sparql;
@@ -32,7 +31,6 @@ class RdfBasedSourceSelector extends React.Component{
         this.handleOntologyUrlChange = this.handleOntologyUrlChange.bind(this);
         this.handleSparqlChange = this.handleSparqlChange.bind(this);
         this.handleOntologyFileChange = this.handleOntologyFileChange.bind(this);
-        this.toggleOntologySource = this.toggleOntologySource.bind(this);
         this.setSources = this.setSources.bind(this);
 
     }
@@ -86,32 +84,16 @@ class RdfBasedSourceSelector extends React.Component{
 		this.setState({sparql: event.target.value});
 	};
 
-    toggleOntologySource(){
-        this.setState(prevState=>{
-            prevState.ontology_from_file = !prevState.ontology_from_file;
-            return(prevState);
-        });
-    }
-
 	render() {
 	    return (
 	    	<div id="source_selector">
 		      	<form>
-                    <span style={{display:this.state.ontology_from_file===true?'inherit':'none', marginBottom:'29px'}}>
-                        <label id="extra-label">
-                          Ontology file <span className="toggleSource" onClick={()=>this.toggleOntologySource()}>(or load from url)</span> :
-                        </label>
+                    <span style={{display:'inherit', marginBottom:'29px'}}>
                         <label>
                           <input id="uploadInput" type="file" name="myFiles" onInput={this.handleOntologyFileChange}/>
                         </label>
                     </span>
 
-                    <span style={{display:this.state.ontology_from_file===false?'inherit':'none'}}>
-                        <label>
-                          Url to ontology <span className="toggleSource" onClick={()=>this.toggleOntologySource()}>(or load from local file)</span> :<br/>
-                          <input type="text" value={this.state.ontology_url} onChange={this.handleOntologyUrlChange} />
-                        </label>
-                    </span>
 			        <label>
 			          Sparql endpoint:
 			          <input type="text" value={this.state.sparql} onChange={this.handleSparqlChange} />
