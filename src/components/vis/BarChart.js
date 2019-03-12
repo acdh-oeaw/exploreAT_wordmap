@@ -12,7 +12,7 @@ const params = {
     legendHeight: 70,
     marginTop: 45, // for the selection of 
     marginRight: 10, // because of the padding of the container
-    paddingLeft:65,
+    paddingLeft:85,
     paddingTop: 35,
     paddingRight: 5,
     paddingBottom: 10,
@@ -50,6 +50,7 @@ class BarChart extends React.Component{
         };
 
         this.node = d3.select(this.node);
+        this.renderAxis = this.renderAxis.bind(this);
         this.createBars = this.createBars.bind(this);
         this.selectAttribute = this.selectAttribute.bind(this);
         this.highlightEntities = this.highlightEntities.bind(this);
@@ -78,6 +79,11 @@ class BarChart extends React.Component{
             const {data, total} = this.updatedData(this.state.selected_attribute);
             this.setState({data,total});
         }
+        this.renderAxis();
+    }
+
+    componentDidMount(){
+        this.renderAxis();
     }
 
     updatedData(attribute){
@@ -133,6 +139,8 @@ class BarChart extends React.Component{
         const yScale = d3.scaleLinear()
             .domain([0,d3.values(this.state.data).reduce((a,b)=>a>b?a:b,0)])
             .range([0,dimensions.height]);
+        this.yScale = yScale;
+        this.drawWidth = dimensions.width-params.paddingRight-params.paddingLeft-this.state.legend.length*5;
 
         const bar_width = (dimensions.width-params.paddingRight-params.paddingLeft-this.state.legend.length*5)/d3.keys(this.state.data).length;
         let rotationAccumulated = 0;
@@ -218,6 +226,28 @@ class BarChart extends React.Component{
         );
     }
 
+    renderAxis(){
+        if(this.yScale != null){
+            const reversedScale = d3.scaleLinear()
+                .domain([this.yScale.domain()[0],this.yScale.domain()[1]])
+                .range([this.yScale.range()[1],this.yScale.range()[0]]);
+
+            const yAxis = g => g
+                .attr("transform", `translate(${this.drawWidth+params.paddingRight+params.paddingLeft-5},${params.paddingTop})`)
+                .call(d3.axisLeft(reversedScale).tickSize(this.drawWidth));
+
+            function customYAxis(g) {
+                g.call(yAxis);
+                g.select(".domain").remove();
+                g.selectAll(".tick:not(:first-of-type) line").attr("stroke", "#777").attr("stroke-dasharray", "2,2");
+                g.selectAll(".tick text").attr("dy", -4);
+            }
+
+            d3.select(this.axis)
+                .call(customYAxis);
+        }
+    }
+
     setSortBy(value){
         this.setState(prev=>({
             keySortOrder:((value!='key' && prev.keySortOrder == 'up')
@@ -253,6 +283,7 @@ class BarChart extends React.Component{
                     <span key={e.name} onClick={()=>this.selectAttribute(e)} className="option" style={style(e.name)}> {e.name} </span>
                 ))}</p>
                 <svg style={size}>
+                    <g ref={node => this.axis = node}></g> 
                     <g id="bars">
                         {this.state.data!=null?this.createBars(chartDimensions):""}
                     </g>
