@@ -848,6 +848,9 @@ div#BubbleGraph circle.hovered{
   color: white;
 }
 
+/* about (It is really the help page) ---------------------------------------------------------------------------
+ */
+
 div#about{
     display: block;
     padding: 5px;
@@ -894,6 +897,14 @@ div#about div.visualization span.underline{
     text-decoration: underline;
 }
 
+/* Home page ---------------------------------------------------------------------------
+*/
+div#home{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 div#home a{
     position: absolute;
     z-index: 10;
@@ -911,6 +922,7 @@ div#home a h2{
 }
 
 div#home div.banner{
+    margin: 1.5em 0;
     position: relative;
     width: 100%;
     display: flex;
@@ -920,7 +932,31 @@ div#home div.banner{
 
 div#home div.banner img{
     opacity: 0.6;
-    width: 45%;
+    width: 30%;
     height: auto;
     box-shadow: rgba(0, 0, 0, 0.24) 1px 2px 2px 0px, rgba(0, 0, 0, 0.4) 2px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 5px 9px 0px;
+}
+
+div#logo-container{
+	height: 10em;
+	display: flex;
+	flex-wrap: wrap;
+	margin: 2em;
+	align-items: center;
+}
+
+div#logo-container img{
+	display: inline-block;
+	height: 100%;
+	width: auto;
+}
+
+div#logo-container img#acdh{
+	height: 60%;
+}
+
+div#logo-container img#visusal{
+	background-color: darkgrey;
+	height: 60%;
+	padding: 1px;
 }
