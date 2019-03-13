@@ -846,15 +846,14 @@ div#BubbleGraph circle.hovered{
   text-align: left;
   background-color: #18bc9c;
   color: white;
-}
-
+} 
 /* about (It is really the help page) ---------------------------------------------------------------------------
  */
 
 div#about{
     display: block;
     padding: 5px;
-    max-width: 21.5cm;
+    max-width: 22.5cm;
     margin: 0 auto;
 }
 
@@ -875,6 +874,7 @@ div#about div.step:nth-of-type(2n+1){
 
 div#about div.visualization img,
 div#about div.step img{
+  margin: 0.5em 0;
     background-color: white;
   box-shadow: rgba(0, 0, 0, 0.14) 1px 2px 2px 0px, rgba(0, 0, 0, 0.2) 2px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 5px 9px 0px;
   width: 30%;
@@ -897,6 +897,11 @@ div#about div.visualization span.underline{
     text-decoration: underline;
 }
 
+div#about i.padded{
+    margin: 5px;
+    display: inline-block;
+    padding: 0 40px;
+}
 /* Home page ---------------------------------------------------------------------------
 */
 div#home{
@@ -946,12 +951,14 @@ div#logo-container{
 }
 
 div#logo-container img{
+    margin: 0 5px;
 	display: inline-block;
 	height: 100%;
 	width: auto;
 }
 
-div#logo-container img#acdh{
+div#logo-container img#acdh,
+div#logo-container img#oeaw{
 	height: 60%;
 }
 
@@ -959,4 +966,8 @@ div#logo-container img#visusal{
 	background-color: darkgrey;
 	height: 60%;
 	padding: 1px;
+}
+
+img.pageWidth{
+    width:22.5cm;
 }

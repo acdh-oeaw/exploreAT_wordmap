@@ -69,7 +69,9 @@ class App extends React.Component {
           </div>
 
           <div id="footer">
-            This would be the footer
+            ExploreAT! DH Dashboard. Application done in the contexto of the <a target="blank" href="https://www.oeaw.ac.at/acdh/projects/exploreat/">ExploreAT! project.</a><br/>
+            Code for the application can be found at <a href="https://github.com/acdh-oeaw/exploreat-dh-dashboard">
+                {"https://github.com/acdh-oeaw/exploreat-dh-dashboard"}</a>
           </div>
           
         </div>

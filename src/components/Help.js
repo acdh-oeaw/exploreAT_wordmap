@@ -22,11 +22,11 @@ const About = (props)=>{
             <p>
                 Three steps are involved in he process of visually exploring data:
                 <ol>
-                    <li>Load an ontology and choose a SPARQL endpoint.</li>
-                    <li>Choose the desired entities, select desired attributes from 
-                        the selected entities, execute this visual query to retrieve 
+                    <li>Loading an ontology and choosing a SPARQL endpoint.</li>
+                    <li>Choosing the desired entities, selecting desired attributes from 
+                        the selected entities and executing this visual query to retrieve 
                         the data.</li>
-                    <li>Create visualizations by selecting attributes and/or aggregations,
+                    <li>Creating visualizations by selecting attributes and/or aggregations,
                         and choosing from the proposed visualizations.</li>
                 </ol>
             </p>
@@ -39,6 +39,8 @@ const About = (props)=>{
                 fashion as it can be seen in the web ontology visualizer <a href="http://vowl.visualdataweb.org/webvowl.html">
                 WebVOWL</a>; entities (classes and subclasses) are represented by nodes, and relationships
                 ammong these entities with links.<br/><br/>
+
+                <img className="pageWidth" src="/public/step3.png"/>
 
                 <b>The nodes and links that are selected are the classes and relationships that will be
                 retrieved.</b><br/><br/>
@@ -210,7 +212,7 @@ const About = (props)=>{
                         <span className="underline">Visual representation</span>:<br/>
                         A set of bubbles which represent a value for the variable used for aggregating, which size is
                         proportional to the number of occurencies. The bubbles are distributed along an horizontal axis based
-                        on the value of the not-aggregated variableselected.<br/>
+                        on the value of the not-aggregated variable selected.<br/>
                         <span className="underline">Configuration</span>:<br/>
                         The available aggregations for creating or clustering the bubbles can be cycled through by clicking on
                         the names.
@@ -219,7 +221,7 @@ const About = (props)=>{
                 </div>
             </div>
 
-            <h4>Example of use</h4>
+            <h4>Use case</h4>
             This examples shows how a researcher could through the process of answering to the folowing question:<br/>
             <i className="padded">Which are the questions related to questionnaires about human-related topics that have been done by a woman researcher?</i>
             

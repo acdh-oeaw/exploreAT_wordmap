@@ -31,6 +31,7 @@ const Home = (props)=>{
             <img id="visusal" src="/public/visusal.png"/>
             <img id="usal" src="/public/usal.jpg"/>
             <img id="acdh" src="/public/acdh.png"/>
+            <img id="oeaw" src="/public/oeaw.png"/>
         </div>
       </div>);
 }
