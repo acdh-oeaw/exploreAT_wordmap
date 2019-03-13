@@ -855,7 +855,7 @@ div#about{
     margin: 0 auto;
 }
 
-div.visualization{
+div#about div.visualization, div.step{
     padding:7px;
     margin:5px;
     width: 100%;
@@ -864,12 +864,14 @@ div.visualization{
     justify-content: space-between;
 }
 
-div.visualization:nth-of-type(2n+1){
+div#about div.visualization:nth-of-type(2n+1),
+div#about div.step:nth-of-type(2n+1){
     background-color: #c5f7ed;
     flex-direction: row-reverse;
 }
 
-div.visualization img{
+div#about div.visualization img,
+div#about div.step img{
     background-color: white;
   box-shadow: rgba(0, 0, 0, 0.14) 1px 2px 2px 0px, rgba(0, 0, 0, 0.2) 2px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 5px 9px 0px;
   width: 30%;
@@ -877,10 +879,17 @@ div.visualization img{
   display:block;
 }
 
-div.visualization p{
+div#about div.step img{
+    width: 65%;
+}
+div#about div.step p{
+    width: 30%;
+}
+
+div#about div.visualization p{
     width: 65%;
 }
 
-div.visualization span.underline{
+div#about div.visualization span.underline{
     text-decoration: underline;
 }
