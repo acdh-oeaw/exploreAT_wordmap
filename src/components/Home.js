@@ -97,7 +97,12 @@ const Home = (props)=>{
                     <img src="/public/filter.svg"/>
                     <p>
                         <b>Filter</b><br/>
-                            
+                        Textual search and filters can be done on any available variable of the retrieved 
+                        data. These textual searchs are accumulated, enabling to reduce the number of analyzed 
+                        entries at a moment.<br/>
+                        This component can be used as way to reduce cardinality of the aggregations and make 
+                        use of visualizations that have constraints, such as a bar chart with a manageable amount
+                        of bars instead of the unfiltered amount of groups.
                     </p>
                 </div>
                 <div class="visualization">
@@ -162,7 +167,11 @@ const Home = (props)=>{
                     <img src="/public/table.svg"/>
                     <p>
                         <b>Table</b><br/>
-                            
+                        Raw entries retrieved form the SPARQL endpoint can ve seen in this visualization. The table allows to see
+                        details regarding certain data that can not be seen in other visualizations.<br/>
+                        The tabkle shows a cropped version of the data where uris are not shown completely, but the last part; 
+                        additionally, the full uri can be seen when the data is hovered. This allows to ease the reading 
+                        of data as RDF data is based on uris.
                     </p>
                 </div>
                 <div class="visualization">
