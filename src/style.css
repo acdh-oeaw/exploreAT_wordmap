@@ -12,7 +12,7 @@ div#react-root {
 div#app {
   display: flex;
   flex-flow: column;
-  height: 100%;
+  min-height: 100%;
 }
 
 #header {
@@ -846,4 +846,41 @@ div#BubbleGraph circle.hovered{
   text-align: left;
   background-color: #18bc9c;
   color: white;
+}
+
+div#about{
+    display: block;
+    padding: 5px;
+    max-width: 21.5cm;
+    margin: 0 auto;
+}
+
+div.visualization{
+    padding:7px;
+    margin:5px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+div.visualization:nth-of-type(2n+1){
+    background-color: #c5f7ed;
+    flex-direction: row-reverse;
+}
+
+div.visualization img{
+    background-color: white;
+  box-shadow: rgba(0, 0, 0, 0.14) 1px 2px 2px 0px, rgba(0, 0, 0, 0.2) 2px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 5px 9px 0px;
+  width: 30%;
+  height: auto;
+  display:block;
+}
+
+div.visualization p{
+    width: 65%;
+}
+
+div.visualization span.underline{
+    text-decoration: underline;
 }
