@@ -893,3 +893,34 @@ div#about div.visualization p{
 div#about div.visualization span.underline{
     text-decoration: underline;
 }
+
+div#home a{
+    position: absolute;
+    z-index: 10;
+    top: 45%;
+}
+
+div#home a h2{
+    display: inline-block;
+    box-shadow: rgba(0, 0, 0, 0.14) 1px 2px 2px 0px, rgba(0, 0, 0, 0.2) 2px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 5px 9px 0px;
+    margin: 0 auto;
+    background-color: #18bc9c;
+    color: white;
+    font-weight: bold;
+    padding:3px;
+}
+
+div#home div.banner{
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+div#home div.banner img{
+    opacity: 0.6;
+    width: 45%;
+    height: auto;
+    box-shadow: rgba(0, 0, 0, 0.24) 1px 2px 2px 0px, rgba(0, 0, 0, 0.4) 2px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 5px 9px 0px;
+}

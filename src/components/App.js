@@ -4,7 +4,7 @@ import { Switch } from 'react-router';
 import { hot } from 'react-hot-loader';
 import EntitySelector from './EntitySelector';
 import Home from './Home';
-import About from './About';
+import Help from './Help';
 import Explorer from './Explorer';
 
 /**
@@ -47,8 +47,8 @@ class App extends React.Component {
               </div>
               <div id="links">
                 <NavLink to="/">Home</NavLink>
-                <NavLink to="/entities">Explorer</NavLink>
-                <NavLink to="/about">About</NavLink>
+                <NavLink to="/entities">App</NavLink>
+                <NavLink to="/help">Help</NavLink>
               </div>
             </div>
           </div>
@@ -56,7 +56,7 @@ class App extends React.Component {
           <div className="content">
             <Switch>
               <Route exact path="/" component={Home}/>
-              <Route exact path="/about" component={About}/>
+              <Route exact path="/help" component={Help}/>
               <Route exact path="/entities/" 
                   render={(props) => <EntitySelector {...props} 
                       setEntitySelectionSources={this.setEntitySelectionSources}
