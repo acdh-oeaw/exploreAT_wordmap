@@ -168,8 +168,7 @@ class BarChart extends React.Component{
             
             return(<g key={d.key} transform={`translate(${params.paddingLeft + i*bar_width},${params.paddingTop+dimensions.height - yScale(d.value)})`}> 
                 {bar}
-                <text x={bar_width/2} y={15} className="barValue">{d.value}</text>
-                <title>{d.key} - {d.value}</title>
+                <title>{`${d.key}\nValue : ${d.value}`}</title>
             </g>);
         });
 
