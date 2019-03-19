@@ -39,8 +39,8 @@ class EntitySelector extends React.Component{
 			test_nodes : [],
 			ontology:ontology,
 			sparql:sparql,
-            content_height: 70,
-            nodes_height: 30
+            content_height: 60,
+            nodes_height: 35
         };
 
 		this.wrapper = new UrlParamWrapper();

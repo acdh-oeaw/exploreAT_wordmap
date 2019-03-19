@@ -20,19 +20,25 @@ class SparqlQueryCreator extends React.Component{
 
 		this.wrapper = new UrlParamWrapper();
 		this.sparqlQueries = new SparqlQueryBuilder();
+        this.updateSvgSize = this.updateSvgSize.bind(this);
 	}
 
-	componentDidUpdate(prevProps, prevState, snapshot){
+    updateSvgSize(){
         // Get the bounds of the SVG content
         const bbox = this.svg.getBBox();
         //var  bbox = svg.getBBox();
         // Update the width and height using the size of the contents
         this.svg.setAttribute("height", bbox.y + bbox.height + bbox.y);
+    }
+
+	componentDidUpdate(prevProps, prevState, snapshot){
+        this.updateSvgSize()
 	}
 
 	render() {
 	    return (
             <div style={({height: this.props.nodes_height+'%',display: this.props.loaded===true?'inline-block':'none'})} id="nodes" >
+                <div>
                 <svg ref={node => this.svg = node}>
                     <g>
                         <circle r="20" cx="22" cy="42" fill="grey"></circle>
@@ -120,6 +126,7 @@ class SparqlQueryCreator extends React.Component{
                         })()
                     }
                 </svg>
+                </div>
             </div>
 	    );
 	}

@@ -195,7 +195,6 @@ div#explorer.entitySelector div.content div#graph{
 }
 
 div#explorer.entitySelector div.content div#nodes{
-  min-height: 250px;
   width: 100%; 
   padding: 0.1em;
 }
@@ -214,11 +213,13 @@ div#explorer.entitySelector .tooltip p{
 
 div#explorer.entitySelector svg{
   display:block;
-  height:100%;
   width:100%;
 }
 
-div#explorer div.content div#nodes svg{height:180%;}
+div#explorer.entitySelector #graph svg{
+  height:100%;
+}
+
 
 div#explorer div.content div#nodes{
   overflow-y: scroll;
@@ -974,6 +975,7 @@ img.pageWidth{
  * */
 div#resize-handler{
     background-color: cadetblue;
+    margin-bottom: 1em;
     width: 100%;
     height: 4px;
     display: flex;
