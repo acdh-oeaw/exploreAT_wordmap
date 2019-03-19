@@ -118,6 +118,12 @@ class EntitySelector extends React.Component{
 		      	if (data && !err) {
 		        	this.setState(prevState=>{
 		        			prevState.test_nodes.push({	name: entity, attributes: data});
+                            
+                            // It is possible to suppose that it will have a :, as
+                            // all nodes come from the ontology file and therefore have
+                            // a reduced form
+                            prevState.triples.push(`?${entity.split(':')[1]} <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ${entity}`);
+                            
 		        			prevState.active_nodes.push(entity)
 		        			return(prevState);
 		        	});
@@ -149,7 +155,7 @@ class EntitySelector extends React.Component{
 		if(attribute && origin){
 			const {predicate, target, object, sparql_triple} = this.attributeToQuery(attribute, origin);
 
-			const svg_element = d3.select('#'+this.wrapper.nameOfEntity(origin)+this.wrapper.nameOfEntity(attribute));
+			const svg_element = d3.selectAll('#'+this.wrapper.nameOfEntity(origin)+this.wrapper.nameOfEntity(attribute));
 			svg_element.classed('attribute-selected', svg_element.classed('attribute-selected')?false:true);
 
 			if(this.state.selected_entities.includes(attribute)){

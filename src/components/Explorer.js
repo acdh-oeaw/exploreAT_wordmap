@@ -80,6 +80,7 @@ class Explorer extends React.Component{
   componentDidMount(){
     this.createColorScales = this.createColorScales.bind(this);
     let query = this.sparqlQueries.createDataSparqlQuery(this.prefixes, this.triples);    
+      console.log(query);
     sparql(this.api_url, query, (err, data) => {
       if (data && !err) {
         let state = {
@@ -87,6 +88,7 @@ class Explorer extends React.Component{
           crossfilter: crossfilter(data),
           available_entities:d3.keys(data[0]),
           filters: {},
+          sparql_query: query,
           loaded: true
         }
         d3.keys(data[0]).map(d=>state.filters[d]=state.crossfilter.dimension(x=>x[d]));
@@ -238,6 +240,7 @@ class Explorer extends React.Component{
           <div className="info">
               <span className="button" onClick={()=>alert(this.prefixes.map(p=>p.prefix).join(', '))}>Show ontology</span>
               <span className="button" onClick={()=>alert(this.api_url)}>Show Sparql endpoint </span>
+              <span className="button" onClick={()=>alert(this.state.sparql_query)}>Show Sparql query </span>
               <span className="button" onClick={()=>alert(this.state.available_entities.map(e=>`${e}\n`))}>Show variables </span>
               <span className="button" onClick={()=>this.resetAllFilters()}>Reset all filters </span>
               <NavLink to={"/entities/"}> <span className="button">Back to entity selection</span> </NavLink>
