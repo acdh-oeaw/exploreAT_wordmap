@@ -10,7 +10,7 @@ import { BrowserRouter as Route, NavLink } from "react-router-dom";
  */
 const Home = (props)=>{
     return(<div id="home">
-        <h3>ExploreAT DH Dashboard</h3>
+        <h3>exploreAT! DH Dashboard</h3>
         <h5>Visually exploring RDF data from the perspective of an ontology</h5>
         <h5>
             Query a SPARQL endpoint using an ontology schema as a reference<br/>
@@ -22,9 +22,10 @@ const Home = (props)=>{
             <NavLink to="/entities"><h2>Start the app</h2></NavLink>
         </div>
         <h5>
-            This application is a result framed in the project ExploreAT!. A project<br/>
-            aimed at providing open science and citizen science techniques to<br/>
-            leverage knowledge and unique insights into the German Language.<br/>
+            This application is a result framed in the project “exploreAT! - exploring<br/>
+            austria’s culture through the language glass”. The project runs within an Open<br/>
+            Innovation framework and aims at leveraging cultural knowledge by providing<br/>
+            unique insights into the German language in Austria.
         </h5>
         <div id="logo-container">
             <img id="exploreat" src="/public/square_logo.png"/>

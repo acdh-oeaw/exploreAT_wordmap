@@ -20,7 +20,7 @@ const About = (props)=>{
         <div>
             <h3>Working with the dashboard</h3>
             <p>
-                Three steps are involved in he process of visually exploring data:
+                Three steps are involved in the process of visually exploring data:
                 <ol>
                     <li>Loading an ontology and choosing a SPARQL endpoint.</li>
                     <li>Choosing the desired entities, selecting desired attributes from 
@@ -56,7 +56,7 @@ const About = (props)=>{
             
             <h4>Creating visualizations</h4>
             <p>
-                Once data has been retrieved, it is accesible to be explored in the dashboard.<br/>
+                Once data has been retrieved, it is accessible to be explored in the dashboard.<br/>
                 A set of visualizations are available to be added to the dashboard.
             </p>
             <p>
@@ -68,7 +68,7 @@ const About = (props)=>{
                 space in order to arrange the dashboard as best works for the specific task performed at
                 each moment.<br/>
                 Additionally, the window of a visualization can be resized by dragging the bottom-right corner.
-                This is helpfull to increase readibility in the visualiztion.
+                This is helpfull to increase readibility in the visualization.
 
             </p>
             <h5>Available visualizations</h5>
