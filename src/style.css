@@ -970,6 +970,8 @@ img.pageWidth{
     width:22.5cm;
 }
 
+/* Resizing
+ * */
 div#resize-handler{
     background-color: cadetblue;
     width: 100%;
@@ -984,4 +986,48 @@ div#resize-handler p{
     background-color: white;
     display: inline-block;
     cursor: pointer;
+}
+
+form#status.loading{
+    display: flex;
+}
+
+form#status{
+    display: none;
+    margin-top: 5em;
+    flex-direction: column;
+    align-items: center;
+}
+
+form#status p{
+    font-weight: bold;
+    color: #18bc9c;
+}
+
+/* Loader
+ * */
+.lds-dual-ring {
+  display: inline-block;
+  width: 64px;
+  height: 64px;
+}
+.lds-dual-ring:after {
+  content: " ";
+  display: block;
+  width: 46px;
+  height: 46px;
+  margin: 1px;
+  border-radius: 50%;
+  border: 5px solid #fff;
+  border-color: #18bc9c transparent #18bc9c transparent;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+
+@keyframes lds-dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

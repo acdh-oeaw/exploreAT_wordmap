@@ -24,6 +24,7 @@ class RdfBasedSourceSelector extends React.Component{
             sparql:"http://localhost:3030/oldcan/query",
             ontology_url:"https://explorations4u.acdh.oeaw.ac.at/ontology/oldcan",
             ontology:null,
+            status: ''
         };
 
         this.sparql = sparql;
@@ -65,6 +66,7 @@ class RdfBasedSourceSelector extends React.Component{
                     });
             }).then((count)=>{
                 retrieved += 1;
+                d3.select('form#status p').text(retrieved+' / '+ontology.entities.length);
                 for(let i =0; i<ontology.entities.length; i++){
                     if(ontology.entities[i].name == e.name){
                         ontology.entities[i].count = count[0].count.valueOf();
@@ -100,9 +102,15 @@ class RdfBasedSourceSelector extends React.Component{
 			        </label>
 		      	</form>
                     {(this.state.ontology != null && this.state.sparql.length>0)?(
-                        <button onClick={()=>this.setSources(this.state.ontology, this.state.sparql)} >Go</button>
+                        <button onClick={()=>this.setState({status:'loading'},()=>this.setSources(this.state.ontology, this.state.sparql))}>
+                            Go
+                        </button>
                         ):(<button disabled >Go</button>)
                     }
+                <form id="status" className={this.state.status}>
+                    <p></p>
+                    <div className="lds-dual-ring"></div>
+                </form>
 	      	</div>
 	    );
 	}
