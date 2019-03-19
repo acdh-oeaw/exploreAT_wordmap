@@ -32,7 +32,7 @@ class SparqlQueryCreator extends React.Component{
 
 	render() {
 	    return (
-            <div style={({display: this.props.loaded===true?'inline-block':'none'})} id="nodes" >
+            <div style={({height: this.props.nodes_height+'%',display: this.props.loaded===true?'inline-block':'none'})} id="nodes" >
                 <svg ref={node => this.svg = node}>
                     <g>
                         <circle r="20" cx="22" cy="42" fill="grey"></circle>

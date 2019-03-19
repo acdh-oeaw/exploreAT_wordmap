@@ -38,8 +38,10 @@ class EntitySelector extends React.Component{
 			active_edges: [],
 			test_nodes : [],
 			ontology:ontology,
-			sparql:sparql
-		};
+			sparql:sparql,
+            content_height: 70,
+            nodes_height: 30
+        };
 
 		this.wrapper = new UrlParamWrapper();
 		this.sparqlQueries = new SparqlQueryBuilder();
@@ -53,6 +55,9 @@ class EntitySelector extends React.Component{
 		this.renderContent = this.renderContent.bind(this);
 		this.setSources = this.setSources.bind(this);
 	}
+
+    componentDidMount(){
+    }
 
 	attributeToQuery(attribute, origin){
 		// predicateToSparql wrapps the predicate in <> if it does no use a prefix
@@ -232,8 +237,9 @@ class EntitySelector extends React.Component{
 				"/entities/" + this.state.triples.reduce((final, actual)=>final+this.wrapper.urlToParam(actual)+",","");
 
 			return(
-				<div className="content">
+				<div className="content" >
                     <EntityForceLayout 
+                         content_height={this.state.content_height}
                          entities={this.state.ontology.entities.map(e=>({entity:e.name, count:e.count}))}
                          relationships={this.state.ontology.relationships}
                          selectEntity={this.selectNode}
@@ -246,9 +252,32 @@ class EntitySelector extends React.Component{
                          ontology={this.state.ontology.ontology_base}
                          sparql={this.state.sparql}
                     /> 
+                    <div id="resize-handler">
+                        <p onClick={
+                            ()=>{
+                                this.setState(prev=>{
+                                    prev.content_height = prev.content_height-5;
+                                    prev.nodes_height = prev.nodes_height+5;
+
+                                    return prev;
+                                })
+                            }
+                        }>Raise border</p>
+                        <p onClick={
+                            ()=>{
+                                this.setState(prev=>{
+                                    prev.content_height = prev.content_height+5;
+                                    prev.nodes_height = prev.nodes_height-5;
+
+                                    return prev;
+                                })
+                            }
+                        }>Lower border</p>
+                    </div>
                     <SparqlQueryCreator 
                     	  triples={this.state.triples}
                     	  url={url}
+                          nodes_height={this.state.nodes_height}
                           test_nodes={this.state.test_nodes}
                           active_edges={this.state.active_edges}
                           selectAttribute={this.selectAttribute}
@@ -259,6 +288,8 @@ class EntitySelector extends React.Component{
 		     );
 		}
 	}
+
+
 
 	render() {
 		const prefixes_used = {};

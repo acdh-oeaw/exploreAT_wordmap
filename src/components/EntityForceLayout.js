@@ -233,7 +233,7 @@ class EntityForceLayout extends React.Component{
 
 	render() {
 	    return (
-            <div id="graph">
+            <div id="graph" style={{'height':this.props.content_height+'%'}}>
                 <svg ref={node => this.svg = node}>
                   <defs>
                     <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
