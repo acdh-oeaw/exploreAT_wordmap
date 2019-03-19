@@ -21,7 +21,7 @@ class RdfBasedSourceSelector extends React.Component{
         super(props);
         this.state={
             //sparql:"http://dboe-jena.hephaistos.arz.oeaw.ac.at/dboe/query",
-            sparql:"http://localhost:3000/oldcan/query",
+            sparql:"http://localhost:3030/oldcan/query",
             ontology_url:"https://explorations4u.acdh.oeaw.ac.at/ontology/oldcan",
             ontology:null,
         };
@@ -90,7 +90,7 @@ class RdfBasedSourceSelector extends React.Component{
 	    	<div id="source_selector">
 		      	<form>
                     <span style={{display:'inherit', marginBottom:'29px'}}>
-                        <label for="uploadInput" >Ontology file:<br/></label>
+                        <label htmlFor="uploadInput" >Ontology file:<br/></label>
                           <input id="uploadInput" type="file" name="uploadInput" onInput={this.handleOntologyFileChange}/>
                     </span>
 
