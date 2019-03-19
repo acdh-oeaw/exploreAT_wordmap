@@ -108,7 +108,7 @@ class ComponentSelector extends React.Component{
     createComponent(){
         if(this.state.name != "" && this.state.attributes.length>0 && this.state.type != ""){
             this.props.addComponent(this.state.name, this.state.attributes, this.state.type);
-            this.setState({name: "", attributes: [], showComponents:false});
+            this.setState({name: "", attributes: [], typeIndex: 0, showComponents:false});
         }
     }
 
@@ -125,6 +125,9 @@ class ComponentSelector extends React.Component{
             });
 
         if(aggregated > 0){
+            useful_visualizations = useful_visualizations.filter(vis=>vis!='Filter');
+            vis_incompatibilities.push(`Textual searchs can only be done over the values of non aggregated variables.`);
+
             useful_visualizations = useful_visualizations.filter(vis=>vis!='Parallel Coordinates');
             vis_incompatibilities.push(`Metrics cannot be used with Parallel Coordinates.`);
 
@@ -186,7 +189,7 @@ class ComponentSelector extends React.Component{
             vis_incompatibilities.push(`All attributes must have the same amount of entries to be displayed in a table.`);
         }
 
-        this.setState({showComponents:true, type:useful_visualizations[0], useful_visualizations:useful_visualizations, vis_incompatibilities:vis_incompatibilities});
+        this.setState({showComponents:true, type:useful_visualizations[0], useful_visualizations:useful_visualizations, vis_incompatibilities:vis_incompatibilities}, ()=>this.handleNextType(0));
     }
 
     backToEntities(){
