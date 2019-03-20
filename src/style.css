@@ -10,6 +10,7 @@ div#react-root {
 }
 
 div#app {
+  height: auto;
   display: flex;
   flex-flow: column;
   min-height: 100%;
@@ -25,12 +26,17 @@ div#app {
 }
 
 div#app div.content, div#app div#source_selector{
-  height:100%;
   flex: 1 1 auto;
 }
 
-#footer {
-  flex: 0 1 60px;
+@-moz-document url-prefix() {
+  #footer {
+    flex: 0 1 60px;
+  }
+
+  div#app div.content, div#app div#source_selector{
+    height:100%;
+  }
 }
 
 /* Header ---------------------------------------------------------------------------
@@ -942,11 +948,11 @@ div#home div.banner img{
 }
 
 div#logo-container{
-	height: 10em;
+	height: 8em;
 	display: flex;
-	flex-wrap: wrap;
-	margin: 2em;
+	margin: 1em;
 	align-items: center;
+  justify-content: space-between;
 }
 
 div#logo-container img{
