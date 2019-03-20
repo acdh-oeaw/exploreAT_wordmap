@@ -21,15 +21,15 @@ const About = (props)=>{
             <h3>Working with the dashboard</h3>
             <p>
                 Three steps are involved in the process of visually exploring data:
-                <ol>
-                    <li>Loading an ontology and choosing a SPARQL endpoint.</li>
-                    <li>Choosing the desired entities, selecting desired attributes from 
-                        the selected entities and executing this visual query to retrieve 
-                        the data.</li>
-                    <li>Creating visualizations by selecting attributes and/or aggregations,
-                        and choosing from the proposed visualizations.</li>
-                </ol>
             </p>
+            <ol>
+                <li>Loading an ontology and choosing a SPARQL endpoint.</li>
+                <li>Choosing the desired entities, selecting desired attributes from 
+                    the selected entities and executing this visual query to retrieve 
+                    the data.</li>
+                <li>Creating visualizations by selecting attributes and/or aggregations,
+                    and choosing from the proposed visualizations.</li>
+            </ol>
             <h4>Retrieving the data</h4>
             <p>
                 <i>The visualizations are created from the data retrieved with the visual query 
