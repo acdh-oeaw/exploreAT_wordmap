@@ -91,6 +91,11 @@ class Explorer extends React.Component{
           sparql_query: query,
           loaded: true
         }
+          if(data.length == 0)
+              window.alert('The SPARQL endpoint retrieved 0 results.'
+                +'This can be a connection problem or a query that\n'
+                +'includes attributes not available in the database.\n\nIf you want to replicate the query, the endpoint is:\n\n'
+                +this.api_url+'\n\nThe SPARQL query formed in the previous step is:\n\n'+query);
         d3.keys(data[0]).map(d=>state.filters[d]=state.crossfilter.dimension(x=>x[d]));
         this.colorScales = this.createColorScales(data);
         this.setState(state);
