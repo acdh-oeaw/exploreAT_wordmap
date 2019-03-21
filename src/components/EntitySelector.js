@@ -326,6 +326,16 @@ class EntitySelector extends React.Component{
 		          <div className="info">
 		              	<span className="button" onClick={()=>alert(this.state.ontology.ontology_base)}>Show ontology</span>
               			<span className="button" onClick={()=>alert(this.state.sparql)}>Show Sparql endpoint </span>
+              			<span className="button" onClick={()=>this.setState({
+                            current_search: "",
+                            selected_entities: [],
+                            triples: [],
+                            active_nodes: [],
+                            active_edges: [],
+                            test_nodes : [],
+                            ontology:null,
+                            sparql:"",
+                        }, this.props.setEntitySelectionSources(null, ""))}>Change sources</span>
 		          </div>
 		        </div>
 		        }
