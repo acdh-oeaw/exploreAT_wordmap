@@ -29,15 +29,17 @@ div#app div.content, div#app div#source_selector{
   flex: 1 1 auto;
 }
 
-@-moz-document url-prefix() {
-  #footer {
-    flex: 0 1 60px;
-  }
-
-  div#app div.content, div#app div#source_selector{
-    height:100%;
-  }
+div#app > div.content{
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
 }
+
+div#app > div.content > div{
+    height: auto !important;
+    width: 100% !important;
+}
+
 
 /* Header ---------------------------------------------------------------------------
 */
