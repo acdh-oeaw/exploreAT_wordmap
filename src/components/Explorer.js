@@ -16,12 +16,15 @@ import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
 // Import visualization
 
 import BarChart from './vis/BarChart';
+import Filter from './vis/Filter';
+import BubbleGraph from './vis/BubbleGraph';
 import CirclePacking from './vis/CirclePacking';
-import PackedBubbles from './vis/PackedBubbles';
 import ParallelCoordinates from './vis/ParallelCoordinates';
 import PieChart from './vis/PieChart';
 import StreamGraph from './vis/StreamGraph';
 import Table from './vis/Table';
+import ViolinPlot from './vis/ViolinPlot';
+import JitterViolinPlot from './vis/JitterViolinPlot';
 
 const ReactGridLayout = WidthProvider(RGL);
 
@@ -35,8 +38,7 @@ const ReactGridLayout = WidthProvider(RGL);
  */
 class Explorer extends React.Component{ 
   constructor(props){
-    super(props);    
-    
+    super(props);  
     this.state = {
       data : null,
       available_entities:[],
@@ -63,17 +65,22 @@ class Explorer extends React.Component{
     // Include here the components that will be available for selection
     this.availableComponents = {
         "Bar Chart":BarChart, 
+        "Filter":Filter,
+        "Bubble Graph":BubbleGraph,
         "Circle Packing":CirclePacking,
         "Parallel Coordinates": ParallelCoordinates,
         "Pie Chart": PieChart, 
         "Stream Graph": StreamGraph,
         "Table": Table, 
+        "Violin Plot":ViolinPlot,
+        "Jitter Violin Plot":JitterViolinPlot,
     };
   }
 
   componentDidMount(){
     this.createColorScales = this.createColorScales.bind(this);
     let query = this.sparqlQueries.createDataSparqlQuery(this.prefixes, this.triples);    
+      console.log(query);
     sparql(this.api_url, query, (err, data) => {
       if (data && !err) {
         let state = {
@@ -81,8 +88,14 @@ class Explorer extends React.Component{
           crossfilter: crossfilter(data),
           available_entities:d3.keys(data[0]),
           filters: {},
+          sparql_query: query,
           loaded: true
         }
+          if(data.length == 0)
+              window.alert('The SPARQL endpoint retrieved 0 results.'
+                +'This can be a connection problem or a query that\n'
+                +'includes attributes not available in the database.\n\nIf you want to replicate the query, the endpoint is:\n\n'
+                +this.api_url+'\n\nThe SPARQL query formed in the previous step is:\n\n'+query);
         d3.keys(data[0]).map(d=>state.filters[d]=state.crossfilter.dimension(x=>x[d]));
         this.colorScales = this.createColorScales(data);
         this.setState(state);
@@ -160,7 +173,11 @@ class Explorer extends React.Component{
 
       this.setState(prevState=>{
         prevState.layout[name] = {x: 0, y: 0, w: 2, h: 4, isDraggable:true};
-        prevState.visComponents[name]={attributes:attributes,data:this.state.data,instance:newInstance};
+        prevState.visComponents[name]={
+          attributes:attributes,
+          data:this.state.data,
+          instance:newInstance,
+          help:this.availableComponents[type].prototype.help};
         return prevState;
       });
     }
@@ -190,6 +207,7 @@ class Explorer extends React.Component{
 				height={this.state.layout[c.key].h * 90 + (this.state.layout[c.key].h - 1)*10 - 30}
 				name={c.key}
 				attributes={c.value.attributes}
+        help={c.value.help}
 				data={this.state.data}
 				filters={this.state.filters}
         colorScales={this.colorScales}
@@ -205,7 +223,7 @@ class Explorer extends React.Component{
       <div key="selector" style={({display: this.state.loaded===true?'block':'none'})}>
         <VisSelectorWrapper width={this.state.layout.selector.w * Math.trunc(document.body.clientWidth/6) - 25} 
 				height={this.state.layout.selector.h * 90 + (this.state.layout.selector.h - 1)*10 - 30}
-				name={"Component Selector"}
+				name={"View Selector"}
 				addComponent={this.addComponent}
 				entities={this.state.available_entities}
 				data={this.state.data}
@@ -223,13 +241,14 @@ class Explorer extends React.Component{
   render(){
     return(<div id="explorer">
         <div className="header">
-          <h2>Explorer page</h2>
+          <h2>Explorer</h2>
           <div className="info">
-              <span>Ontologies referenced : {this.prefixes.map(p=>p.prefix).join(', ')}</span>
-              <span>Sparql entry point : {this.api_url}</span>
+              <span className="button" onClick={()=>alert(this.prefixes.map(p=>p.prefix).join(', '))}>Show ontology</span>
+              <span className="button" onClick={()=>alert(this.api_url)}>Show Sparql endpoint </span>
+              <span className="button" onClick={()=>alert(this.state.sparql_query)}>Show Sparql query </span>
               <span className="button" onClick={()=>alert(this.state.available_entities.map(e=>`${e}\n`))}>Show variables </span>
               <span className="button" onClick={()=>this.resetAllFilters()}>Reset all filters </span>
-              <NavLink to={"/entities/"}> <span className="button">Go back to entity selection</span> </NavLink>
+              <NavLink to={"/entities/"}> <span className="button">Back to entity selection</span> </NavLink>
           </div>
         </div>
         <div className="content">

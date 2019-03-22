@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
 import React from 'react';
+import { Icon } from 'react-materialize';
 
 /* BarChart
  * BarChart component to show aggregated data
@@ -8,12 +9,12 @@ import React from 'react';
  * Data is provided as an array of objects
  */
 const params = {
-    legendWidth: 200,
-    marginTop: 25, // for the selection of 
+    legendHeight: 70,
+    marginTop: 45, // for the selection of 
     marginRight: 10, // because of the padding of the container
-    paddingLeft:10,
-    paddingTop: 10,
-    paddingRight: 10,
+    paddingLeft:85,
+    paddingTop: 35,
+    paddingRight: 5,
     paddingBottom: 10,
  };
 
@@ -49,6 +50,7 @@ class BarChart extends React.Component{
         };
 
         this.node = d3.select(this.node);
+        this.renderAxis = this.renderAxis.bind(this);
         this.createBars = this.createBars.bind(this);
         this.selectAttribute = this.selectAttribute.bind(this);
         this.highlightEntities = this.highlightEntities.bind(this);
@@ -77,6 +79,11 @@ class BarChart extends React.Component{
             const {data, total} = this.updatedData(this.state.selected_attribute);
             this.setState({data,total});
         }
+        this.renderAxis();
+    }
+
+    componentDidMount(){
+        this.renderAxis();
     }
 
     updatedData(attribute){
@@ -131,9 +138,11 @@ class BarChart extends React.Component{
         const last_field_of_uri = (uri)=>uri.includes('/')?uri.split('/')[uri.split('/').length-1]:uri;
         const yScale = d3.scaleLinear()
             .domain([0,d3.values(this.state.data).reduce((a,b)=>a>b?a:b,0)])
-            .range([params.paddingTop,dimensions.height-params.paddingBottom]);
+            .range([0,dimensions.height]);
+        this.yScale = yScale;
+        this.drawWidth = dimensions.width-params.paddingRight-params.paddingLeft-this.state.legend.length*5;
 
-        const bar_width = (dimensions.width)/d3.keys(this.state.data).length;
+        const bar_width = (dimensions.width-params.paddingRight-params.paddingLeft-this.state.legend.length*5)/d3.keys(this.state.data).length;
         let rotationAccumulated = 0;
 
         const bars = d3.entries(this.state.data).sort(this.state.sortingFunction).map((d,i)=>{
@@ -141,7 +150,7 @@ class BarChart extends React.Component{
             // shortter names will yield faster search results
             let classValue = last_field_of_uri(String(d.key.valueOf()));
             const className = `${this.state.legend}-${this.sanitizeClassName(classValue)}`;
-            console.log()
+            
             const bar = (<rect 
                 fill={this.props.colorScales[this.state.legend](this.sanitizeClassName( this.stripUri( d.key)))} 
                 className={className}
@@ -157,14 +166,85 @@ class BarChart extends React.Component{
                 }}
                 ></rect>);
             
-            return(<g key={d.key} transform={`translate(${params.paddingLeft + i*bar_width},${dimensions.height - yScale(d.value)})`}> 
+            return(<g key={d.key} transform={`translate(${params.paddingLeft + i*bar_width},${params.paddingTop+dimensions.height - yScale(d.value)})`}> 
                 {bar}
-                <text x={2+ bar_width/2} y={15} className="barValue">{d.value}</text>
-                <title>{d.key} - {d.value}</title>
+                <title>{`${d.key}\nValue : ${d.value}`}</title>
             </g>);
         });
 
-        return bars;
+        return (
+            <g>
+                <g>{bars}</g>
+                <g>
+                {yScale.domain().map(d=>(<text key={d} transform={`translate(${params.paddingTop+dimensions.height - yScale(d)})`}>{d}</text>))}
+                </g>
+                {this.state.data!=null?this.createLegend(dimensions,bar_width):""}
+            </g>
+        );
+    }
+
+    createLegend(dimensions,bar_width){
+        const last_field_of_uri = (uri)=>uri.includes('/')?uri.split('/')[uri.split('/').length-1]:uri;
+        return(
+        <g className="legend">
+            <g transform={`translate(5,${params.paddingTop})`}
+                onClick={()=>this.setSortBy("value")}>
+                <text x="0" y="0" className={"sortBy"}>
+                    Value 
+                </text>
+                <g transform={`translate(40,-10)`}>
+                    {(this.state.valueSortOrder == 'up')?<polygon points="0 0, 13 0, 6.5 10.5" fill="black"/>:<polygon points="0 10.5, 6.5 0, 13 10.5" fill="black"/>}
+                </g>
+            </g>
+            <g transform={`translate(${dimensions.width-params.paddingRight-this.state.legend.length*5+15},${params.paddingTop+dimensions.height})`}
+                onClick={()=>this.setSortBy("key")}>
+                <text x="0" y="0" className={"sortBy"}>
+                    {this.state.legend}
+                </text>
+                <g transform={`translate(${this.state.legend.length * 8},-10)`}>
+                    {(this.state.keySortOrder == 'up')?<polygon points="0 0, 13 0, 6.5 10.5" fill="black"/>:<polygon points="0 10.5, 6.5 0, 13 10.5" fill="black"/>}
+                </g>
+            </g>
+            <g transform={`translate(0,${params.paddingTop+dimensions.height+10})`}>
+                {d3.entries(this.state.data).sort(this.state.sortingFunction).map((d,i,all)=>(
+                        <g transform={`translate(${params.paddingLeft + i*bar_width + bar_width/3})`} 
+                                key={d.key} 
+                                className={`${this.state.legend}-${last_field_of_uri(String(d.key))}`}
+                                onMouseEnter={()=>this.highlightEntities(`${this.state.legend}-${last_field_of_uri(String(d.key))}`)}
+                                onClick={()=>{
+                                    this.props.filters[this.state.selected_attribute.aggregation_term].filter(d.key);
+                                    this.props.updateFilteredData();
+                                }}
+                                onMouseOut={()=>this.unhighlightEntities()}>
+                                <text transform="rotate(55,0,0)">{last_field_of_uri(d.key).slice(0,10)}</text>
+                        </g>
+                    ))
+                }
+            </g>
+        </g>
+        );
+    }
+
+    renderAxis(){
+        if(this.yScale != null){
+            const reversedScale = d3.scaleLinear()
+                .domain([this.yScale.domain()[0],this.yScale.domain()[1]])
+                .range([this.yScale.range()[1],this.yScale.range()[0]]);
+
+            const yAxis = g => g
+                .attr("transform", `translate(${this.drawWidth+params.paddingRight+params.paddingLeft-5},${params.paddingTop})`)
+                .call(d3.axisLeft(reversedScale).tickSize(this.drawWidth));
+
+            function customYAxis(g) {
+                g.call(yAxis);
+                g.select(".domain").remove();
+                g.selectAll(".tick:not(:first-of-type) line").attr("stroke", "#777").attr("stroke-dasharray", "2,2");
+                g.selectAll(".tick text").attr("dy", -4);
+            }
+
+            d3.select(this.axis)
+                .call(customYAxis);
+        }
     }
 
     setSortBy(value){
@@ -183,16 +263,14 @@ class BarChart extends React.Component{
     }
 
     render(){
-        const last_field_of_uri = (uri)=>uri.includes('/')?uri.split('/')[uri.split('/').length-1]:uri;
-
         const size = {
             width: (this.props.width - params.marginRight),
             height: (this.props.height - params.marginTop),
         }
 
         const chartDimensions = {
-            width: (this.props.width - params.marginRight - params.paddingRight - params.paddingLeft - params.legendWidth),
-            height: (this.props.height - params.marginTop - params.paddingTop - params.paddingBottom),   
+            width: (this.props.width - params.marginRight - params.paddingRight - params.paddingLeft),
+            height: (this.props.height - params.marginTop - params.paddingTop - params.paddingBottom - params.legendHeight),   
         }
 
         const style = (e)=>this.state.sector_dimension==e?{cursor:"pointer",color:"#18bc9c", marginLeft:"5px"}:
@@ -204,60 +282,25 @@ class BarChart extends React.Component{
                     <span key={e.name} onClick={()=>this.selectAttribute(e)} className="option" style={style(e.name)}> {e.name} </span>
                 ))}</p>
                 <svg style={size}>
+                    <g ref={node => this.axis = node}></g> 
                     <g id="bars">
                         {this.state.data!=null?this.createBars(chartDimensions):""}
-                    </g>
-                    <g className="legend" transform={`translate(${this.props.width - params.legendWidth },30)`}>
-                        <g transform={`translate(0,0)`}>
-                            <text x="7" y="0">
-                                {this.state.legend}
-                                <tspan onClick={()=>this.setSortBy("key")} className={"sortBy"}> 
-                                    {(this.state.keySortOrder == 'up')?"⯆":"⯅"}
-                                </tspan>
-                                ( value 
-                                <tspan onClick={()=>this.setSortBy("value")} className={"sortBy"}> 
-                                    {(this.state.valueSortOrder == 'up')?"⯆":"⯅"}
-                                </tspan>
-                                )
-                            </text>
-                        </g>
-                        {(()=>{
-                            let legend = "";
-                            if(this.state.data != null){
-                                legend = d3.entries(this.state.data).sort(this.state.sortingFunction).map((d,i)=>(
-                                    (55 + i*16 > this.props.height-params.marginTop - params.paddingBottom)?'':
-                                    <g transform={`translate(0,${17 + i*16})`} 
-                                            key={d.key} 
-                                            className={`${this.state.legend}-${last_field_of_uri(String(d.key))}`}
-                                            onMouseEnter={()=>this.highlightEntities(`${this.state.legend}-${last_field_of_uri(String(d.key))}`)}
-                                            onClick={()=>{
-                                                this.props.filters[this.state.selected_attribute.aggregation_term].filter(d.key);
-                                                this.props.updateFilteredData();
-                                            }}
-                                            onMouseOut={()=>this.unhighlightEntities()}>
-                                        <circle cx="0" cy="0" r="6" fill={
-                                            this.props.colorScales[this.state.legend](
-                                                this.sanitizeClassName( 
-                                                    this.stripUri( d.key)))}></circle>
-                                        <text x="7" y="5">
-                                            {last_field_of_uri(d.key)} ( {d.value} )
-                                        </text>
-                                    </g>
-                                ));
-                            }
-                            return(legend);
-                        })()}
-                        {(d3.entries(this.state.data).length*16 + 55 <
-                          this.props.height-params.marginTop - params.paddingBottom)?'':
-                            <g transform={`translate(0,${this.props.height-params.marginTop - params.paddingBottom - 45})`}>
-                                <text x="7" y="15"> . . . </text>
-                            </g>
-                        }
                     </g>
                 </svg>
             </div>
         );
     }
 }
+
+BarChart.prototype.help="Bar Chart\n"+
+    "Used to visually represent distribution of aggregated data.\n\n"+
+    "Data used in the visualization:\n"+
+    "Aggregated variables, which have the count of occurrencies for each value of the aggregation term.\n\n"+
+    "Visual representation:\n"+
+    "Each of the different values of the variable used for aggregating has its own bar with a height \n"+
+    "proportional to the occurencies count.\n\n"+
+    "Configuration:\n"+
+    "The available aggregations for representation can be cycled through by clicking on the names, and \n"+
+    "the order in which the values appear changed by clicking in the correspondant arrow of in the legend.";
 
 export default BarChart;
