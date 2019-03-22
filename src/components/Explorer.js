@@ -16,6 +16,7 @@ import SparqlQueryBuilder from '../aux/SparqlQueryBuilder';
 // Import visualization
 
 import BarChart from './vis/BarChart';
+import Filter from './vis/Filter';
 import BubbleGraph from './vis/BubbleGraph';
 import CirclePacking from './vis/CirclePacking';
 import ParallelCoordinates from './vis/ParallelCoordinates';
@@ -64,6 +65,7 @@ class Explorer extends React.Component{
     // Include here the components that will be available for selection
     this.availableComponents = {
         "Bar Chart":BarChart, 
+        "Filter":Filter,
         "Bubble Graph":BubbleGraph,
         "Circle Packing":CirclePacking,
         "Parallel Coordinates": ParallelCoordinates,
@@ -78,6 +80,7 @@ class Explorer extends React.Component{
   componentDidMount(){
     this.createColorScales = this.createColorScales.bind(this);
     let query = this.sparqlQueries.createDataSparqlQuery(this.prefixes, this.triples);    
+      console.log(query);
     sparql(this.api_url, query, (err, data) => {
       if (data && !err) {
         let state = {
@@ -85,8 +88,14 @@ class Explorer extends React.Component{
           crossfilter: crossfilter(data),
           available_entities:d3.keys(data[0]),
           filters: {},
+          sparql_query: query,
           loaded: true
         }
+          if(data.length == 0)
+              window.alert('The SPARQL endpoint retrieved 0 results.'
+                +'This can be a connection problem or a query that\n'
+                +'includes attributes not available in the database.\n\nIf you want to replicate the query, the endpoint is:\n\n'
+                +this.api_url+'\n\nThe SPARQL query formed in the previous step is:\n\n'+query);
         d3.keys(data[0]).map(d=>state.filters[d]=state.crossfilter.dimension(x=>x[d]));
         this.colorScales = this.createColorScales(data);
         this.setState(state);
@@ -236,6 +245,7 @@ class Explorer extends React.Component{
           <div className="info">
               <span className="button" onClick={()=>alert(this.prefixes.map(p=>p.prefix).join(', '))}>Show ontology</span>
               <span className="button" onClick={()=>alert(this.api_url)}>Show Sparql endpoint </span>
+              <span className="button" onClick={()=>alert(this.state.sparql_query)}>Show Sparql query </span>
               <span className="button" onClick={()=>alert(this.state.available_entities.map(e=>`${e}\n`))}>Show variables </span>
               <span className="button" onClick={()=>this.resetAllFilters()}>Reset all filters </span>
               <NavLink to={"/entities/"}> <span className="button">Back to entity selection</span> </NavLink>

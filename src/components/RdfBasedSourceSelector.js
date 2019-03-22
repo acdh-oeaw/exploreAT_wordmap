@@ -20,10 +20,11 @@ class RdfBasedSourceSelector extends React.Component{
     constructor(props){
         super(props);
         this.state={
-            sparql:"http://dboe-jena.hephaistos.arz.oeaw.ac.at/dboe/query",
+            //sparql:"http://dboe-jena.hephaistos.arz.oeaw.ac.at/dboe/query",
+            sparql:"http://localhost:3030/oldcan/query",
             ontology_url:"https://explorations4u.acdh.oeaw.ac.at/ontology/oldcan",
             ontology:null,
-            ontology_from_file : true,
+            status: ''
         };
 
         this.sparql = sparql;
@@ -32,7 +33,6 @@ class RdfBasedSourceSelector extends React.Component{
         this.handleOntologyUrlChange = this.handleOntologyUrlChange.bind(this);
         this.handleSparqlChange = this.handleSparqlChange.bind(this);
         this.handleOntologyFileChange = this.handleOntologyFileChange.bind(this);
-        this.toggleOntologySource = this.toggleOntologySource.bind(this);
         this.setSources = this.setSources.bind(this);
 
     }
@@ -66,6 +66,7 @@ class RdfBasedSourceSelector extends React.Component{
                     });
             }).then((count)=>{
                 retrieved += 1;
+                d3.select('form#status p').text(retrieved+' / '+ontology.entities.length);
                 for(let i =0; i<ontology.entities.length; i++){
                     if(ontology.entities[i].name == e.name){
                         ontology.entities[i].count = count[0].count.valueOf();
@@ -86,41 +87,30 @@ class RdfBasedSourceSelector extends React.Component{
 		this.setState({sparql: event.target.value});
 	};
 
-    toggleOntologySource(){
-        this.setState(prevState=>{
-            prevState.ontology_from_file = !prevState.ontology_from_file;
-            return(prevState);
-        });
-    }
-
 	render() {
 	    return (
 	    	<div id="source_selector">
 		      	<form>
-                    <span style={{display:this.state.ontology_from_file===true?'inherit':'none', marginBottom:'29px'}}>
-                        <label id="extra-label">
-                          Ontology file <span className="toggleSource" onClick={()=>this.toggleOntologySource()}>(or load from url)</span> :
-                        </label>
-                        <label>
-                          <input id="uploadInput" type="file" name="myFiles" onInput={this.handleOntologyFileChange}/>
-                        </label>
+                    <span style={{display:'inherit', marginBottom:'29px'}}>
+                        <label htmlFor="uploadInput" >Ontology file:<br/></label>
+                          <input id="uploadInput" type="file" name="uploadInput" onInput={this.handleOntologyFileChange}/>
                     </span>
 
-                    <span style={{display:this.state.ontology_from_file===false?'inherit':'none'}}>
-                        <label>
-                          Url to ontology <span className="toggleSource" onClick={()=>this.toggleOntologySource()}>(or load from local file)</span> :<br/>
-                          <input type="text" value={this.state.ontology_url} onChange={this.handleOntologyUrlChange} />
-                        </label>
-                    </span>
 			        <label>
 			          Sparql endpoint:
 			          <input type="text" value={this.state.sparql} onChange={this.handleSparqlChange} />
 			        </label>
 		      	</form>
                     {(this.state.ontology != null && this.state.sparql.length>0)?(
-                        <button onClick={()=>this.setSources(this.state.ontology, this.state.sparql)} >Go</button>
+                        <button onClick={()=>this.setState({status:'loading'},()=>this.setSources(this.state.ontology, this.state.sparql))}>
+                            Go
+                        </button>
                         ):(<button disabled >Go</button>)
                     }
+                <form id="status" className={this.state.status}>
+                    <p></p>
+                    <div className="lds-dual-ring"></div>
+                </form>
 	      	</div>
 	    );
 	}

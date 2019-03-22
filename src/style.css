@@ -10,9 +10,10 @@ div#react-root {
 }
 
 div#app {
+  height: auto;
   display: flex;
   flex-flow: column;
-  height: 100%;
+  min-height: 100%;
 }
 
 #header {
@@ -25,13 +26,20 @@ div#app {
 }
 
 div#app div.content, div#app div#source_selector{
-  height:100%;
   flex: 1 1 auto;
 }
 
-#footer {
-  flex: 0 1 60px;
+div#app > div.content{
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
 }
+
+div#app > div.content > div{
+    height: auto !important;
+    width: 100% !important;
+}
+
 
 /* Header ---------------------------------------------------------------------------
 */
@@ -190,15 +198,11 @@ div#explorer.entitySelector div.content{
 }
 
 div#explorer.entitySelector div.content div#graph{
-  border-bottom: solid cadetblue;
-  height: 70%; 
   width: 100%; 
   padding:0.5em;
 }
 
 div#explorer.entitySelector div.content div#nodes{
-  min-height: 250px;
-  height: 30%;
   width: 100%; 
   padding: 0.1em;
 }
@@ -217,11 +221,13 @@ div#explorer.entitySelector .tooltip p{
 
 div#explorer.entitySelector svg{
   display:block;
-  height:100%;
   width:100%;
 }
 
-div#explorer div.content div#nodes svg{height:180%;}
+div#explorer.entitySelector #graph svg{
+  height:100%;
+}
+
 
 div#explorer div.content div#nodes{
   overflow-y: scroll;
@@ -517,6 +523,10 @@ div#Table p{
   padding-top: 5px;
 }
 
+div#Table .tableElement{
+    border-bottom: 2px dashed #18bc9c;
+    cursor: pointer;
+}
 /* Old rdf explorer ------------------------------------------------------------------
 */
 
@@ -802,4 +812,232 @@ div#CirclePacking div.menu circle{
 
 div#BubbleGraph circle.hovered{
   stroke:black;
+}
+
+/* Filter ---------------------------------------------------------------------------
+*/
+#Filter div{
+    display: block;
+    width: 99%;
+    margin: 0 auto;
+}
+
+#Filter table{
+  width: 99%;
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+}
+
+#Filter table select{
+    display:block;
+}
+
+#Filter table input{
+    margin: 0;
+    height: 1em;
+}
+
+#Filter td, #Filter th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#Filter tr:nth-child(even){background-color: #f2f2f2;}
+
+#Filter tr:hover {background-color: #ddd;}
+
+#Filter th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #18bc9c;
+  color: white;
+} 
+/* about (It is really the help page) ---------------------------------------------------------------------------
+ */
+
+div#about{
+    display: block;
+    padding: 5px;
+    max-width: 22.5cm;
+    margin: 0 auto;
+}
+
+div#about div.visualization, div.step{
+    padding:7px;
+    margin:5px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+div#about div.visualization:nth-of-type(2n+1),
+div#about div.step:nth-of-type(2n+1){
+    background-color: #c5f7ed;
+    flex-direction: row-reverse;
+}
+
+div#about div.visualization img,
+div#about div.step img{
+  margin: 0.5em 0;
+    background-color: white;
+  box-shadow: rgba(0, 0, 0, 0.14) 1px 2px 2px 0px, rgba(0, 0, 0, 0.2) 2px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 5px 9px 0px;
+  width: 30%;
+  height: 100%;
+  display:block;
+}
+
+div#about div.step img{
+    width: 65%;
+}
+div#about div.step p{
+    width: 30%;
+}
+
+div#about div.visualization p{
+    width: 65%;
+}
+
+div#about div.visualization span.underline{
+    text-decoration: underline;
+}
+
+div#about i.padded{
+    margin: 5px;
+    display: inline-block;
+    padding: 0 40px;
+}
+/* Home page ---------------------------------------------------------------------------
+*/
+div#home{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+div#home a{
+    position: absolute;
+    z-index: 10;
+    top: 45%;
+}
+
+div#home a h2{
+    display: inline-block;
+    box-shadow: rgba(0, 0, 0, 0.14) 1px 2px 2px 0px, rgba(0, 0, 0, 0.2) 2px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 5px 9px 0px;
+    margin: 0 auto;
+    background-color: #18bc9c;
+    color: white;
+    font-weight: bold;
+    padding:3px;
+}
+
+div#home div.banner{
+    margin: 1.5em 0;
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+div#home div.banner img{
+    opacity: 0.6;
+    width: 30%;
+    height: 100%;
+    box-shadow: rgba(0, 0, 0, 0.24) 1px 2px 2px 0px, rgba(0, 0, 0, 0.4) 2px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 5px 9px 0px;
+}
+
+div#logo-container{
+	height: 8em;
+	display: flex;
+	margin: 1em;
+	align-items: center;
+  justify-content: space-between;
+}
+
+div#logo-container img{
+    margin: 0 5px;
+	display: inline-block;
+	height: 100%;
+	width: auto;
+}
+
+div#logo-container img#acdh,
+div#logo-container img#oeaw{
+	height: 60%;
+}
+
+div#logo-container img#visusal{
+	background-color: darkgrey;
+	height: 60%;
+	padding: 1px;
+}
+
+img.pageWidth{
+    width:22.5cm;
+}
+
+/* Resizing
+ * */
+div#resize-handler{
+    background-color: cadetblue;
+    margin-bottom: 1em;
+    width: 100%;
+    height: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+div#resize-handler p{
+    border: solid cadetblue;
+    background-color: white;
+    display: inline-block;
+    cursor: pointer;
+}
+
+form#status.loading{
+    display: flex;
+}
+
+form#status{
+    display: none;
+    margin-top: 5em;
+    flex-direction: column;
+    align-items: center;
+}
+
+form#status p{
+    font-weight: bold;
+    color: #18bc9c;
+}
+
+/* Loader
+ * */
+.lds-dual-ring {
+  display: inline-block;
+  width: 64px;
+  height: 64px;
+}
+.lds-dual-ring:after {
+  content: " ";
+  display: block;
+  width: 46px;
+  height: 46px;
+  margin: 1px;
+  border-radius: 50%;
+  border: 5px solid #fff;
+  border-color: #18bc9c transparent #18bc9c transparent;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+
+@keyframes lds-dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

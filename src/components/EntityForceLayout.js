@@ -27,6 +27,8 @@ class EntityForceLayout extends React.Component{
 			loaded: false, 
 		};
 
+        this.selectEntity = [this.props.selectEntity,];
+
 		this.sparqlQueries = new SparqlQueryBuilder();
 		this.wrapper = new UrlParamWrapper();
 		this.updateHighlights = this.updateHighlights.bind(this);
@@ -44,6 +46,8 @@ class EntityForceLayout extends React.Component{
 	componentDidUpdate(prevProps, prevState, snapshot){
 		if(this.state.loaded === true){
             this.updateHighlights(this.props);
+            if(this.props.test_nodes.length==0 && this.selectEntity.length==0)
+                this.selectEntity.push(this.props.selectEntity);
         }
 	}
 
@@ -157,7 +161,9 @@ class EntityForceLayout extends React.Component{
 			.attr('class', 'node')
 			.attr('id', d=>this.wrapper.nameOfEntity(d.entity))
 			.on("click",(d)=>{
-				this.props.selectEntity(d.entity)
+                if(this.props.test_nodes.length == 0 && this.selectEntity.length==1){
+                    this.selectEntity.pop()(d.entity);
+                }
 			})
 			.call(layout.drag);
 
@@ -233,7 +239,7 @@ class EntityForceLayout extends React.Component{
 
 	render() {
 	    return (
-            <div id="graph">
+            <div id="graph" style={{'height':this.props.content_height+'%'}}>
                 <svg ref={node => this.svg = node}>
                   <defs>
                     <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">

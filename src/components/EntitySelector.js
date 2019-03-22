@@ -38,8 +38,10 @@ class EntitySelector extends React.Component{
 			active_edges: [],
 			test_nodes : [],
 			ontology:ontology,
-			sparql:sparql
-		};
+			sparql:sparql,
+            content_height: 60,
+            nodes_height: 35
+        };
 
 		this.wrapper = new UrlParamWrapper();
 		this.sparqlQueries = new SparqlQueryBuilder();
@@ -53,6 +55,9 @@ class EntitySelector extends React.Component{
 		this.renderContent = this.renderContent.bind(this);
 		this.setSources = this.setSources.bind(this);
 	}
+
+    componentDidMount(){
+    }
 
 	attributeToQuery(attribute, origin){
 		// predicateToSparql wrapps the predicate in <> if it does no use a prefix
@@ -113,6 +118,12 @@ class EntitySelector extends React.Component{
 		      	if (data && !err) {
 		        	this.setState(prevState=>{
 		        			prevState.test_nodes.push({	name: entity, attributes: data});
+                            
+                            // It is possible to suppose that it will have a :, as
+                            // all nodes come from the ontology file and therefore have
+                            // a reduced form
+                            prevState.triples.push(`?${entity.split(':')[1]} <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ${entity}`);
+                            
 		        			prevState.active_nodes.push(entity)
 		        			return(prevState);
 		        	});
@@ -144,7 +155,7 @@ class EntitySelector extends React.Component{
 		if(attribute && origin){
 			const {predicate, target, object, sparql_triple} = this.attributeToQuery(attribute, origin);
 
-			const svg_element = d3.select('#'+this.wrapper.nameOfEntity(origin)+this.wrapper.nameOfEntity(attribute));
+			const svg_element = d3.selectAll('#'+this.wrapper.nameOfEntity(origin)+this.wrapper.nameOfEntity(attribute));
 			svg_element.classed('attribute-selected', svg_element.classed('attribute-selected')?false:true);
 
 			if(this.state.selected_entities.includes(attribute)){
@@ -232,8 +243,9 @@ class EntitySelector extends React.Component{
 				"/entities/" + this.state.triples.reduce((final, actual)=>final+this.wrapper.urlToParam(actual)+",","");
 
 			return(
-				<div className="content">
+				<div className="content" >
                     <EntityForceLayout 
+                         content_height={this.state.content_height}
                          entities={this.state.ontology.entities.map(e=>({entity:e.name, count:e.count}))}
                          relationships={this.state.ontology.relationships}
                          selectEntity={this.selectNode}
@@ -246,9 +258,32 @@ class EntitySelector extends React.Component{
                          ontology={this.state.ontology.ontology_base}
                          sparql={this.state.sparql}
                     /> 
+                    <div id="resize-handler">
+                        <p onClick={
+                            ()=>{
+                                this.setState(prev=>{
+                                    prev.content_height = prev.content_height-5;
+                                    prev.nodes_height = prev.nodes_height+5;
+
+                                    return prev;
+                                })
+                            }
+                        }>Raise border</p>
+                        <p onClick={
+                            ()=>{
+                                this.setState(prev=>{
+                                    prev.content_height = prev.content_height+5;
+                                    prev.nodes_height = prev.nodes_height-5;
+
+                                    return prev;
+                                })
+                            }
+                        }>Lower border</p>
+                    </div>
                     <SparqlQueryCreator 
                     	  triples={this.state.triples}
                     	  url={url}
+                          nodes_height={this.state.nodes_height}
                           test_nodes={this.state.test_nodes}
                           active_edges={this.state.active_edges}
                           selectAttribute={this.selectAttribute}
@@ -259,6 +294,8 @@ class EntitySelector extends React.Component{
 		     );
 		}
 	}
+
+
 
 	render() {
 		const prefixes_used = {};
@@ -289,6 +326,16 @@ class EntitySelector extends React.Component{
 		          <div className="info">
 		              	<span className="button" onClick={()=>alert(this.state.ontology.ontology_base)}>Show ontology</span>
               			<span className="button" onClick={()=>alert(this.state.sparql)}>Show Sparql endpoint </span>
+              			<span className="button" onClick={()=>this.setState({
+                            current_search: "",
+                            selected_entities: [],
+                            triples: [],
+                            active_nodes: [],
+                            active_edges: [],
+                            test_nodes : [],
+                            ontology:null,
+                            sparql:"",
+                        }, this.props.setEntitySelectionSources(null, ""))}>Change sources</span>
 		          </div>
 		        </div>
 		        }

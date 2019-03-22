@@ -4,6 +4,7 @@ import { Switch } from 'react-router';
 import { hot } from 'react-hot-loader';
 import EntitySelector from './EntitySelector';
 import Home from './Home';
+import Help from './Help';
 import Explorer from './Explorer';
 
 /**
@@ -46,7 +47,8 @@ class App extends React.Component {
               </div>
               <div id="links">
                 <NavLink to="/">Home</NavLink>
-                <NavLink to="/entities">Explorer</NavLink>
+                <NavLink to="/entities">App</NavLink>
+                <NavLink to="/help">Help</NavLink>
               </div>
             </div>
           </div>
@@ -54,6 +56,7 @@ class App extends React.Component {
           <div className="content">
             <Switch>
               <Route exact path="/" component={Home}/>
+              <Route exact path="/help" component={Help}/>
               <Route exact path="/entities/" 
                   render={(props) => <EntitySelector {...props} 
                       setEntitySelectionSources={this.setEntitySelectionSources}
@@ -66,7 +69,9 @@ class App extends React.Component {
           </div>
 
           <div id="footer">
-            This would be the footer
+            exploreAT! DH Dashboard. Application done in the context of the <a target="blank" href="https://www.oeaw.ac.at/acdh/projects/exploreat/">exploreAT! project.</a><br/>
+            Code for the application can be found at <a href="https://github.com/acdh-oeaw/exploreat-dh-dashboard">
+                {"https://github.com/acdh-oeaw/exploreat-dh-dashboard"}</a>
           </div>
           
         </div>
