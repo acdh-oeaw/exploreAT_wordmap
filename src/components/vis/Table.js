@@ -76,18 +76,33 @@ class Table extends React.Component{
             const d = data[i];
             const df = [];
             
-
             if(this.props.attributes[0].aggregation=='none'){
                 this.props.attributes.map(e=>{
                     df.push(<td key={e.attribute+i} title={d[e.attribute].valueOf()}>
-                        <span className="tableElement"> {this.stripUris(d[e.attribute].valueOf())}</span>
+                        {String(d[e.attribute].valueOf()).startsWith('http')?(
+                            <span className="tableElement"> 
+                                <a target='blank' href={d[e.attribute].valueOf()}>
+                                    {this.stripUris(d[e.attribute].valueOf())}
+                                </a>
+                            </span>
+                        ):(
+                            <span className="tableElement"> {this.stripUris(d[e.attribute].valueOf())}</span>
+                        )}
                     </td>);
                 });
             }
             else{
                 d3.keys(d).map(e=>{
                     df.push(<td key={e+i} title={d[e].valueOf()}>
-                        <span className="tableElement"> {this.stripUris(d[e].valueOf())}</span>
+                        {String(d[e].valueOf()).startsWith('http')?(
+                            <span className="tableElement"> 
+                                <a target='blank' href={d[e].valueOf()}>
+                                    {this.stripUris(d[e].valueOf())}
+                                </a>
+                            </span>
+                        ):(
+                            <span className="tableElement"> {this.stripUris(String(d[e].valueOf()))}</span>
+                        )}
                     </td>);
                 });
             }

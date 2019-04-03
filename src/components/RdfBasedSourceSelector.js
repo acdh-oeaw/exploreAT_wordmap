@@ -57,6 +57,8 @@ class RdfBasedSourceSelector extends React.Component{
         ontology.entities.map(e=>{
             // A promise for the number of different entries in the database
             promises.push(new Promise((resolve,reject)=>{
+                console.log(
+                    this.sparqlQueries.getEntityCountQuery(e.name, {prefix:ontology.ontology_prefix, uri:ontology.ontology_base})) 
                 this.sparql(this.state.sparql, 
                     this.sparqlQueries.getEntityCountQuery(e.name, {prefix:ontology.ontology_prefix, uri:ontology.ontology_base}), 
                     (err, data) => {
