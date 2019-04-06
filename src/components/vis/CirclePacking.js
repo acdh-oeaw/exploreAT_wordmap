@@ -130,14 +130,6 @@ class CirclePacking extends React.Component{
         const stratify = d3.stratify()
             .parentId(function(d) { return d.id.substring(0, d.id.lastIndexOf(".")); });
 
-            /*
-        const pack = d3.pack()
-            .size([width - params.paddingRight - params.paddingLeft -20 
-                , height - params.paddingBottom - params.paddingTop - 20])
-            .padding(20);
-
-        console.log(pack.padding())
-        */
         const vData = stratify(this.state.data);
 
         let vLayout = d3.pack().size([width-7, height-7]).padding(7);
