@@ -197,8 +197,13 @@ class JitterViolinPlot extends React.Component{
                 .attr("cy", d=>yScale(d.value))
                 .attr("r", 5)
                 .style("fill", d=>this.props.colorScales[this.state.selected_attribute.aggregation_term](d.key))
-                .attr("stroke", "white");
-
+                .attr("stroke", "white")
+                .on('click', d=>{
+                    this.props
+                        .filters[this.state.selected_attribute.aggregation_term]
+                        .filter(d.key);
+                    this.props.updateFilteredData();
+                });
         d3.select(this.vis)
             .selectAll('circle.point title')
             .text(d=>d.key)
@@ -261,8 +266,8 @@ class JitterViolinPlot extends React.Component{
                 <svg ref={node => this.svg = node} 
                     width={this.props.width-params.margin*2} 
                     height={this.props.height-params.margin*2}>
-                    <g id="vis" ref={node => this.vis = node}><path></path></g>
                     <g id="axis" ref={node => this.axis = node}></g>
+                    <g id="vis" ref={node => this.vis = node}><path></path></g>
                 </svg>
             </div>
         );
