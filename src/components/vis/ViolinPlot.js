@@ -249,6 +249,7 @@ class ViolinPlot extends React.Component{
     }
 }
 
+ViolinPlot.prototype.img="/public/violinplot.svg";
 ViolinPlot.prototype.help="Violin Plot\n"+
     "Allows to see the distribution of some numerical data.\n\n"+
     "Data used in the visualization:\n"+

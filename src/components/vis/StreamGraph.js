@@ -323,6 +323,7 @@ class StreamGraph extends React.Component{
     }
 }
 
+StreamGraph.prototype.img="/public/streamgraph.svg";
 StreamGraph.prototype.help="Stream Graph\n"+
     "Used to see how some aggregation changes along an non-aggregated variable.\n\n"+
     "Data used in the visualization:\n"+

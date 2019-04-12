@@ -856,6 +856,21 @@ div#BubbleGraph circle.hovered{
 /* about (It is really the help page) ---------------------------------------------------------------------------
  */
 
+div#about h3, div#about h4,
+div#about h5, div#about a.top-link{
+    margin-right: 0.3em;
+    display: inline-block;
+}
+
+div#about #links a{
+    margin-right: 0.5em;
+}
+
+div#about #links{
+    display:flex;
+    flex-wrap: wrap;
+}
+
 div#about{
     display: block;
     padding: 5px;

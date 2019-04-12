@@ -21,6 +21,7 @@ import OptionTags from './OptionTags.js';
 class ComponentSelector extends React.Component{
     constructor(props){
         super(props);
+        console.log(props)
 
         this.state = {
             name: "",
@@ -84,25 +85,25 @@ class ComponentSelector extends React.Component{
     }
 
     handlePrevType(newIndex){
-        let index = newIndex>=0?newIndex:this.props.availableComponents.length-1;
-        index = index<this.props.availableComponents.length?index:0;
-        while(!this.state.useful_visualizations.includes(this.props.availableComponents[index])){
+        let index = newIndex>=0?newIndex:this.props.availableComponentNames.length-1;
+        index = index<this.props.availableComponentNames.length?index:0;
+        while(!this.state.useful_visualizations.includes(this.props.availableComponentNames[index])){
             index = index - 1;
-            index = index>=0?index:this.props.availableComponents.length-1;
+            index = index>=0?index:this.props.availableComponentNames.length-1;
         }
 
-        this.setState({typeIndex: index, type: this.props.availableComponents[index]});
+        this.setState({typeIndex: index, type: this.props.availableComponentNames[index]});
     }
 
     handleNextType(newIndex){
-        let index = newIndex>0?newIndex:this.props.availableComponents.length-1;
-        index = index<this.props.availableComponents.length?index:0;
-        while(!this.state.useful_visualizations.includes(this.props.availableComponents[index])){
+        let index = newIndex>0?newIndex:this.props.availableComponentNames.length-1;
+        index = index<this.props.availableComponentNames.length?index:0;
+        while(!this.state.useful_visualizations.includes(this.props.availableComponentNames[index])){
             index += 1;
-            index = index<this.props.availableComponents.length?index:0;
+            index = index<this.props.availableComponentNames.length?index:0;
         }
         
-        this.setState({typeIndex: index, type: this.props.availableComponents[index]});
+        this.setState({typeIndex: index, type: this.props.availableComponentNames[index]});
     }
 
     createComponent(){
@@ -113,7 +114,7 @@ class ComponentSelector extends React.Component{
     }
 
     showComponents(){
-        let useful_visualizations = this.props.availableComponents;
+        let useful_visualizations = this.props.availableComponentNames;
         const vis_incompatibilities = [];
 
         let nonAggregated = 0, 
@@ -197,28 +198,13 @@ class ComponentSelector extends React.Component{
     }
 
     renderMenu(){
-        const carouselOptions = {
-            "Filter":<img className="button" alt="Filter" title="Filter" key="Filter" 
-                height={this.props.height-200} src={"/public/filter.svg"}/>,
-            "Bar Chart":<img className="button" alt="Bar Chart" title="Bar Chart" key="Bar Chart" 
-                height={this.props.height-200} src={"/public/bar.svg"}/>,
-            "Bubble Graph":<img className="button" alt="Bubble Graph" title="Bubble Graph" key="Bubble Graph" 
-                height={this.props.height-200} src={"/public/bubblegraph.svg"}/>,
-            "Circle Packing":<img className="button" alt="Circle Packing" title="Circle Packing" key="Circle Packing" 
-                height={this.props.height-200} src={"/public/circlepacking.svg"}/>,
-            "Parallel Coordinates":<img className="button" alt="Parallel Coordinates" title="Parallel Coordinates" key="Parallel Coordinates" 
-                height={this.props.height-200} src={"/public/ppcc.svg"}/>,
-            "Pie Chart":<img className="button" alt="Pie Chart" title="Pie Chart" key="Pie Chart" 
-                height={this.props.height-200} src={"/public/pie.svg"}/>,
-            "Stream Graph":<img className="button" alt="Stream Graph" title="Stream Graph" key="Stream Graph" 
-                height={this.props.height-200} src={"/public/streamgraph.svg"}/>,
-            "Table":<img className="button" alt="Table" title="Table" key="Table" 
-                height={this.props.height-200} src={"/public/table.svg"}/>,
-            "Violin Plot":<img className="button" alt="Violin Plot" title="Violin Plot" key="Violin Plot" 
-                height={this.props.height-200} src={"/public/violinplot.svg"}/>,
-            "Jitter Violin Plot":<img className="button" alt="Jitter Violin Plot" title="Jitter Violin Plot" key="Jitter Violin Plot" 
-                height={this.props.height-200} src={"/public/jitterviolinplot.svg"}/>,
-        };
+	    const carouselOptions = {};
+        d3.entries(this.props.availableComponents).forEach(e=>{
+			console.log(e,carouselOptions)
+            carouselOptions[e.key] = (<img className="button" alt={e.key} title={e.value.prototype.help} key={e.key} 
+       				height={this.props.height-200} src={e.value.prototype.img}/>)
+        });
+
 
         if(this.state.name != "" && this.state.attributes.length>0 && this.state.showComponents === true){
             return(
@@ -231,7 +217,7 @@ class ComponentSelector extends React.Component{
                     <li>
                         <div id="miniatureCarousel">
                         <button onClick={()=>this.handlePrevType(this.state.typeIndex-1)}>{"< Previous"}</button>
-                        {carouselOptions[this.props.availableComponents[this.state.typeIndex]]}
+                        {carouselOptions[this.props.availableComponentNames[this.state.typeIndex]]}
                         <button onClick={()=>this.handleNextType(this.state.typeIndex+1)}>{"Next >"}</button>
                         </div>
                     </li>

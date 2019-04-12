@@ -122,7 +122,10 @@ class EntitySelector extends React.Component{
                             // It is possible to suppose that it will have a :, as
                             // all nodes come from the ontology file and therefore have
                             // a reduced form
-                            prevState.triples.push(`?${entity.split(':')[1]} <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ${entity}`);
+                            console.log(entity)
+                            const s = entity.startsWith('http')?entity.split('/')[entity.split('/').length-1]:entity.split(':')[1];
+                            const p = entity.startsWith('http')?'<'+entity+'>':entity;
+                            prevState.triples.push(`?${s} <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ${p}`);
                             
 		        			prevState.active_nodes.push(entity)
 		        			return(prevState);

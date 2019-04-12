@@ -247,7 +247,7 @@ class PieChart extends React.Component{
                         </circle>
                         {this.createSectors(size)}
                     </g>
-                   <g className="legend" transform={`translate(${this.props.width - params.legendWidth },30)`}>
+                   <g className="legend" transform={`translate(${size.x + size.radius + 20 },30)`}>
                         <g transform={`translate(0,0)`}>
                             <text x="7" y="0">{this.state.legend}</text>
                             <g transform={`translate(${this.state.legend.length * 8},-10)`} onClick={()=>this.setSortBy("key")}>
@@ -299,6 +299,7 @@ class PieChart extends React.Component{
     }
 }
 
+PieChart.prototype.img="/public/pie.svg";
 PieChart.prototype.help="Pie Chart\n"+
     "Used to visually represent distribution of aggregated data.\n\n"+
     "Data used in the visualization:\n"+

@@ -359,6 +359,7 @@ class BubbleGraph extends React.Component{
     }
 }
 
+BubbleGraph.prototype.img="/public/bubblegraph.svg";
 BubbleGraph.prototype.help="Bubble Graph\n"+
     "Used to visually identify how the disrtibution of some aggregation changes with a second variable.\n\n"+
     "Data used in the visualization:\n"+

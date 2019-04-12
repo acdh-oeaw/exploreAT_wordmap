@@ -165,4 +165,8 @@ class Filter extends React.Component{
     }
 }
 
+Filter.prototype.img="/public/filter.svg";
+Filter.prototype.help = "Filter\n"+
+    "Used to do textual filters by selecting any un-aggregated attribute and writing in the text field."
+
 export default Filter;

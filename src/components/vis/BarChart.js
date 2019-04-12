@@ -292,6 +292,7 @@ class BarChart extends React.Component{
     }
 }
 
+BarChart.prototype.img="/public/bar.svg";
 BarChart.prototype.help="Bar Chart\n"+
     "Used to visually represent distribution of aggregated data.\n\n"+
     "Data used in the visualization:\n"+

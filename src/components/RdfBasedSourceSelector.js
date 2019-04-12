@@ -21,7 +21,7 @@ class RdfBasedSourceSelector extends React.Component{
         super(props);
         this.state={
             //sparql:"http://dboe-jena.hephaistos.arz.oeaw.ac.at/dboe/query",
-            sparql:"http://localhost:3030/oldcan/query",
+            sparql:"https://dboe-jena.hephaistos.arz.oeaw.ac.at/dboe/query",
             ontology_url:"https://explorations4u.acdh.oeaw.ac.at/ontology/oldcan",
             ontology:null,
             status: ''

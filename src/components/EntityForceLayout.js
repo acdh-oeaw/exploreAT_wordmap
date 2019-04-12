@@ -117,8 +117,13 @@ class EntityForceLayout extends React.Component{
 					relationship : d.relationship,
 					value: d.value
 				});
+            else{
+                console.log(d)
+            }
 			}
 		);
+        console.log(nodehash)
+        console.log(edges)
 
 
 		const linkForce = d3.forceLink().distance(160).strength(0.1);
@@ -151,6 +156,7 @@ class EntityForceLayout extends React.Component{
 			//.style("stroke-opacity", .5)
 			//.attr('stroke', params.edgeColor)
 			.style("stroke-width", d => d.value)
+            //.each(d=>console.log(d))
 			.append("title")
       			.text(d=>this.wrapper.nameOfEntity(d.relationship));
 

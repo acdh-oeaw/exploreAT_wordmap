@@ -428,6 +428,7 @@ class ParallelCoordinates extends React.Component{
     }
 }
 
+ParallelCoordinates.prototype.img="/public/ppcc.svg";
 ParallelCoordinates.prototype.help="Parallel Coordinates\n"+
     "Used to represent visually a large number of attributes for each of the available entries.\n\n"+
     "Data used in the visualization:\n"+

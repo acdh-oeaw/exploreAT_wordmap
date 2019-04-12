@@ -31,10 +31,23 @@ function parseOntologyJson(json){
 
     // Entity and inheritance extraction
     const classes = [];
+    const equivalentClasses = {};
+
+    const shortten = d=> shorttenUriWithPrefix(d, ontology_parsed.ontology_base, ontology_parsed.ontology_prefix);
+
     if(ontology_parsed.fields.includes('rdfs:Class'))
         classes.push(...json['rdfs:Class'].length==undefined?[json['rdfs:Class']]:json['rdfs:Class'])
     if(ontology_parsed.fields.includes('owl:Class'))
         classes.push(...json['owl:Class'].length==undefined?[json['owl:Class']]:json['owl:Class'])
+    classes
+        .filter(c=>c.hasOwnProperty('owl:equivalentClass'))
+        .forEach(c=>c['owl:equivalentClass']
+            .filter(e=>e.hasOwnProperty('rdf:resource'))
+            .forEach(e=>{                
+                equivalentClasses[shortten(e['rdf:resource'])] = shortten(c['rdf:about']);
+                equivalentClasses[shortten(c['rdf:about'])] = shortten(e['rdf:resource']);
+            })
+    )
 
     ontology_parsed.entities = [];
     ontology_parsed.relationships = [];
@@ -72,6 +85,29 @@ function parseOntologyJson(json){
                         ontology_parsed.ontology_prefix);
                     relationship.value = 5;
                     ontology_parsed.relationships.push(relationship)
+
+                    // Equivalent classes should have their respective counterparts
+                    let eq = {};
+                    if(equivalentClasses.hasOwnProperty(relationship.source)){
+                        Object.assign(eq, relationship);
+                        eq.source = equivalentClasses[eq.source];
+                        ontology_parsed.relationships.push(relationship);
+
+                        if(equivalentClasses.hasOwnProperty(relationship.target)){
+                            eq.target = equivalentClasses[eq.target];
+                            ontology_parsed.relationships.push(relationship);
+                        }
+                    }
+                    if(equivalentClasses.hasOwnProperty(relationship.target)){
+                        Object.assign(eq, relationship);
+                        eq.target = equivalentClasses[eq.target];
+                        ontology_parsed.relationships.push(relationship);
+
+                        if(equivalentClasses.hasOwnProperty(relationship.source)){
+                            eq.source = equivalentClasses[eq.source];
+                            ontology_parsed.relationships.push(relationship);
+                        }
+                    }
                 }
             })
         }
@@ -137,18 +173,43 @@ function parseOntologyJson(json){
                     
                     combinations.map(combination=>{
                         if(combination.domain['rdf:resource'] && combination.range['rdf:resource']){
-                            ontology_parsed.relationships.push({
-                                relationship : relationship,
-                                value : value,
-                                source : shorttenUriWithPrefix(
-                                    combination.domain['rdf:resource'], 
-                                    ontology_parsed.ontology_base, 
-                                    ontology_parsed.ontology_prefix),
-                                target : shorttenUriWithPrefix(
-                                    combination.range['rdf:resource'], 
-                                    ontology_parsed.ontology_base, 
-                                    ontology_parsed.ontology_prefix)
-                            })
+                            let entry = {
+                                    relationship : relationship,
+                                    value : value,
+                                    source : shorttenUriWithPrefix(
+                                        combination.domain['rdf:resource'], 
+                                        ontology_parsed.ontology_base, 
+                                        ontology_parsed.ontology_prefix),
+                                    target : shorttenUriWithPrefix(
+                                        combination.range['rdf:resource'], 
+                                        ontology_parsed.ontology_base, 
+                                        ontology_parsed.ontology_prefix)
+                            };
+
+                            ontology_parsed.relationships.push(entry);
+
+                            // Equivalent classes should have their respective counterparts
+                            let eq = {};
+                            if(equivalentClasses.hasOwnProperty(entry.source)){
+                                Object.assign(eq, entry);
+                                eq.source = equivalentClasses[eq.source];
+                                ontology_parsed.relationships.push(eq);
+
+                                if(equivalentClasses.hasOwnProperty(entry.target)){
+                                    eq.target = equivalentClasses[eq.target];
+                                    ontology_parsed.relationships.push(eq);
+                                }
+                            }
+                            if(equivalentClasses.hasOwnProperty(entry.target)){
+                                Object.assign(eq, entry);
+                                eq.target = equivalentClasses[eq.target];
+                                ontology_parsed.relationships.push(eq);
+
+                                if(equivalentClasses.hasOwnProperty(entry.source)){
+                                    eq.source = equivalentClasses[eq.source];
+                                    ontology_parsed.relationships.push(eq);
+                                }
+                            }
                         }
                     });
                 }
@@ -194,6 +255,29 @@ function parseOntologyJson(json){
                                     entry.target = r_name;
                                     entry.value = 6.5;
                                     ontology_parsed.relationships.push(entry)
+
+                                    // Equivalent classes should have their respective counterparts
+                                    let eq = {};
+                                    if(equivalentClasses.hasOwnProperty(entry.source)){
+                                        Object.assign(eq, entry);
+                                        eq.source = equivalentClasses[eq.source];
+                                        ontology_parsed.relationships.push(eq);
+
+                                        if(equivalentClasses.hasOwnProperty(entry.target)){
+                                            eq.target = equivalentClasses[eq.target];
+                                            ontology_parsed.relationships.push(eq);
+                                        }
+                                    }
+                                    if(equivalentClasses.hasOwnProperty(entry.target)){
+                                        Object.assign(eq, entry);
+                                        eq.target = equivalentClasses[eq.target];
+                                        ontology_parsed.relationships.push(eq);
+
+                                        if(equivalentClasses.hasOwnProperty(entry.source)){
+                                            eq.source = equivalentClasses[eq.source];
+                                            ontology_parsed.relationships.push(eq);
+                                        }
+                                    }
                                 }else{
                                     entry.attr = name;
                                     ontology_parsed.attributes.push(entry)

@@ -229,7 +229,8 @@ class Explorer extends React.Component{
 				data={this.state.data}
 				filters={this.state.filters}
 				updateFilteredData={this.updateFilteredData}
-				availableComponents={d3.keys(this.availableComponents)}>
+				availableComponents={this.availableComponents}
+				availableComponentNames={d3.keys(this.availableComponents)}>
 			<ComponentSelector/>
         </VisSelectorWrapper>
       </div>
